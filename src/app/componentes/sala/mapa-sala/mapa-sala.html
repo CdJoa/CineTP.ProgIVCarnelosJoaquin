@@ -1,0 +1,80 @@
+<div class="mapa-sala-wrapper" *ngIf="sala() as s">
+  <!-- Título principal -->
+  <div class="header-titulos" *ngIf="titulo()">
+    <h2 class="titulo-pantalla">{{ titulo() }}</h2>
+  </div>
+
+  <!-- Arco de la Pantalla / Screen -->
+  <div class="pantalla-container" *ngIf="mostrarPantalla()">
+    <div class="pantalla-arco"></div>
+  </div>
+
+  <!-- Leyenda de tipos de butacas -->
+  <div class="leyenda-bar" *ngIf="mostrarLeyenda()">
+    <div class="leyenda-item"><span class="seat-badge disponible-comun"></span> Común (4-20-4)</div>
+    <div class="leyenda-item"><span class="seat-badge disponible-disc">♿</span> Discapacitado (2-10-2)</div>
+    <div class="leyenda-item"><span class="seat-badge disponible-vip"></span> VIP (4-20-4)</div>
+  </div>
+
+  <!-- Plano de Butacas en 3 Bloques -->
+  <div class="grid-asientos">
+    <div *ngFor="let fila of s.filas" class="fila-linea">
+      <!-- Letra de Fila Izquierda -->
+      <span class="row-label">{{ fila.letra }}</span>
+
+      <!-- BLOQUE 1 (Izquierda) -->
+      <div class="bloque">
+        <div
+          *ngFor="let a of fila.bloque1"
+          class="asiento-box"
+          [class.comun]="a.tipo === 'comun'"
+          [class.discapacitado]="a.tipo === 'discapacitado'"
+          [class.vip]="a.tipo === 'vip'"
+          [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero"
+        >
+          <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
+          <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
+        </div>
+      </div>
+
+      <!-- Pasillo Izquierdo -->
+      <div class="pasillo"></div>
+
+      <!-- BLOQUE 2 (Centro) -->
+      <div class="bloque">
+        <div
+          *ngFor="let a of fila.bloque2"
+          class="asiento-box"
+          [class.comun]="a.tipo === 'comun'"
+          [class.discapacitado]="a.tipo === 'discapacitado'"
+          [class.vip]="a.tipo === 'vip'"
+          [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero"
+        >
+          <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
+          <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
+        </div>
+      </div>
+
+      <!-- Pasillo Derecho -->
+      <div class="pasillo"></div>
+
+      <!-- BLOQUE 3 (Derecha) -->
+      <div class="bloque">
+        <div
+          *ngFor="let a of fila.bloque3"
+          class="asiento-box"
+          [class.comun]="a.tipo === 'comun'"
+          [class.discapacitado]="a.tipo === 'discapacitado'"
+          [class.vip]="a.tipo === 'vip'"
+          [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero"
+        >
+          <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
+          <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
+        </div>
+      </div>
+
+      <!-- Letra de Fila Derecha -->
+      <span class="row-label">{{ fila.letra }}</span>
+    </div>
+  </div>
+</div>

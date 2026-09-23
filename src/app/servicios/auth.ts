@@ -1,0 +1,279 @@
+import { Injectable, signal, computed } from '@angular/core';
+import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import { environment } from '../environments/environments';
+import { CredencialesLoginDto, RegistroUsuarioDto, Usuario } from '../models/usuario';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class Auth {
+  private supabase: SupabaseClient;
+
+  // Estados reactivos con Signals de Angular
+  readonly usuarioActual = signal<Usuario | null>(null);
+  readonly cargando = signal<boolean>(true);
+  readonly estaAutenticado = computed(() => !!this.usuarioActual());
+
+  constructor() {
+    this.supabase = createClient(
+      environment.supabaseUrl,
+      environment.supabasePublishableKey
+    );
+
+    this.inicializarSesion();
+  }
+
+  get clienteSupabase(): SupabaseClient {
+    return this.supabase;
+  }
+
+  private async inicializarSesion(): Promise<void> {
+    try {
+      this.cargando.set(true);
+      const { data: { session } } = await this.supabase.auth.getSession();
+
+      if (session?.user) {
+        await this.cargarPerfil(session.user);
+      } else {
+        this.usuarioActual.set(null);
+      }
+
+      // Escuchar cambios de autenticación
+      this.supabase.auth.onAuthStateChange(async (_event, session) => {
+        if (session?.user) {
+          await this.cargarPerfil(session.user);
+        } else {
+          this.usuarioActual.set(null);
+        }
+      });
+    } catch (err) {
+      console.error('Error al inicializar sesión:', err);
+      this.usuarioActual.set(null);
+    } finally {
+      this.cargando.set(false);
+    }
+  }
+
+  private async cargarPerfil(authUser: User): Promise<Usuario> {
+    try {
+      const { data, error } = await this.supabase
+        .from('usuarios')
+        .select('*')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
+      if (data && !error) {
+        const usuario: Usuario = {
+          id: data.id,
+          email: data.email || authUser.email || '',
+          nombre: data.nombre,
+          apellido: data.apellido,
+          fechaNacimiento: data.fecha_nacimiento || data.fechaNacimiento || '',
+          rol: data.rol || 'cliente',
+          puntos: data.puntos ?? 0,
+          credito: data.credito ?? 0,
+          creadoEn: data.creado_en || data.creadoEn,
+        };
+        this.usuarioActual.set(usuario);
+        return usuario;
+      }
+    } catch (err) {
+      console.warn('No se pudo cargar perfil de la base de datos, usando datos de auth:', err);
+    }
+
+    // Perfil por defecto con metadata de auth
+    const metadata = authUser.user_metadata || {};
+    const usuarioFallback: Usuario = {
+      id: authUser.id,
+      email: authUser.email || '',
+      nombre: metadata['nombre'] || '',
+      apellido: metadata['apellido'] || '',
+      fechaNacimiento: metadata['fechaNacimiento'] || '',
+      rol: (metadata['rol'] as any) || 'cliente',
+      puntos: metadata['puntos'] ?? 0,
+      credito: metadata['credito'] ?? 0,
+    };
+    this.usuarioActual.set(usuarioFallback);
+    return usuarioFallback;
+  }
+
+  async login(credenciales: CredencialesLoginDto): Promise<{ exito: boolean; mensaje?: string; usuario?: Usuario }> {
+    try {
+      const { data, error } = await this.supabase.auth.signInWithPassword({
+        email: credenciales.email.trim(),
+        password: credenciales.password,
+      });
+
+      if (error) {
+        return { exito: false, mensaje: this.traducirError(error.message) };
+      }
+
+      if (!data.user) {
+        return { exito: false, mensaje: 'No se pudo obtener la información del usuario.' };
+      }
+
+      const usuario = await this.cargarPerfil(data.user);
+      return { exito: true, usuario };
+    } catch (err: any) {
+      return { exito: false, mensaje: err?.message || 'Error inesperado al iniciar sesión.' };
+    }
+  }
+
+  async registro(datos: RegistroUsuarioDto): Promise<{ exito: boolean; mensaje?: string; usuario?: Usuario }> {
+    try {
+      const { data, error } = await this.supabase.auth.signUp({
+        email: datos.email.trim(),
+        password: datos.password,
+        options: {
+          data: {
+            nombre: datos.nombre.trim(),
+            apellido: datos.apellido.trim(),
+            fechaNacimiento: datos.fechaNacimiento,
+            rol: 'cliente',
+            puntos: 0,
+            credito: 0,
+          },
+        },
+      });
+
+      if (error) {
+        return { exito: false, mensaje: this.traducirError(error.message) };
+      }
+
+      if (!data.user) {
+        return { exito: false, mensaje: 'No se pudo completar el registro.' };
+      }
+
+      const nuevoUsuario: Usuario = {
+        id: data.user.id,
+        email: datos.email.trim(),
+        nombre: datos.nombre.trim(),
+        apellido: datos.apellido.trim(),
+        fechaNacimiento: datos.fechaNacimiento,
+        rol: 'cliente',
+        puntos: 0,
+        credito: 0,
+        creadoEn: new Date().toISOString(),
+      };
+
+      // Intentamos persistir en la tabla usuarios si existe
+      try {
+        await this.supabase.from('usuarios').insert([{
+          id: nuevoUsuario.id,
+          email: nuevoUsuario.email,
+          nombre: nuevoUsuario.nombre,
+          apellido: nuevoUsuario.apellido,
+          fecha_nacimiento: nuevoUsuario.fechaNacimiento,
+          rol: nuevoUsuario.rol,
+          puntos: nuevoUsuario.puntos,
+          credito: nuevoUsuario.credito,
+        }]);
+      } catch (dbError) {
+        console.warn('Aviso: perfil guardado en sesión de Auth, tabla usuarios pendiente:', dbError);
+      }
+
+      this.usuarioActual.set(nuevoUsuario);
+      return { exito: true, usuario: nuevoUsuario };
+    } catch (err: any) {
+      return { exito: false, mensaje: err?.message || 'Error inesperado al registrar usuario.' };
+    }
+  }
+
+  async registrarEmpleado(datos: RegistroUsuarioDto): Promise<{ exito: boolean; mensaje?: string; usuario?: Usuario }> {
+    try {
+      // Guardamos la sesión del admin para restaurarla luego, ya que signUp
+      // reemplaza la sesión activa por la del usuario recién creado.
+      const { data: { session: sesionAdmin } } = await this.supabase.auth.getSession();
+
+      const { data, error } = await this.supabase.auth.signUp({
+        email: datos.email.trim(),
+        password: datos.password,
+        options: {
+          data: {
+            nombre: datos.nombre.trim(),
+            apellido: datos.apellido.trim(),
+            fechaNacimiento: datos.fechaNacimiento,
+            rol: 'empleado',
+            puntos: 0,
+            credito: 0,
+          },
+        },
+      });
+
+      if (error) {
+        return { exito: false, mensaje: this.traducirError(error.message) };
+      }
+
+      if (!data.user) {
+        return { exito: false, mensaje: 'No se pudo completar el registro del empleado.' };
+      }
+
+      const nuevoEmpleado: Usuario = {
+        id: data.user.id,
+        email: datos.email.trim(),
+        nombre: datos.nombre.trim(),
+        apellido: datos.apellido.trim(),
+        fechaNacimiento: datos.fechaNacimiento,
+        rol: 'empleado',
+        puntos: 0,
+        credito: 0,
+        creadoEn: new Date().toISOString(),
+      };
+
+      try {
+        await this.supabase.from('usuarios').insert([{
+          id: nuevoEmpleado.id,
+          email: nuevoEmpleado.email,
+          nombre: nuevoEmpleado.nombre,
+          apellido: nuevoEmpleado.apellido,
+          fecha_nacimiento: nuevoEmpleado.fechaNacimiento,
+          rol: nuevoEmpleado.rol,
+          puntos: nuevoEmpleado.puntos,
+          credito: nuevoEmpleado.credito,
+        }]);
+      } catch (dbError) {
+        console.warn('Aviso: perfil guardado en Auth, tabla usuarios pendiente:', dbError);
+      }
+
+      // Restauramos la sesión del admin para que no quede logueado como el nuevo empleado.
+      if (sesionAdmin) {
+        await this.supabase.auth.setSession({
+          access_token: sesionAdmin.access_token,
+          refresh_token: sesionAdmin.refresh_token,
+        });
+      }
+
+      return { exito: true, usuario: nuevoEmpleado };
+    } catch (err: any) {
+      return { exito: false, mensaje: err?.message || 'Error inesperado al registrar empleado.' };
+    }
+  }
+
+  async logout(): Promise<{ exito: boolean; mensaje?: string }> {
+    try {
+      const { error } = await this.supabase.auth.signOut();
+      if (error) {
+        return { exito: false, mensaje: error.message };
+      }
+      this.usuarioActual.set(null);
+      return { exito: true };
+    } catch (err: any) {
+      return { exito: false, mensaje: err?.message || 'Error al cerrar sesión.' };
+    }
+  }
+
+  private traducirError(msg: string): string {
+    if (msg.includes('Invalid login credentials')) {
+      return 'Credenciales inválidas. Verifica tu correo y contraseña.';
+    }
+    if (msg.includes('Email already in use') || msg.includes('User already registered')) {
+      return 'El correo electrónico ya se encuentra registrado.';
+    }
+    if (msg.includes('Password should be at least')) {
+      return 'La contraseña debe contener al menos 6 caracteres.';
+    }
+    return msg;
+  }
+}
+
+export { Auth as AuthService };

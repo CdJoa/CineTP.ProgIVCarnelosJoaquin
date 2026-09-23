@@ -1,0 +1,292 @@
+:host {
+  display: block;
+}
+
+.admin-peliculas-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.header-bar h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 4px;
+}
+
+.header-bar p {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+}
+
+.btn-crear {
+  background: #000;
+  color: #fff;
+  padding: 8px 16px;
+  text-decoration: none;
+  font-size: 13px;
+  border: 1px solid #000;
+  display: inline-block;
+}
+
+.btn-crear:hover {
+  background: #333;
+}
+
+.peliculas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.loading-box,
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Modal de edición */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-card {
+  background: #fff;
+  border: 1px solid #000;
+  padding: 20px;
+  width: 100%;
+  max-width: 850px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-body-layout {
+  display: flex;
+  gap: 24px;
+}
+
+@media (max-width: 700px) {
+  .modal-body-layout {
+    flex-direction: column;
+  }
+}
+
+.auth-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auth-form label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #000;
+}
+
+.auth-form input,
+.auth-form select,
+.auth-form textarea {
+  padding: 8px;
+  border: 1px solid #000;
+  background: #fff;
+  color: #000;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.modal-preview-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  padding: 12px;
+}
+
+.modal-preview-sidebar h4 {
+  font-size: 13px;
+  margin: 0 0 10px;
+  color: #555;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+}
+
+.btn-primary {
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.generos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.genero-chip {
+  padding: 4px 10px;
+  border: 1px solid #000;
+  background: #fff;
+  color: #000;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.genero-chip.selected {
+  background: #000;
+  color: #fff;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.alert-error, .alert-success {
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.alert-error {
+  background: #fee;
+  border: 1px solid #c00;
+  color: #c00;
+}
+
+.alert-success {
+  background: #efe;
+  border: 1px solid #080;
+  color: #080;
+}
+
+/* Detalle seleccionado abajo */
+.detail-panel {
+  margin-top: 24px;
+  background: #fff;
+  border: 1px solid #000;
+  padding: 16px;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+}
+
+.detail-header h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.detail-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.detail-card-preview {
+  display: block;
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.detail-info p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.btn-primary-sm {
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 6px;
+}

@@ -1,0 +1,185 @@
+<div class="administrar-salas-container">
+  <!-- Cabecera -->
+  <header class="header-seccion">
+    <div>
+      <h1 class="titulo-seccion">Administrar Salas</h1>
+      <p class="subtitulo-seccion">Gestione la configuración de filas, capacidades y distribución de asientos</p>
+    </div>
+    <button type="button" (click)="abrirCreacion()" class="btn-crear">
+      + Nueva Sala
+    </button>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <div class="buscador-box">
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+        placeholder="Buscar por nombre de sala..."
+        class="input-buscador"
+      />
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="main-layout" *ngIf="!cargando(); else cargandoTemplate">
+    <!-- Lista de Salas (Izquierda) -->
+    <div class="salas-lista-panel">
+      <div *ngIf="salasFiltradas.length === 0" class="empty-state">
+        <p>No se encontraron salas registradas.</p>
+      </div>
+
+      <div
+        *ngFor="let sala of salasFiltradas"
+        class="sala-card"
+        [class.seleccionada]="salaSeleccionada()?.id === sala.id"
+        (click)="seleccionarSala(sala)"
+      >
+        <div class="card-header">
+          <h3 class="sala-nombre">{{ sala.nombre }}</h3>
+          <span class="formato-badge">{{ sala.formato || '2D' }}</span>
+          <span class="status-badge" [class.activa]="sala.activa">
+            {{ sala.activa ? 'Activa' : 'Inactiva' }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div class="stat-info">
+            <span class="stat-label">Capacidad:</span>
+            <strong class="stat-val">{{ sala.capacidadTotal }} Butacas</strong>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Filas Totales:</span>
+            <span class="stat-val">{{ sala.filas.length || 20 }} (A - T)</span>
+          </div>
+        </div>
+
+        <div class="card-actions" (click)="$event.stopPropagation()">
+          <button class="btn-accion edit" (click)="abrirEdicion(sala)">
+            ✏️ Editar Filas
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalle y Mapa Interactivo (Derecha) -->
+    <div class="sala-detalle-panel">
+      <div *ngIf="salaSeleccionada() as selected; else noSeleccion">
+        <div class="detalle-header">
+          <h2>{{ selected.nombre }}</h2>
+        </div>
+
+        <!-- Componente Mapa de Sala -->
+        <app-mapa-sala
+          [salaInput]="selected"
+        ></app-mapa-sala>
+      </div>
+
+      <ng-template #noSeleccion>
+        <div class="no-seleccion-card">
+          <h3>Seleccione una Sala</h3>
+          <p>Hacé clic en una sala de la lista para ver su distribución de asientos en tiempo real.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <ng-template #cargandoTemplate>
+    <div class="cargando-box">
+      <div class="spinner"></div>
+      <p>Cargando información de salas...</p>
+    </div>
+  </ng-template>
+
+  <!-- Modal / Panel de Edición/Creación de Sala -->
+  <div *ngIf="modoModal()" class="modal-overlay" (click)="cerrarEdicion()">
+    <div class="modal-content modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ modoModal() === 'crear' ? 'Nueva Sala' : 'Editar Configuración de Sala' }}</h2>
+        <button class="btn-close" (click)="cerrarEdicion()">✕</button>
+      </div>
+
+      <div class="modal-body-layout">
+        <!-- Columna Izquierda: Formulario y Editor de Filas -->
+        <form [formGroup]="editForm" (ngSubmit)="guardarCambios()" class="modal-form-col">
+          <div class="form-group">
+            <label class="form-label">Nombre de la Sala</label>
+            <input type="text" formControlName="nombre" class="form-input" placeholder="Ej: Sala 1 - IMAX 3D" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Formato de Proyección</label>
+            <select formControlName="formato" class="form-input">
+              <option value="2D">2D</option>
+              <option value="3D">3D</option>
+            </select>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="activa" />
+              <span>Sala Activa para venta de funciones</span>
+            </label>
+          </div>
+
+          <!-- Selector de Tipo por Fila -->
+          <div class="form-group">
+            <label class="form-label">Configuración de Filas (A a T)</label>
+            <div class="modal-filas-grid">
+              <div *ngFor="let letra of letrasFilas" class="fila-edit-item">
+                <span class="letra-badge">Fila {{ letra }}</span>
+                <div class="select-btn-group">
+                  <button
+                    type="button"
+                    class="btn-sel"
+                    [class.active]="(configFilasEditando()[letra] || 'comun') === 'comun'"
+                    (click)="cambiarTipoFilaEditando(letra, 'comun')"
+                  >
+                    Común
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-sel disc"
+                    [class.active]="configFilasEditando()[letra] === 'discapacitado'"
+                    (click)="cambiarTipoFilaEditando(letra, 'discapacitado')"
+                  >
+                    ♿ Disc.
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-sel vip"
+                    [class.active]="configFilasEditando()[letra] === 'vip'"
+                    (click)="cambiarTipoFilaEditando(letra, 'vip')"
+                  >
+                    👑 VIP
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="cerrarEdicion()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-save" [disabled]="guardando()">
+              {{ guardando() ? 'Guardando...' : (modoModal() === 'crear' ? 'Crear Sala' : 'Guardar Cambios') }}
+            </button>
+          </div>
+        </form>
+
+        <!-- Columna Derecha: Vista Previa en Tiempo Real del Mapa de Sala -->
+        <div class="modal-preview-col" *ngIf="salaEditandoPreview as prev">
+          <div class="preview-header">
+            <h3>Vista Previa</h3>
+          </div>
+          <div class="preview-mapa-container">
+            <app-mapa-sala [salaInput]="prev"></app-mapa-sala>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

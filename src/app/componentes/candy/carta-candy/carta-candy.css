@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+.candy-card {
+  background: #fff;
+  border: 1px solid #000;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.imagen-box {
+  width: 100%;
+  height: 180px;
+  background: #eee;
+  position: relative;
+}
+
+.candy-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imagen-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 12px;
+}
+
+.badge-categoria {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #000;
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 6px;
+}
+
+.candy-nombre {
+  font-size: 15px;
+  font-weight: bold;
+  margin: 10px 0 6px;
+}
+
+.candy-descripcion {
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.candy-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+}
+
+.candy-precio {
+  font-size: 14px;
+}
+
+.puntos-tag {
+  color: #555;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.btn-editar {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}

@@ -1,0 +1,15 @@
+<nav class="navbar">
+  <div class="navbar-left">
+    <a routerLink="/home" class="nav-brand">CineTP</a>
+  </div>
+
+  <div class="navbar-right">
+    @if (authService.usuarioActual(); as usuario) {
+      <span class="user-greeting">Hola, {{ usuario.nombre }}</span>
+      <button type="button" (click)="cerrarSesion()" class="nav-btn">Cerrar Sesión</button>
+    } @else {
+      <a routerLink="/login" class="nav-link">Iniciar Sesión</a>
+      <a routerLink="/registro" class="nav-link">Registrarse</a>
+    }
+  </div>
+</nav>

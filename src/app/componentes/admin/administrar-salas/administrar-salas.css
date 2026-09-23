@@ -1,0 +1,329 @@
+:host {
+  display: block;
+  padding: 1.5rem;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+.administrar-salas-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-seccion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.titulo-seccion {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+  color: #0f172a;
+}
+
+.subtitulo-seccion {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.btn-crear {
+  background: #388e3c;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.filtros-bar {
+  margin-bottom: 1.5rem;
+}
+
+.input-buscador {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.65rem 1rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.salas-lista-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sala-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.sala-card.seleccionada {
+  border-color: #388e3c;
+  background: #f0fdf4;
+}
+
+.sala-nombre {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.status-badge.activa {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+.stat-info {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stat-val {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.btn-accion {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sala-detalle-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.detalle-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.live-indicator {
+  font-size: 0.8rem;
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  border: 1px solid #fca5a5;
+}
+
+.no-seleccion-card {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #94a3b8;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #ffffff;
+  width: 90%;
+  max-width: 650px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content.modal-wide {
+  max-width: 1400px;
+  width: 96vw;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 { margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+
+.btn-close { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; }
+
+.modal-body-layout {
+  display: grid;
+  grid-template-columns: 500px 1fr;
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+  .modal-body-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-form-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-preview-col {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.capacidad-badge {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+}
+
+.preview-mapa-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0.5rem 0;
+  overflow-x: auto;
+}
+
+.preview-mapa-container app-mapa-sala {
+  width: 100%;
+  max-width: 100%;
+}
+
+.modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* 2 Columnas ordenadas verticalmente (A-J en col 1, K-T en col 2) */
+.modal-filas-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(10, auto);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.35rem 0.6rem;
+  padding-right: 0.25rem;
+}
+
+.fila-edit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  padding: 0.3rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.letra-badge { font-weight: 700; font-size: 0.78rem; color: #0f172a; min-width: 42px; }
+
+.select-btn-group { display: flex; gap: 0.2rem; }
+
+.btn-sel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-sel.active { background: #388e3c; color: #fff; border-color: #2e7d32; }
+.btn-sel.disc.active { background: #1976d2; color: #fff; border-color: #1565c0; }
+.btn-sel.vip.active { background: #f57c00; color: #fff; border-color: #e65100; }
+
+.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem; }
+
+.btn-cancel { background: #e2e8f0; color: #334155; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.btn-save { background: #388e3c; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; cursor: pointer; }

@@ -1,0 +1,245 @@
+<div class="admin-peliculas-container">
+  <div class="header-bar">
+    <div>
+      <h2>Administrar Películas</h2>
+      <p>Selecciona o edita cualquier película del sistema</p>
+    </div>
+    <button type="button" (click)="abrirCreacion()" class="btn-crear">
+      + Nueva Película
+    </button>
+  </div>
+
+  @if (mensajeError() && !peliculaEditando()) {
+    <div class="alert-error">
+      <span>{{ mensajeError() }}</span>
+    </div>
+  }
+
+  @if (mensajeExito() && !peliculaEditando()) {
+    <div class="alert-success">
+      <span>{{ mensajeExito() }}</span>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="loading-box">
+      <p>Cargando lista de películas...</p>
+    </div>
+  } @else {
+    @if (peliculas().length === 0) {
+      <div class="empty-state">
+        <p>No hay películas registradas todavía.</p>
+        <button type="button" (click)="abrirCreacion()" class="btn-secondary">Agregar la primera película</button>
+      </div>
+    } @else {
+      <!-- Grilla usando el componente CartaPelicula -->
+      <div class="peliculas-grid">
+        @for (pelicula of peliculas(); track pelicula.id) {
+          <app-carta-pelicula
+            [pelicula]="pelicula"
+            [seleccionada]="peliculaSeleccionada()?.id === pelicula.id"
+            [mostrarBotonEditar]="true"
+            (seleccionar)="seleccionarPelicula($event)"
+            (editar)="abrirEdicion($event)"
+          ></app-carta-pelicula>
+        }
+      </div>
+
+      <!-- Panel de detalle de película seleccionada -->
+      @if (peliculaSeleccionada(); as sel) {
+        <div class="detail-panel">
+          <div class="detail-header">
+            <h2>Película Seleccionada: {{ sel.titulo }}</h2>
+            <div class="detail-actions">
+              <button class="btn-primary-sm" (click)="abrirEdicion(sel)">Editar Película</button>
+              <button class="btn-close" (click)="peliculaSeleccionada.set(null)">X Cerrar</button>
+            </div>
+          </div>
+
+          <div class="detail-content">
+            <app-carta-pelicula [pelicula]="sel" class="detail-card-preview"></app-carta-pelicula>
+
+            <div class="detail-info">
+              <p><strong>Sinopsis:</strong> {{ sel.sinopsis }}</p>
+              <p><strong>Duración:</strong> {{ sel.duracion }} minutos</p>
+              <p><strong>Restricción de edad:</strong> {{ sel.restriccionEdad > 0 ? '+' + sel.restriccionEdad : 'ATP' }}</p>
+              <p><strong>Puntos por compra:</strong> {{ sel.puntajeCompra }} pts</p>
+              <p><strong>Fecha de estreno:</strong> {{ sel.fechaEstreno }}</p>
+              <p><strong>Estado:</strong> {{ sel.activa ? 'Activa' : 'Inactiva' }}</p>
+              <p><strong>Precio normal:</strong> ${{ sel.precioNormal }}</p>
+              @if (sel.esPreventa) {
+                <p><strong>Precio preventa:</strong> ${{ sel.precioPreventa }}</p>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    }
+  }
+
+  <!-- Modal / Formulario de Edición o Creación -->
+  @if (modoModal()) {
+    <div class="modal-overlay" (click)="cerrarEdicion()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ modoModal() === 'crear' ? 'Nueva Película' : 'Editar Película' }}</h2>
+          <button class="btn-close" (click)="cerrarEdicion()">X</button>
+        </div>
+
+        @if (mensajeError()) {
+          <div class="alert-error">
+            <span>{{ mensajeError() }}</span>
+          </div>
+        }
+
+        @if (mensajeExito()) {
+          <div class="alert-success">
+            <span>{{ mensajeExito() }}</span>
+          </div>
+        }
+
+        <div class="modal-body-layout">
+          <form [formGroup]="editForm" (ngSubmit)="guardarCambios()" class="auth-form" novalidate>
+            
+            <!-- Título -->
+            <div class="form-group">
+              <label for="titulo">Título</label>
+              <input
+                id="titulo"
+                type="text"
+                formControlName="titulo"
+                [class.invalid]="titulo?.invalid && (titulo?.dirty || titulo?.touched)"
+              />
+            </div>
+
+            <!-- Sinopsis -->
+            <div class="form-group">
+              <label for="sinopsis">Sinopsis</label>
+              <textarea
+                id="sinopsis"
+                formControlName="sinopsis"
+                rows="3"
+                [class.invalid]="sinopsis?.invalid && (sinopsis?.dirty || sinopsis?.touched)"
+              ></textarea>
+            </div>
+
+            <!-- Fila: Duración + Estreno -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="duracion">Duración (min)</label>
+                <input
+                  id="duracion"
+                  type="number"
+                  formControlName="duracion"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="fechaEstreno">Fecha de Estreno</label>
+                <input
+                  id="fechaEstreno"
+                  type="date"
+                  formControlName="fechaEstreno"
+                />
+              </div>
+            </div>
+
+            <!-- Géneros -->
+            <div class="form-group">
+              <label>Géneros</label>
+              <div class="generos-grid">
+                @for (genero of generosList; track genero.value) {
+                  <button
+                    type="button"
+                    class="genero-chip"
+                    [class.selected]="estaSeleccionado($any(genero.value))"
+                    (click)="toggleGenero($any(genero.value))"
+                  >
+                    {{ genero.label }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Fila: Restricción edad, Puntaje, Precio normal -->
+            <div class="form-row form-row-3">
+              <div class="form-group">
+                <label for="restriccionEdad">Restricción Edad</label>
+                <select id="restriccionEdad" formControlName="restriccionEdad">
+                  <option value="0">ATP</option>
+                  <option value="13">+13</option>
+                  <option value="16">+16</option>
+                  <option value="18">+18</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="puntajeCompra">Puntos por compra</label>
+                <input id="puntajeCompra" type="number" formControlName="puntajeCompra" />
+              </div>
+
+              <div class="form-group">
+                <label for="precioNormal">Precio ($)</label>
+                <input id="precioNormal" type="number" formControlName="precioNormal" />
+              </div>
+            </div>
+
+            <!-- Póster -->
+            <div class="form-group poster-group">
+              <label for="poster-file-edit">Póster</label>
+              <div class="poster-input-container">
+                <input
+                  id="poster-file-edit"
+                  type="file"
+                  accept="image/*"
+                  (change)="onArchivoPosterSeleccionado($event)"
+                  [disabled]="subiendoPoster()"
+                  class="file-input"
+                />
+                @if (subiendoPoster()) {
+                  <span class="uploading-status">Subiendo...</span>
+                }
+              </div>
+            </div>
+
+            <!-- Preventa -->
+            <div class="form-group form-group-check">
+              <label class="check-label">
+                <input type="checkbox" formControlName="esPreventa" />
+                Habilitar preventa
+              </label>
+            </div>
+
+            @if (esPreventa?.value) {
+              <div class="form-group">
+                <label for="precioPreventa">Precio Preventa ($)</label>
+                <input id="precioPreventa" type="number" formControlName="precioPreventa" />
+              </div>
+            }
+
+            <!-- Botones Modal -->
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="cerrarEdicion()">Cancelar</button>
+              <button type="submit" class="btn-primary" [disabled]="editForm.invalid || guardando() || subiendoPoster()">
+                @if (guardando()) {
+                  <span>Guardando...</span>
+                } @else {
+                  <span>{{ modoModal() === 'crear' ? 'Crear Película' : 'Guardar Cambios' }}</span>
+                }
+              </button>
+            </div>
+
+          </form>
+
+          <!-- Previsualización en la ventana modal -->
+          @if (peliculaEditandoPreview; as prev) {
+            <div class="modal-preview-sidebar">
+              <h4>Vista previa</h4>
+              <app-carta-pelicula [pelicula]="prev"></app-carta-pelicula>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

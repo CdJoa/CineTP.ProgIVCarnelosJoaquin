@@ -1,0 +1,50 @@
+<div
+  class="pelicula-card"
+  [class.selected]="seleccionada()"
+  (click)="onCardClick()"
+>
+  <div class="poster-box">
+    @if (pelicula().poster) {
+      <img [src]="pelicula().poster" [alt]="pelicula().titulo" [appHoverZoom]="1.05" class="poster-img" />
+    } @else {
+      <div class="poster-placeholder">
+        <span>🎬 Sin Póster</span>
+      </div>
+    }
+
+    @if (pelicula().esPreventa) {
+      <span class="badge badge-preventa">Preventa</span>
+    }
+  </div>
+
+  <div class="pelicula-info">
+    <h3 class="pelicula-titulo">{{ pelicula().titulo }}</h3>
+    
+    <div class="pelicula-metadatos">
+      <span>⏱️ {{ pelicula().duracion }} min</span>
+      <span>📅 {{ pelicula().fechaEstreno }}</span>
+      <span class="badge-edad">{{ pelicula().restriccionEdad > 0 ? '+' + pelicula().restriccionEdad : 'ATP' }}</span>
+    </div>
+
+    <div class="generos-list">
+      @for (genero of pelicula().generos; track genero) {
+        <span class="genero-tag">{{ genero }}</span>
+      }
+    </div>
+
+    <div class="pelicula-footer">
+      <div class="pelicula-precio">
+        <strong>${{ pelicula().precioNormal }}</strong>
+        @if (pelicula().esPreventa && pelicula().precioPreventa) {
+          <span class="precio-preventa">(${{ pelicula().precioPreventa }})</span>
+        }
+      </div>
+
+      @if (mostrarBotonEditar()) {
+        <button type="button" class="btn-editar" (click)="onEditarClick($event)">
+          ✏️ Editar
+        </button>
+      }
+    </div>
+  </div>
+</div>

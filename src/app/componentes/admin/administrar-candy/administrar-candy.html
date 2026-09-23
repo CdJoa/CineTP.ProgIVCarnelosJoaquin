@@ -1,0 +1,176 @@
+<div class="admin-candy-container">
+  <div class="header-bar">
+    <div>
+      <h2>Administrar Candy Bar</h2>
+      <p>Gestiona los pochoclos, bebidas y snacks del cine</p>
+    </div>
+    <button type="button" (click)="abrirCreacion()" class="btn-crear">
+      + Nuevo Producto
+    </button>
+  </div>
+
+  @if (mensajeError() && !productoEditando()) {
+    <div class="alert alert-error">
+      <span>{{ mensajeError() }}</span>
+    </div>
+  }
+
+  @if (mensajeExito() && !productoEditando()) {
+    <div class="alert alert-success">
+      <span>{{ mensajeExito() }}</span>
+    </div>
+  }
+
+  <!-- Filtros de búsqueda -->
+  <div class="filtros-bar">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Buscar producto..."
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+      />
+    </div>
+
+    <div class="categorias-filtros">
+      <button
+        type="button"
+        class="filtro-btn"
+        [class.active]="categoriaFiltro() === 'todos'"
+        (click)="categoriaFiltro.set('todos')"
+      >
+        Todos
+      </button>
+
+      @for (cat of categoriasList; track cat.value) {
+        <button
+          type="button"
+          class="filtro-btn"
+          [class.active]="categoriaFiltro() === cat.value"
+          (click)="categoriaFiltro.set(cat.value)"
+        >
+          {{ cat.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Contenido Principal / Grilla de Productos -->
+  @if (cargando()) {
+    <div class="loading-box">
+      <span>Cargando productos de Candy Bar...</span>
+    </div>
+  } @else if (productosFiltrados.length === 0) {
+    <div class="empty-state">
+      <p>No se encontraron productos.</p>
+    </div>
+  } @else {
+    <div class="candy-grid">
+      @for (producto of productosFiltrados; track producto.id) {
+        <app-carta-candy
+          [producto]="producto"
+          [seleccionado]="productoSeleccionado()?.id === producto.id"
+          [mostrarBotonEditar]="true"
+          (seleccionar)="seleccionarProducto($event)"
+          (editar)="abrirEdicion($event)"
+        ></app-carta-candy>
+      }
+    </div>
+
+    <!-- Panel de detalle de producto seleccionado -->
+    @if (productoSeleccionado(); as sel) {
+      <div class="detail-panel">
+        <div class="detail-header">
+          <h2>Producto Seleccionado: {{ sel.nombre }}</h2>
+          <div class="detail-actions">
+            <button class="btn-primary-sm" (click)="abrirEdicion(sel)">Editar Producto</button>
+            <button class="btn-close" (click)="productoSeleccionado.set(null)">X Cerrar</button>
+          </div>
+        </div>
+
+        <div class="detail-content">
+          <app-carta-candy [producto]="sel" class="detail-card-preview"></app-carta-candy>
+
+          <div class="detail-info">
+            <p><strong>Categoría:</strong> {{ sel.categoria | uppercase }}</p>
+            <p><strong>Descripción:</strong> {{ sel.descripcion }}</p>
+            <p><strong>Precio:</strong> ${{ sel.precio }}</p>
+            <p><strong>Puntos por compra:</strong> {{ sel.puntajeCompra }} pts</p>
+            <p><strong>Estado:</strong> {{ sel.activo ? 'Activo' : 'Inactivo' }}</p>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Modal de Edición o Creación -->
+  @if (modoModal()) {
+    <div class="modal-overlay" (click)="cerrarEdicion()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ modoModal() === 'crear' ? 'Nuevo Producto' : 'Editar Producto: ' + (productoEditando()?.nombre || '') }}</h3>
+          <button type="button" class="btn-close" (click)="cerrarEdicion()">X</button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="editForm" (ngSubmit)="guardarCambios()" class="edit-form">
+            <div class="form-group">
+              <label for="editNombre">Nombre</label>
+              <input id="editNombre" type="text" formControlName="nombre" />
+            </div>
+
+            <div class="form-group">
+              <label for="editCategoria">Categoría</label>
+              <select id="editCategoria" formControlName="categoria">
+                @for (cat of categoriasList; track cat.value) {
+                  <option [value]="cat.value">{{ cat.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="editDescripcion">Descripción</label>
+              <textarea id="editDescripcion" formControlName="descripcion" rows="3"></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="editPrecio">Precio ($)</label>
+                <input id="editPrecio" type="number" step="0.01" formControlName="precio" />
+              </div>
+
+              <div class="form-group">
+                <label for="editPuntos">Puntos de Compra</label>
+                <input id="editPuntos" type="number" formControlName="puntajeCompra" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="editImagen">Imagen</label>
+              <div class="poster-input-container">
+                <input type="file" accept="image/*" (change)="onArchivoSeleccionado($event)" class="file-input" />
+                @if (subiendoImagen()) {
+                  <span class="uploading-status"><span class="spinner"></span> Subiendo...</span>
+                }
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" (click)="cerrarEdicion()">Cancelar</button>
+              <button type="submit" class="btn-primary" [disabled]="guardando() || subiendoImagen()">
+                {{ guardando() ? 'Guardando...' : (modoModal() === 'crear' ? 'Crear Producto' : 'Guardar Cambios') }}
+              </button>
+            </div>
+          </form>
+
+          @if (productoEditandoPreview) {
+            <div class="modal-preview">
+              <h4>Vista Previa</h4>
+              <app-carta-candy [producto]="productoEditandoPreview"></app-carta-candy>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

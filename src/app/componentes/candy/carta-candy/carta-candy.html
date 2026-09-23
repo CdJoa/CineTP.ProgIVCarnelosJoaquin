@@ -1,0 +1,39 @@
+<div
+  class="candy-card"
+  [class.selected]="seleccionado()"
+  (click)="onCardClick()"
+>
+  <div class="imagen-box">
+    @if (producto().imagen) {
+      <img [src]="producto().imagen" [alt]="producto().nombre" [appHoverZoom]="1.05" class="candy-img" />
+    } @else {
+      <div class="imagen-placeholder">
+        <span>Sin Imagen</span>
+      </div>
+    }
+
+    <span class="badge-categoria">
+      {{ producto().categoria | uppercase }}
+    </span>
+  </div>
+
+  <div class="candy-info">
+    <h3 class="candy-nombre">{{ producto().nombre }}</h3>
+    <p class="candy-descripcion">{{ producto().descripcion }}</p>
+
+    <div class="candy-footer">
+      <div class="candy-precio">
+        <strong>${{ producto().precio }}</strong>
+        @if (producto().puntajeCompra > 0) {
+          <span class="puntos-tag">+{{ producto().puntajeCompra }} pts</span>
+        }
+      </div>
+
+      @if (mostrarBotonEditar()) {
+        <button type="button" class="btn-editar" (click)="onEditarClick($event)">
+          Editar
+        </button>
+      }
+    </div>
+  </div>
+</div>

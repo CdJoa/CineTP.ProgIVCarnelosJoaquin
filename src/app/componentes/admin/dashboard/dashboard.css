@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.dashboard {
+  padding: 30px;
+}
+
+.dashboard h1 {
+  font-size: 22px;
+  margin: 0 0 8px;
+  color: #212529;
+  font-family: Arial, sans-serif;
+}
+
+.dashboard p {
+  color: #666666;
+  font-size: 14px;
+  margin: 0 0 24px;
+  font-family: Arial, sans-serif;
+}
+
+.cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  padding: 20px 24px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 200px;
+  font-family: Arial, sans-serif;
+}
+
+.card:hover {
+  border-color: #0056b3;
+}
+
+.card h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: #0056b3;
+}
+
+.card p {
+  margin: 0;
+  font-size: 13px;
+  color: #666666;
+}

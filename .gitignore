@@ -39,6 +39,16 @@ testem.log
 /typings
 __screenshots__/
 
+# Environment files
+src/app/environments/environments.ts
+src/app/environments/environments.*.ts
+src/environments/
+
 # System files
 .DS_Store
 Thumbs.db
+
+# Sensitive and helper text files
+cuentasRapidas.txt
+comandos.txt
+*.txt

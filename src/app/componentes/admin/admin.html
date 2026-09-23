@@ -1,0 +1,32 @@
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Panel Admin</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/admin/peliculas" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        Administrar Películas
+      </a>
+      <a routerLink="/admin/candy" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        Administrar Candy Bar
+      </a>
+      <a routerLink="/admin/salas" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        Administrar Salas
+      </a>
+      <a routerLink="/admin/empleados/nuevo" routerLinkActive="active" class="nav-item">
+        Registrar Empleado
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a routerLink="/home" class="back-link">← Volver al inicio</a>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="admin-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
