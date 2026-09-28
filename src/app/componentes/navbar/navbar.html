@@ -6,6 +6,9 @@
   <div class="navbar-right">
     @if (authService.usuarioActual(); as usuario) {
       <span class="user-greeting">Hola, {{ usuario.nombre }}</span>
+      @if (usuario.rol === 'admin' || usuario.rol === 'empleado') {
+        <a routerLink="/admin" class="nav-link nav-admin">Panel Admin</a>
+      }
       <button type="button" (click)="cerrarSesion()" class="nav-btn">Cerrar Sesión</button>
     } @else {
       <a routerLink="/login" class="nav-link">Iniciar Sesión</a>

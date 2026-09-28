@@ -8,16 +8,17 @@ import { AdministrarPeliculas } from './componentes/admin/administrar-peliculas/
 import { RegistrarEmpleado } from './componentes/empleado/registrar-empleado/registrar-empleado';
 import { AdministrarCandy } from './componentes/admin/administrar-candy/administrar-candy';
 import { AdministrarSalas } from './componentes/admin/administrar-salas/administrar-salas';
+import { AdministrarFunciones } from './componentes/admin/administrar-funciones/administrar-funciones';
 import { MapaSalaComponent } from './componentes/sala/mapa-sala/mapa-sala';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'login', component: Login, canActivate: [authGuard] },
   { path: 'registro', component: Registro, canActivate: [authGuard] },
   { path: 'register', redirectTo: 'registro', pathMatch: 'full' },
-  { path: 'home', component: Home, canActivate: [authGuard] },
+  { path: 'home', component: Home },
   { path: 'sala', component: MapaSalaComponent, canActivate: [authGuard] },
   {
     path: 'admin',
@@ -28,6 +29,8 @@ export const routes: Routes = [
       { path: '', redirectTo: 'peliculas', pathMatch: 'full' },
       { path: 'peliculas', component: AdministrarPeliculas },
       { path: 'peliculas/nueva', redirectTo: 'peliculas', pathMatch: 'full' },
+      { path: 'funciones', component: AdministrarFunciones },
+      { path: 'funciones/nueva', redirectTo: 'funciones', pathMatch: 'full' },
       { path: 'candy', component: AdministrarCandy },
       { path: 'candy/nuevo', redirectTo: 'candy', pathMatch: 'full' },
       { path: 'salas', component: AdministrarSalas },

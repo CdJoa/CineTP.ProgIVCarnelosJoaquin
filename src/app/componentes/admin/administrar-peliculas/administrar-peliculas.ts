@@ -40,6 +40,8 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
   get esPreventa() { return this.editForm.get('esPreventa'); }
   get precioPreventa() { return this.editForm.get('precioPreventa'); }
   get poster() { return this.editForm.get('poster'); }
+  get enCartelera() { return this.editForm.get('enCartelera'); }
+  get boletosVendidos() { return this.editForm.get('boletosVendidos'); }
 
   get peliculaEditandoPreview(): Pelicula | null {
     if (!this.modoModal()) return null;
@@ -70,6 +72,8 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
       esPreventa: pelicula.esPreventa,
       precioPreventa: pelicula.precioPreventa || '',
       poster: pelicula.poster || '',
+      enCartelera: pelicula.enCartelera ?? true,
+      boletosVendidos: pelicula.boletosVendidos || 0,
     };
   }
 
@@ -86,6 +90,8 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
       esPreventa: false,
       precioPreventa: '',
       poster: '',
+      enCartelera: true,
+      boletosVendidos: 0,
     });
   }
 

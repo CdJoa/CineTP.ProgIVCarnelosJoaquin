@@ -22,6 +22,8 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       precio_preventa: datos.esPreventa && datos.precioPreventa ? Number(datos.precioPreventa) : null,
       precio_normal: Number(datos.precioNormal),
       fecha_estreno: datos.fechaEstreno,
+      en_cartelera: datos.enCartelera ?? true,
+      boletos_vendidos: Number(datos.boletosVendidos || 0),
       activa: true,
     });
   }
@@ -41,6 +43,8 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
     if (datos.restriccionEdad !== undefined) payload['restriccionEdad'] = Number(datos.restriccionEdad);
     if (datos.puntajeCompra !== undefined) payload['puntajeCompra'] = Number(datos.puntajeCompra);
     if (datos.precioNormal !== undefined) payload['precioNormal'] = Number(datos.precioNormal);
+    if (datos.boletosVendidos !== undefined) payload['boletosVendidos'] = Number(datos.boletosVendidos);
+    if (datos.enCartelera !== undefined) payload['enCartelera'] = Boolean(datos.enCartelera);
     if (datos.precioPreventa !== undefined) {
       payload['precioPreventa'] = datos.esPreventa && datos.precioPreventa ? Number(datos.precioPreventa) : null;
     }
@@ -54,6 +58,7 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       .from('funciones')
       .insert({
         pelicula_id: datos.peliculaId,
+        sala_id: datos.salaId || null,
         inicio: datos.inicio,
         precio: datos.precio,
         formato: datos.formato || null,
@@ -70,7 +75,9 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
     return {
       id: data.id,
       peliculaId: data.pelicula_id,
+      salaId: data.sala_id || datos.salaId || '',
       inicio: data.inicio,
+      fin: data.fin || '',
       precio: data.precio,
       formato: data.formato,
       idioma: data.idioma,
@@ -93,7 +100,9 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       precioPreventa: data['precio_preventa'],
       precioNormal: data['precio_normal'],
       fechaEstreno: data['fecha_estreno'],
-      activa: data['activa'],
+      activa: data['activa'] ?? true,
+      enCartelera: data['en_cartelera'] ?? true,
+      boletosVendidos: data['boletos_vendidos'] || 0,
       creadoEn: data['creado_en'],
       formato: data['formato'],
       idioma: data['idioma'],

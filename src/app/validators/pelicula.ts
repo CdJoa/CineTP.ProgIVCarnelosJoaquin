@@ -39,6 +39,8 @@ export function crearFormularioPelicula(fb: FormBuilder): FormGroup {
     esPreventa: [false],
     precioPreventa: [''],
     poster: [''],
+    enCartelera: [true],
+    boletosVendidos: [0],
   });
 }
 
@@ -61,6 +63,8 @@ export function generarPreviewPelicula(
     precioNormal: val['precioNormal'] !== undefined && val['precioNormal'] !== '' ? Number(val['precioNormal']) : (basePelicula?.precioNormal || 0),
     fechaEstreno: val['fechaEstreno'] || basePelicula?.fechaEstreno || 'YYYY-MM-DD',
     activa: basePelicula?.activa ?? true,
+    enCartelera: val['enCartelera'] !== undefined ? val['enCartelera'] : (basePelicula?.enCartelera ?? true),
+    boletosVendidos: val['boletosVendidos'] !== undefined && val['boletosVendidos'] !== '' ? Number(val['boletosVendidos']) : (basePelicula?.boletosVendidos || 0),
   };
 }
 

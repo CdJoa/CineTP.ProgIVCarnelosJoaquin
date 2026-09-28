@@ -8,7 +8,7 @@
       <img [src]="pelicula().poster" [alt]="pelicula().titulo" [appHoverZoom]="1.05" class="poster-img" />
     } @else {
       <div class="poster-placeholder">
-        <span>🎬 Sin Póster</span>
+        <span>Sin Póster</span>
       </div>
     }
 
@@ -21,8 +21,8 @@
     <h3 class="pelicula-titulo">{{ pelicula().titulo }}</h3>
     
     <div class="pelicula-metadatos">
-      <span>⏱️ {{ pelicula().duracion }} min</span>
-      <span>📅 {{ pelicula().fechaEstreno }}</span>
+      <span>{{ pelicula().duracion }} min</span>
+      <span>{{ pelicula().fechaEstreno }}</span>
       <span class="badge-edad">{{ pelicula().restriccionEdad > 0 ? '+' + pelicula().restriccionEdad : 'ATP' }}</span>
     </div>
 
@@ -32,19 +32,18 @@
       }
     </div>
 
-    <div class="pelicula-footer">
-      <div class="pelicula-precio">
-        <strong>${{ pelicula().precioNormal }}</strong>
-        @if (pelicula().esPreventa && pelicula().precioPreventa) {
-          <span class="precio-preventa">(${{ pelicula().precioPreventa }})</span>
-        }
+    @if (mostrarBoletosVendidos()) {
+      <div class="boletos-box">
+        <span class="boletos-vendidos-badge">{{ pelicula().boletosVendidos || 0 }} boletos vendidos</span>
       </div>
+    }
 
-      @if (mostrarBotonEditar()) {
+    @if (mostrarBotonEditar()) {
+      <div class="pelicula-footer">
         <button type="button" class="btn-editar" (click)="onEditarClick($event)">
-          ✏️ Editar
+          Editar
         </button>
-      }
-    </div>
+      </div>
+    }
   </div>
 </div>

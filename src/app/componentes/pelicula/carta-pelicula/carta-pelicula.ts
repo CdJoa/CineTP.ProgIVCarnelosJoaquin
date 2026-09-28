@@ -14,6 +14,7 @@ export class CartaPelicula {
   pelicula = input.required<Pelicula>();
   seleccionada = input<boolean>(false);
   mostrarBotonEditar = input<boolean>(false);
+  mostrarBoletosVendidos = input<boolean>(false);
 
   seleccionar = output<Pelicula>();
   editar = output<Pelicula>();

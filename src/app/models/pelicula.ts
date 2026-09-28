@@ -30,6 +30,8 @@ export interface Pelicula {
   precioNormal: number;
   fechaEstreno: string;      // ISO date string
   activa: boolean;
+  enCartelera: boolean;      // Visibilidad en cartelera pública
+  boletosVendidos: number;   // Contador de entradas/boletos vendidos
   creadoEn?: string;
   formato?: Formato;
   idioma?: Idioma;
@@ -47,6 +49,8 @@ export interface CrearPeliculaDto {
   precioPreventa?: number;
   precioNormal: number;
   fechaEstreno: string;
+  enCartelera?: boolean;
+  boletosVendidos?: number;
   formato?: Formato;
   idioma?: Idioma;
 }

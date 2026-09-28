@@ -1,0 +1,241 @@
+<div class="cartelera-container">
+  <!-- Sección Top 3 Más Vendidas -->
+  <div *ngIf="!cargando() && topTresVendidas.length > 0" class="top-tres-seccion">
+    <div class="cartelera-titulo-box">
+      <h2>Top 3 Más Vendidas</h2>
+      <p>Las películas más elegidas por el público</p>
+    </div>
+
+    <div class="cartelera-grid-layout">
+      <div *ngFor="let pelicula of topTresVendidas" class="grid-item">
+        <app-carta-pelicula
+          [pelicula]="pelicula"
+          [mostrarBoletosVendidos]="true"
+          (seleccionar)="abrirDetalle($event)"
+        ></app-carta-pelicula>
+      </div>
+    </div>
+
+    <hr class="seccion-divider" />
+  </div>
+
+  <!-- Encabezado de Cartelera -->
+  <div class="cartelera-header">
+    <div class="cartelera-titulo-box">
+      <h2>Cartelera</h2>
+      <p>Descubrí las películas disponibles en nuestras salas</p>
+    </div>
+
+    <!-- Pestañas de Filtro -->
+    <div class="filtro-tabs">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="filtroTipo() === 'todas'"
+        (click)="filtroTipo.set('todas')"
+      >
+        Todas
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="filtroTipo() === 'cartelera'"
+        (click)="filtroTipo.set('cartelera')"
+      >
+        En Cartelera
+      </button>
+      <button
+        type="button"
+        class="tab-btn preventa-tab"
+        [class.active]="filtroTipo() === 'preventa'"
+        (click)="filtroTipo.set('preventa')"
+      >
+        Preventas
+      </button>
+    </div>
+  </div>
+
+  <!-- Barra de Búsqueda y Géneros -->
+  <div class="cartelera-filtros">
+    <div class="search-box">
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+        placeholder="Buscar película..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="genero-select-box" *ngIf="generosDisponibles.length > 0">
+      <select
+        [value]="generoSeleccionado()"
+        (change)="generoSeleccionado.set($any($event.target).value)"
+        class="genero-select"
+      >
+        <option value="todos">Todos los géneros</option>
+        <option *ngFor="let g of generosDisponibles" [value]="g">{{ g }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Spinner de Carga -->
+  <div *ngIf="cargando()" class="loading-box">
+    <div class="spinner"></div>
+    <p>Cargando películas...</p>
+  </div>
+
+  <!-- Grilla de Películas -->
+  <div *ngIf="!cargando()" class="cartelera-grid-layout">
+    <div *ngIf="peliculasFiltradas.length === 0" class="empty-cartelera">
+      <p>No se encontraron películas que coincidan con los criterios seleccionados.</p>
+    </div>
+
+    <div
+      *ngFor="let pelicula of peliculasFiltradas"
+      class="grid-item"
+    >
+      <app-carta-pelicula
+        [pelicula]="pelicula"
+        (seleccionar)="abrirDetalle($event)"
+      ></app-carta-pelicula>
+    </div>
+  </div>
+
+  <!-- Overlay Modal y Panel Lateral -->
+  <div *ngIf="peliculaSeleccionada() as p" class="modal-overlay" (click)="cerrarDetalle()">
+    <!-- 1. Modal Detalle de Película Original (Carta grande centrada) -->
+    <div class="modal-content-pelicula" (click)="$event.stopPropagation()">
+      <button type="button" class="btn-close" (click)="cerrarDetalle()">✕</button>
+
+      <div class="modal-grid-detail">
+        <div class="detail-poster-col">
+          <img *ngIf="p.poster" [src]="p.poster" [alt]="p.titulo" class="detail-poster" />
+          <div *ngIf="!p.poster" class="no-poster">Sin Póster</div>
+        </div>
+
+        <div class="detail-info-col">
+          <span *ngIf="p.esPreventa" class="badge-preventa">PREVENTA</span>
+          <h2 class="detail-titulo">{{ p.titulo }}</h2>
+
+          <div class="detail-meta">
+            <span>⏱️ {{ p.duracion }} min</span>
+            <span>📅 Estreno: {{ p.fechaEstreno }}</span>
+            <span class="badge-edad">+{{ p.restriccionEdad }}</span>
+          </div>
+
+          <div class="detail-generos">
+            <span *ngFor="let g of p.generos" class="tag-genero">{{ g }}</span>
+          </div>
+
+          <p class="detail-sinopsis">{{ p.sinopsis || 'Sin descripción disponible.' }}</p>
+
+          <div class="detail-precio-box">
+            <span class="precio-label">Precio Entrada:</span>
+            <strong class="precio-valor">${{ p.esPreventa && p.precioPreventa ? p.precioPreventa : p.precioNormal }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Navbar / Sidebar Vertical a la Derecha para Seleccionar Funciones -->
+    <aside class="sidebar-funciones-derecha" (click)="$event.stopPropagation()">
+      <div class="sidebar-header">
+        <div class="sidebar-title-box">
+          <span class="sidebar-badge">DISPONIBLES</span>
+          <h3 class="sidebar-titulo">Funciones</h3>
+        </div>
+        <button type="button" class="btn-close-sidebar" (click)="cerrarDetalle()">✕</button>
+      </div>
+
+      <!-- Filtros Verticales: Día, Formato e Idioma -->
+      <div class="sidebar-filtros">
+        <!-- Filtro Día -->
+        <div class="filtro-campo">
+          <label class="filtro-lbl">📅 Día</label>
+          <select
+            [value]="filtroFuncionDia()"
+            (change)="filtroFuncionDia.set($any($event.target).value)"
+            class="sidebar-select"
+          >
+            <option value="todos">Todos los días</option>
+            <option *ngFor="let dia of diasDisponiblesPelicula" [value]="dia.valor">
+              {{ dia.etiqueta }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro Formato -->
+        <div class="filtro-campo">
+          <label class="filtro-lbl">🎥 Formato</label>
+          <select
+            [value]="filtroFuncionFormato()"
+            (change)="filtroFuncionFormato.set($any($event.target).value)"
+            class="sidebar-select"
+          >
+            <option value="todos">Todos los formatos</option>
+            <option *ngFor="let fmt of formatosDisponiblesPelicula" [value]="fmt">
+              {{ fmt }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro Idioma -->
+        <div class="filtro-campo">
+          <label class="filtro-lbl">🗣️ Idioma</label>
+          <select
+            [value]="filtroFuncionIdioma()"
+            (change)="filtroFuncionIdioma.set($any($event.target).value)"
+            class="sidebar-select"
+          >
+            <option value="todos">Todos los idiomas</option>
+            <option *ngFor="let idm of idiomasDisponiblesPelicula" [value]="idm">
+              {{ idm | titlecase }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="sidebar-divider" />
+
+      <!-- Lista de Funciones Filtradas -->
+      <div class="sidebar-body">
+        <div *ngIf="cargandoFunciones()" class="loading-sidebar">
+          <div class="mini-spinner"></div>
+          <span>Buscando funciones...</span>
+        </div>
+
+        <div *ngIf="!cargandoFunciones() && funcionesDePeliculaFiltradas.length === 0" class="no-funciones-sidebar">
+          <div class="empty-icon">🍿</div>
+          <p>No hay funciones que coincidan con los filtros seleccionados.</p>
+        </div>
+
+        <div *ngIf="!cargandoFunciones() && funcionesDePeliculaFiltradas.length > 0" class="funciones-vertical-list">
+          <div
+            *ngFor="let fn of funcionesDePeliculaFiltradas"
+            class="fn-card-vertical"
+            [class.active]="funcionSeleccionada()?.id === fn.id"
+            (click)="seleccionarFuncion(fn)"
+          >
+            <div class="fn-card-top">
+              <span class="fn-hora-bold">{{ formatearFechaHora(fn.inicio).hora }}</span>
+              <span class="fn-dia-badge">{{ formatearFechaHora(fn.inicio).dia }}</span>
+            </div>
+
+            <div class="fn-card-mid">
+              <span class="fn-sala-txt">🎬 {{ fn.salaNombre || 'Sala' }}</span>
+              <div class="fn-tags-group">
+                <span class="tag-fmt">{{ fn.formato || '2D' }}</span>
+                <span class="tag-idm">{{ fn.idioma | titlecase }}</span>
+              </div>
+            </div>
+
+            <div class="fn-card-bot">
+              <span class="fn-precio-txt">${{ fn.precio }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

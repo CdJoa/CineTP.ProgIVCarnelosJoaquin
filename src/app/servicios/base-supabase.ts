@@ -93,4 +93,15 @@ export abstract class BaseSupabaseService<T> {
     const snakePayload = objectToSnakeCase(payload);
     return this.insertar(snakePayload);
   }
+
+  async eliminar(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from(this.nombreTabla)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
 }

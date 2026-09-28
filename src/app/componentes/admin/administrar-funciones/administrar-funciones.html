@@ -1,0 +1,221 @@
+<div class="administrar-funciones-container">
+  <!-- Cabecera -->
+  <header class="header-seccion">
+    <div>
+      <h1 class="titulo-seccion">Administrar Funciones</h1>
+      <p class="subtitulo-seccion">Programe funciones asignando película, sala y horario (incluye +30 min de limpieza y preparación)</p>
+    </div>
+    <button type="button" (click)="abrirCreacion()" class="btn-crear">
+      + Nueva Función
+    </button>
+  </header>
+
+  <!-- Barra de Filtros -->
+  <div class="filtros-bar">
+    <div class="filtro-item">
+      <label>Sala:</label>
+      <select [value]="filtroSala()" (change)="filtroSala.set($any($event.target).value)" class="select-filtro">
+        <option value="todas">Todas las salas</option>
+        <option *ngFor="let s of salas()" [value]="s.id">{{ s.nombre }}</option>
+      </select>
+    </div>
+
+    <div class="filtro-item">
+      <label>Estado:</label>
+      <select [value]="filtroEstado()" (change)="filtroEstado.set($any($event.target).value)" class="select-filtro">
+        <option value="todas">Todos los estados</option>
+        <option *ngFor="let est of estadosList" [value]="est">{{ est | titlecase }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="main-layout" *ngIf="!cargando(); else cargandoTemplate">
+    <div *ngIf="funcionesFiltradas.length === 0" class="empty-state">
+      <p>No se encontraron funciones programadas.</p>
+    </div>
+
+    <div *ngIf="funcionesFiltradas.length > 0" class="funciones-grid">
+      <div *ngFor="let funcion of funcionesFiltradas" class="funcion-card" [class.cancelada]="funcion.estado === 'cancelada'">
+        <div class="card-header">
+          <h3 class="pelicula-nombre">{{ funcion.peliculaTitulo }}</h3>
+          <span class="estado-badge" [class]="funcion.estado">
+            {{ funcion.estado | titlecase }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div class="info-row">
+            <span class="info-label">Sala:</span>
+            <strong class="info-val">{{ funcion.salaNombre }}</strong>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Inicio:</span>
+            <span class="info-val">{{ formatearFechaHora(funcion.inicio) }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Fin (+30 min prep.):</span>
+            <span class="info-val">{{ formatearFechaHora(funcion.fin || '') }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Formato / Idioma:</span>
+            <span class="info-val">{{ funcion.formato || '2D' }} - {{ funcion.idioma | titlecase }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Precio:</span>
+            <strong class="precio-val">${{ funcion.precio }}</strong>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button type="button" class="btn-accion edit" (click)="abrirEdicion(funcion)">
+            Editar
+          </button>
+          <button
+            *ngIf="funcion.estado === 'programada'"
+            type="button"
+            class="btn-accion cancel"
+            (click)="cambiarEstado(funcion, 'cancelada')"
+          >
+            Cancelar
+          </button>
+          <button
+            *ngIf="funcion.estado === 'cancelada'"
+            type="button"
+            class="btn-accion reactivate"
+            (click)="cambiarEstado(funcion, 'programada')"
+          >
+            Reactivar
+          </button>
+          <button
+            type="button"
+            class="btn-accion delete"
+            (click)="borrarFuncion(funcion)"
+          >
+            Borrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #cargandoTemplate>
+    <div class="cargando-box">
+      <div class="spinner"></div>
+      <p>Cargando lista de funciones...</p>
+    </div>
+  </ng-template>
+
+  <!-- Modal / Formulario de Edición/Creación de Función -->
+  <div *ngIf="modoModal()" class="modal-overlay" (click)="cerrarEdicion()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ modoModal() === 'crear' ? 'Nueva Función' : 'Editar Función' }}</h2>
+        <button type="button" class="btn-close" (click)="cerrarEdicion()">✕</button>
+      </div>
+
+      <form [formGroup]="editForm" (ngSubmit)="guardarCambios()" class="modal-form">
+        <div *ngIf="mensajeError()" class="alert-error">
+          <span>{{ mensajeError() }}</span>
+        </div>
+
+        <!-- Película -->
+        <div class="form-group">
+          <label class="form-label">Película</label>
+          <select formControlName="peliculaId" class="form-input">
+            <option value="" disabled>Seleccione una película</option>
+            <option *ngFor="let p of peliculas()" [value]="p.id">
+              {{ p.titulo }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Sala -->
+        <div class="form-group">
+          <label class="form-label">Sala</label>
+          <select formControlName="salaId" (change)="onSalaChange()" class="form-input">
+            <option value="" disabled>Seleccione una sala</option>
+            <option *ngFor="let s of salas()" [value]="s.id">
+              {{ s.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Día y Horario Separados -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Día</label>
+            <input
+              type="date"
+              formControlName="fecha"
+              [min]="minFechaActual"
+              (change)="onFechaOrSalaChange()"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Horario</label>
+            <select formControlName="hora" class="form-input">
+              <option
+                *ngFor="let h of opcionesHora"
+                [value]="h"
+                [disabled]="esHoraBloqueada(h)"
+                [style.color]="esHoraBloqueada(h) ? '#ef4444' : 'inherit'"
+              >
+                {{ h }} hs {{ esHoraBloqueada(h) ? '(Ocupado)' : '' }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Formato y Idioma -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Formato (según sala)</label>
+            <input type="text" [value]="formatoDeSalaSeleccionada" class="form-input" disabled />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Idioma</label>
+            <select formControlName="idioma" class="form-input">
+              <option *ngFor="let idm of idiomasList" [value]="idm">{{ idm | titlecase }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Precio y Estado -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Precio ($)</label>
+            <input type="number" formControlName="precio" min="0" class="form-input" />
+          </div>
+
+          <div class="form-group" *ngIf="modoModal() === 'editar'">
+            <label class="form-label">Estado</label>
+            <select formControlName="estado" class="form-input">
+              <option *ngFor="let est of estadosList" [value]="est">{{ est | titlecase }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="cerrarEdicion()">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn-save"
+            [disabled]="guardando() || editForm.invalid || esHoraBloqueada(hora?.value)"
+          >
+            {{ guardando() ? 'Guardando...' : (modoModal() === 'crear' ? 'Crear Función' : 'Guardar Cambios') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -39,41 +39,11 @@
             [pelicula]="pelicula"
             [seleccionada]="peliculaSeleccionada()?.id === pelicula.id"
             [mostrarBotonEditar]="true"
-            (seleccionar)="seleccionarPelicula($event)"
+            (seleccionar)="abrirEdicion($event)"
             (editar)="abrirEdicion($event)"
           ></app-carta-pelicula>
         }
       </div>
-
-      <!-- Panel de detalle de película seleccionada -->
-      @if (peliculaSeleccionada(); as sel) {
-        <div class="detail-panel">
-          <div class="detail-header">
-            <h2>Película Seleccionada: {{ sel.titulo }}</h2>
-            <div class="detail-actions">
-              <button class="btn-primary-sm" (click)="abrirEdicion(sel)">Editar Película</button>
-              <button class="btn-close" (click)="peliculaSeleccionada.set(null)">X Cerrar</button>
-            </div>
-          </div>
-
-          <div class="detail-content">
-            <app-carta-pelicula [pelicula]="sel" class="detail-card-preview"></app-carta-pelicula>
-
-            <div class="detail-info">
-              <p><strong>Sinopsis:</strong> {{ sel.sinopsis }}</p>
-              <p><strong>Duración:</strong> {{ sel.duracion }} minutos</p>
-              <p><strong>Restricción de edad:</strong> {{ sel.restriccionEdad > 0 ? '+' + sel.restriccionEdad : 'ATP' }}</p>
-              <p><strong>Puntos por compra:</strong> {{ sel.puntajeCompra }} pts</p>
-              <p><strong>Fecha de estreno:</strong> {{ sel.fechaEstreno }}</p>
-              <p><strong>Estado:</strong> {{ sel.activa ? 'Activa' : 'Inactiva' }}</p>
-              <p><strong>Precio normal:</strong> ${{ sel.precioNormal }}</p>
-              @if (sel.esPreventa) {
-                <p><strong>Precio preventa:</strong> ${{ sel.precioPreventa }}</p>
-              }
-            </div>
-          </div>
-        </div>
-      }
     }
   }
 
@@ -199,6 +169,21 @@
                 @if (subiendoPoster()) {
                   <span class="uploading-status">Subiendo...</span>
                 }
+              </div>
+            </div>
+
+            <!-- Visibilidad y Boletos Vendidos -->
+            <div class="form-row">
+              <div class="form-group form-group-check">
+                <label class="check-label">
+                  <input type="checkbox" formControlName="enCartelera" />
+                  Mostrar en Cartelera
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label for="boletosVendidos">Boletos Vendidos</label>
+                <input id="boletosVendidos" type="number" formControlName="boletosVendidos" min="0" />
               </div>
             </div>
 

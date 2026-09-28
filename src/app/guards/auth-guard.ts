@@ -17,8 +17,8 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // No autenticado: solo puede ver login y registro
-  if (state.url === '/login' || state.url === '/registro') {
+  // No autenticado: puede ver home, login y registro
+  if (state.url === '/home' || state.url === '/login' || state.url === '/registro' || state.url === '/') {
     return true;
   }
 
