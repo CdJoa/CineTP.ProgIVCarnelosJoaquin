@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LETRAS_FILAS, SalaService } from '../../../servicios/sala';
-import { FilaSala, Sala, TipoFila } from '../../../models/sala';
+import { SalaService } from '../../../servicios/sala';
+import { Sala } from '../../../models/sala';
 import { AdministrarBase } from '../administrar-base';
 import { crearFormularioSala, generarPreviewSala } from '../../../validators/sala';
 import { MapaSalaComponent } from '../../sala/mapa-sala/mapa-sala';
@@ -17,14 +17,11 @@ import { MapaSalaComponent } from '../../sala/mapa-sala/mapa-sala';
 export class AdministrarSalas extends AdministrarBase<Sala> {
   private salaService = inject(SalaService);
 
-  readonly letrasFilas = LETRAS_FILAS;
-
   salas = this.items;
   salaSeleccionada = this.itemSeleccionado;
   salaEditando = this.itemEditando;
 
   busqueda = signal<string>('');
-  configFilasEditando = signal<Record<string, TipoFila>>({});
 
   editForm: FormGroup = crearFormularioSala(this.fb);
 
@@ -34,7 +31,7 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
 
   get salaEditandoPreview(): Sala | null {
     if (!this.modoModal()) return null;
-    const filas = this.salaService.generarFilas(this.configFilasEditando());
+    const filas = this.salaService.generarFilas();
     return generarPreviewSala(this.editForm.value, filas, this.itemEditando() || undefined);
   }
 
@@ -55,12 +52,11 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
     return this.salaService.crearSala({
       nombre: payload.nombre,
       formato: payload.formato || '2D',
-      configuracionFilas: this.configFilasEditando(),
     });
   }
 
   protected override actualizarData(id: string, payload: any): Promise<Sala> {
-    const filasActualizadas = this.salaService.generarFilas(this.configFilasEditando());
+    const filasActualizadas = this.salaService.generarFilas();
     return this.salaService.actualizarSala(id, {
       ...payload,
       filas: filasActualizadas,
@@ -76,17 +72,6 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
   }
 
   protected override onFormularioReset(): void {
-    const defaultConfig: Record<string, TipoFila> = {};
-    for (const letra of this.letrasFilas) {
-      if (letra === 'J' || letra === 'K') {
-        defaultConfig[letra] = 'discapacitado';
-      } else if (letra === 'R' || letra === 'S' || letra === 'T') {
-        defaultConfig[letra] = 'vip';
-      } else {
-        defaultConfig[letra] = 'comun';
-      }
-    }
-    this.configFilasEditando.set(defaultConfig);
     this.editForm.patchValue({
       nombre: '',
       formato: '2D',
@@ -94,20 +79,7 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
     });
   }
 
-  protected override onFormularioCargado(sala: Sala): void {
-    const config: Record<string, TipoFila> = {};
-    if (sala.filas) {
-      for (const f of sala.filas) {
-        config[f.letra] = f.tipo;
-      }
-    }
-    this.configFilasEditando.set(config);
-  }
-
-  public cambiarTipoFilaEditando(letra: string, nuevoTipo: TipoFila): void {
-    const config = { ...this.configFilasEditando() };
-    config[letra] = nuevoTipo;
-    this.configFilasEditando.set(config);
+  protected override onFormularioCargado(_sala: Sala): void {
   }
 
   public seleccionarSala(sala: Sala): void {

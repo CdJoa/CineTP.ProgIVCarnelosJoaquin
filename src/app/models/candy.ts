@@ -6,7 +6,7 @@ export interface ProductoCandy {
   descripcion: string;
   categoria: CategoriaCandy;
   precio: number;
-  imagen?: string;       // URL de Cloudinary
+  imagen?: string;       // URL de Supabase Storage
   puntajeCompra: number; // Puntos que otorga la compra
   activo: boolean;
   creadoEn?: string;

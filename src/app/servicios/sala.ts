@@ -25,11 +25,11 @@ export class SalaService extends BaseSupabaseService<Sala> {
     };
   }
 
-  public generarFilas(configuracionFilas?: Record<string, TipoFila>): FilaSala[] {
+  public generarFilas(): FilaSala[] {
     return LETRAS_FILAS.map((letra, index) => {
-      let tipo: TipoFila = configuracionFilas?.[letra] ||
-        (letra === 'J' || letra === 'K' ? 'discapacitado' :
-         letra === 'R' || letra === 'S' || letra === 'T' ? 'vip' : 'comun');
+      let tipo: TipoFila =
+        letra === 'J' || letra === 'K' ? 'discapacitado' :
+        letra === 'R' || letra === 'S' || letra === 'T' ? 'vip' : 'comun';
 
       return this.crearFila(letra, index + 1, tipo);
     });
@@ -77,7 +77,8 @@ export class SalaService extends BaseSupabaseService<Sala> {
   async obtenerSalas(): Promise<Sala[]> {
     const salas = await this.obtenerTodos('nombre', true);
     for (const sala of salas) {
-      await this.cargarAsientosRelacionales(sala);
+      sala.filas = this.generarFilas();
+      sala.capacidadTotal = this.calcularCapacidadTotal(sala.filas);
     }
     return salas;
   }
@@ -85,43 +86,16 @@ export class SalaService extends BaseSupabaseService<Sala> {
   async obtenerSalaPorId(id: string): Promise<Sala | null> {
     const sala = await this.obtenerPorId(id);
     if (sala) {
-      await this.cargarAsientosRelacionales(sala);
+      sala.filas = this.generarFilas();
+      sala.capacidadTotal = this.calcularCapacidadTotal(sala.filas);
     }
     return sala;
   }
 
-  private async cargarAsientosRelacionales(sala: Sala): Promise<void> {
-    try {
-      const { data, error } = await this.supabase
-        .from('asientos')
-        .select('*')
-        .eq('sala_id', sala.id)
-        .order('numero', { ascending: true });
-
-      if (data && data.length > 0 && !error) {
-        sala.filas = this.reconstruirFilasDesdeAsientos(data);
-        sala.capacidadTotal = sala.filas.reduce((sum, f) => sum + f.totalAsientos, 0);
-      }
-    } catch {
-      // Si la tabla asientos no ha sido creada aún en Supabase, se mantiene la estructura por defecto
-    }
-  }
-
-  private reconstruirFilasDesdeAsientos(asientosDb: Record<string, any>[]): FilaSala[] {
-    const configFilas: Record<string, TipoFila> = {};
-    for (const a of asientosDb) {
-      if (a['fila']) {
-        configFilas[a['fila']] = a['tipo'] as TipoFila;
-      }
-    }
-    return this.generarFilas(configFilas);
-  }
-
   async crearSala(dto: CrearSalaDto): Promise<Sala> {
-    const filas = this.generarFilas(dto.configuracionFilas);
+    const filas = this.generarFilas();
     const capacidadTotal = this.calcularCapacidadTotal(filas);
 
-    // 1. Insertar la sala en la tabla 'salas'
     const nuevaSala = await this.insertar({
       nombre: dto.nombre,
       formato: dto.formato || '2D',
@@ -130,10 +104,6 @@ export class SalaService extends BaseSupabaseService<Sala> {
     });
 
     nuevaSala.filas = filas;
-
-    // 2. Insertar los asientos de forma relacional en la tabla 'asientos' con sala_id
-    await this.guardarAsientosRelacionales(nuevaSala.id, filas);
-
     return nuevaSala;
   }
 
@@ -141,50 +111,11 @@ export class SalaService extends BaseSupabaseService<Sala> {
     const datosActualizar: Record<string, any> = { ...payload };
     delete datosActualizar['filas'];
 
-    if (payload.filas) {
-      datosActualizar['capacidad_total'] = this.calcularCapacidadTotal(payload.filas);
-    }
+    const filas = this.generarFilas();
+    datosActualizar['capacidad_total'] = this.calcularCapacidadTotal(filas);
 
     const salaActualizada = await this.actualizarAuto(id, datosActualizar);
-
-    if (payload.filas) {
-      salaActualizada.filas = payload.filas;
-      await this.guardarAsientosRelacionales(id, payload.filas);
-    } else {
-      await this.cargarAsientosRelacionales(salaActualizada);
-    }
-
+    salaActualizada.filas = filas;
     return salaActualizada;
-  }
-
-  private async guardarAsientosRelacionales(salaId: string, filas: FilaSala[]): Promise<void> {
-    try {
-      // Borrar asientos previos para esta sala
-      await this.supabase.from('asientos').delete().eq('sala_id', salaId);
-
-      // Aplanar asientos para inserción relacional
-      const asientosBatch: Record<string, any>[] = [];
-      for (const f of filas) {
-        const todosAsientos = [...f.bloque1, ...f.bloque2, ...f.bloque3];
-        for (const a of todosAsientos) {
-          asientosBatch.push({
-            id: `${salaId}_${a.id}`,
-            sala_id: salaId,
-            fila: a.fila,
-            numero: a.numero,
-            bloque: a.bloque,
-            tipo: a.tipo,
-            precio: a.precio,
-            estado: a.estado || 'disponible',
-          });
-        }
-      }
-
-      if (asientosBatch.length > 0) {
-        await this.supabase.from('asientos').insert(asientosBatch);
-      }
-    } catch (err) {
-      console.warn('Aviso al guardar asientos relacionales:', err);
-    }
   }
 }

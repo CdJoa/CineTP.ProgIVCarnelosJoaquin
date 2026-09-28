@@ -120,7 +120,25 @@ export class Auth {
   }
 
   async registro(datos: RegistroUsuarioDto): Promise<{ exito: boolean; mensaje?: string; usuario?: Usuario }> {
+    return this.crearUsuarioBase(datos, 'cliente', false);
+  }
+
+  async registrarEmpleado(datos: RegistroUsuarioDto): Promise<{ exito: boolean; mensaje?: string; usuario?: Usuario }> {
+    return this.crearUsuarioBase(datos, 'empleado', true);
+  }
+
+  private async crearUsuarioBase(
+    datos: RegistroUsuarioDto,
+    rol: 'cliente' | 'empleado' | 'admin',
+    preservarSesionActual: boolean
+  ): Promise<{ exito: boolean; mensaje?: string; usuario?: Usuario }> {
     try {
+      let sesionPrevia: any = null;
+      if (preservarSesionActual) {
+        const { data: { session } } = await this.supabase.auth.getSession();
+        sesionPrevia = session;
+      }
+
       const { data, error } = await this.supabase.auth.signUp({
         email: datos.email.trim(),
         password: datos.password,
@@ -129,7 +147,7 @@ export class Auth {
             nombre: datos.nombre.trim(),
             apellido: datos.apellido.trim(),
             fechaNacimiento: datos.fechaNacimiento,
-            rol: 'cliente',
+            rol,
             puntos: 0,
             credito: 0,
           },
@@ -141,7 +159,7 @@ export class Auth {
       }
 
       if (!data.user) {
-        return { exito: false, mensaje: 'No se pudo completar el registro.' };
+        return { exito: false, mensaje: 'No se pudo completar el registro del usuario.' };
       }
 
       const nuevoUsuario: Usuario = {
@@ -150,13 +168,12 @@ export class Auth {
         nombre: datos.nombre.trim(),
         apellido: datos.apellido.trim(),
         fechaNacimiento: datos.fechaNacimiento,
-        rol: 'cliente',
+        rol,
         puntos: 0,
         credito: 0,
         creadoEn: new Date().toISOString(),
       };
 
-      // Intentamos persistir en la tabla usuarios si existe
       try {
         await this.supabase.from('usuarios').insert([{
           id: nuevoUsuario.id,
@@ -169,83 +186,21 @@ export class Auth {
           credito: nuevoUsuario.credito,
         }]);
       } catch (dbError) {
-        console.warn('Aviso: perfil guardado en sesión de Auth, tabla usuarios pendiente:', dbError);
-      }
-
-      this.usuarioActual.set(nuevoUsuario);
-      return { exito: true, usuario: nuevoUsuario };
-    } catch (err: any) {
-      return { exito: false, mensaje: err?.message || 'Error inesperado al registrar usuario.' };
-    }
-  }
-
-  async registrarEmpleado(datos: RegistroUsuarioDto): Promise<{ exito: boolean; mensaje?: string; usuario?: Usuario }> {
-    try {
-      // Guardamos la sesión del admin para restaurarla luego, ya que signUp
-      // reemplaza la sesión activa por la del usuario recién creado.
-      const { data: { session: sesionAdmin } } = await this.supabase.auth.getSession();
-
-      const { data, error } = await this.supabase.auth.signUp({
-        email: datos.email.trim(),
-        password: datos.password,
-        options: {
-          data: {
-            nombre: datos.nombre.trim(),
-            apellido: datos.apellido.trim(),
-            fechaNacimiento: datos.fechaNacimiento,
-            rol: 'empleado',
-            puntos: 0,
-            credito: 0,
-          },
-        },
-      });
-
-      if (error) {
-        return { exito: false, mensaje: this.traducirError(error.message) };
-      }
-
-      if (!data.user) {
-        return { exito: false, mensaje: 'No se pudo completar el registro del empleado.' };
-      }
-
-      const nuevoEmpleado: Usuario = {
-        id: data.user.id,
-        email: datos.email.trim(),
-        nombre: datos.nombre.trim(),
-        apellido: datos.apellido.trim(),
-        fechaNacimiento: datos.fechaNacimiento,
-        rol: 'empleado',
-        puntos: 0,
-        credito: 0,
-        creadoEn: new Date().toISOString(),
-      };
-
-      try {
-        await this.supabase.from('usuarios').insert([{
-          id: nuevoEmpleado.id,
-          email: nuevoEmpleado.email,
-          nombre: nuevoEmpleado.nombre,
-          apellido: nuevoEmpleado.apellido,
-          fecha_nacimiento: nuevoEmpleado.fechaNacimiento,
-          rol: nuevoEmpleado.rol,
-          puntos: nuevoEmpleado.puntos,
-          credito: nuevoEmpleado.credito,
-        }]);
-      } catch (dbError) {
         console.warn('Aviso: perfil guardado en Auth, tabla usuarios pendiente:', dbError);
       }
 
-      // Restauramos la sesión del admin para que no quede logueado como el nuevo empleado.
-      if (sesionAdmin) {
+      if (preservarSesionActual && sesionPrevia) {
         await this.supabase.auth.setSession({
-          access_token: sesionAdmin.access_token,
-          refresh_token: sesionAdmin.refresh_token,
+          access_token: sesionPrevia.access_token,
+          refresh_token: sesionPrevia.refresh_token,
         });
+      } else {
+        this.usuarioActual.set(nuevoUsuario);
       }
 
-      return { exito: true, usuario: nuevoEmpleado };
+      return { exito: true, usuario: nuevoUsuario };
     } catch (err: any) {
-      return { exito: false, mensaje: err?.message || 'Error inesperado al registrar empleado.' };
+      return { exito: false, mensaje: err?.message || 'Error inesperado al registrar usuario.' };
     }
   }
 

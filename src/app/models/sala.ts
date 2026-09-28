@@ -35,13 +35,11 @@ export interface Sala {
 export interface CrearSalaDto {
   nombre: string;
   formato: FormatoSala;
-  configuracionFilas?: Record<string, TipoFila>;
 }
 
 export interface ActualizarSalaDto {
   nombre?: string;
   formato?: FormatoSala;
-  configuracionFilas?: Record<string, TipoFila>;
   activa?: boolean;
 }
 

@@ -19,7 +19,6 @@ export class AdministrarCandy extends AdministrarBase<ProductoCandy> {
 
   readonly categoriasList = CATEGORIAS_CANDY;
 
-  // Aliases de Signals para mantener compatibilidad total con el template HTML
   productos = this.items;
   productoSeleccionado = this.itemSeleccionado;
   productoEditando = this.itemEditando;

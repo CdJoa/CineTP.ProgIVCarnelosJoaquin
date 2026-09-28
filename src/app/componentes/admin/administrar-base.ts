@@ -1,11 +1,11 @@
 import { Directive, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { CloudinaryService } from '../../servicios/cloudinary';
+import { SupabaseStorageService } from '../../servicios/supabase-storage';
 
 @Directive()
 export abstract class AdministrarBase<T extends { id: string }> implements OnInit {
   protected fb = inject(FormBuilder);
-  protected cloudinaryService = inject(CloudinaryService);
+  protected storageService = inject(SupabaseStorageService);
 
   // Signals de estado CRUD
   items: WritableSignal<T[]> = signal<T[]>([]);
@@ -82,7 +82,7 @@ export abstract class AdministrarBase<T extends { id: string }> implements OnIni
   }
 
   async subirImagenControl(event: Event, controlName: string): Promise<void> {
-    return this.cloudinaryService.procesarInputImagen(
+    return this.storageService.procesarInputImagen(
       event,
       this.editForm,
       controlName,

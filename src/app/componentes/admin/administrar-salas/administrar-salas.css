@@ -217,7 +217,7 @@
 
 .modal-body-layout {
   display: grid;
-  grid-template-columns: 500px 1fr;
+  grid-template-columns: 320px 1fr;
   gap: 1.5rem;
   padding: 1.25rem 1.5rem;
   overflow-y: auto;
@@ -284,46 +284,7 @@
 
 .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1.25rem; }
 
-/* 2 Columnas ordenadas verticalmente (A-J en col 1, K-T en col 2) */
-.modal-filas-grid {
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-rows: repeat(10, auto);
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.35rem 0.6rem;
-  padding-right: 0.25rem;
-}
-
-.fila-edit-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f8fafc;
-  padding: 0.3rem 0.45rem;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-}
-
-.letra-badge { font-weight: 700; font-size: 0.78rem; color: #0f172a; min-width: 42px; }
-
-.select-btn-group { display: flex; gap: 0.2rem; }
-
-.btn-sel {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #64748b;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.68rem;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.btn-sel.active { background: #388e3c; color: #fff; border-color: #2e7d32; }
-.btn-sel.disc.active { background: #1976d2; color: #fff; border-color: #1565c0; }
-.btn-sel.vip.active { background: #f57c00; color: #fff; border-color: #e65100; }
-
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem; }
 
 .btn-cancel { background: #e2e8f0; color: #334155; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; }
 .btn-save { background: #388e3c; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; cursor: pointer; }
