@@ -1,13 +1,15 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { environment } from '../environments/environments';
 import { CredencialesLoginDto, RegistroUsuarioDto, Usuario } from '../models/usuario';
+import { CuponesService } from './cupones';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
   private supabase: SupabaseClient;
+  private cuponesService = inject(CuponesService);
 
   // Estados reactivos con Signals de Angular
   readonly usuarioActual = signal<Usuario | null>(null);
@@ -185,6 +187,11 @@ export class Auth {
           puntos: nuevoUsuario.puntos,
           credito: nuevoUsuario.credito,
         }]);
+
+        // Asignar cupón de registro si es cliente
+        if (rol === 'cliente') {
+          await this.cuponesService.asignarCuponRegistro(nuevoUsuario.id);
+        }
       } catch (dbError) {
         console.warn('Aviso: perfil guardado en Auth, tabla usuarios pendiente:', dbError);
       }

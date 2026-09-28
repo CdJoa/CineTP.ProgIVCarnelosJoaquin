@@ -10,6 +10,7 @@ import { AdministrarCandy } from './componentes/admin/administrar-candy/administ
 import { AdministrarSalas } from './componentes/admin/administrar-salas/administrar-salas';
 import { AdministrarFunciones } from './componentes/admin/administrar-funciones/administrar-funciones';
 import { MapaSalaComponent } from './componentes/sala/mapa-sala/mapa-sala';
+import { AdministrarCuponesComponent } from './componentes/admin/administrar-cupones/administrar-cupones';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 
@@ -35,6 +36,8 @@ export const routes: Routes = [
       { path: 'candy/nuevo', redirectTo: 'candy', pathMatch: 'full' },
       { path: 'salas', component: AdministrarSalas },
       { path: 'salas/nueva', redirectTo: 'salas', pathMatch: 'full' },
+      { path: 'cupones', component: AdministrarCuponesComponent },
+      { path: 'cupones/nuevo', redirectTo: 'cupones', pathMatch: 'full' },
       { path: 'empleados/nuevo', component: RegistrarEmpleado },
     ],
   },

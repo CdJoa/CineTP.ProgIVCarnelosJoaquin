@@ -1,0 +1,264 @@
+.admin-cupones-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.header-bar h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 4px;
+}
+
+.header-bar p {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+}
+
+.filtros-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #fafafa;
+  border: 1px solid #ddd;
+}
+
+.search-box input {
+  padding: 8px 12px;
+  border: 1px solid #000;
+  font-size: 13px;
+  width: 300px;
+}
+
+.cupones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.cupon-card {
+  background: #fff;
+  border: 1px solid #000;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.cupon-card.inactivo {
+  opacity: 0.5;
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.badge {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 3px;
+}
+
+.badge-discount {
+  background: #e11d48;
+  color: #fff;
+}
+
+.badge-info {
+  background: #2563eb;
+  color: #fff;
+}
+
+.badge-age {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.badge-status {
+  background: #6b7280;
+  color: #fff;
+  margin-left: auto;
+}
+
+.badge-status.active {
+  background: #059669;
+}
+
+.cupon-code {
+  background: #f3f4f6;
+  border: 1px dashed #000;
+  padding: 6px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.cupon-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.cupon-desc {
+  margin: 0;
+  color: #555;
+  font-size: 12px;
+}
+
+.card-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-content {
+  background: #fff;
+  border: 1px solid #000;
+  padding: 20px;
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 8px;
+  border: 1px solid #000;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.btn-primary {
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.alert-error, .alert-success {
+  padding: 8px 12px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.alert-error {
+  background: #fee;
+  color: #c00;
+  border: 1px solid #c00;
+}
+
+.alert-success {
+  background: #efe;
+  color: #080;
+  border: 1px solid #080;
+}
+
+.loading-box, .empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 13px;
+}

@@ -1,0 +1,188 @@
+<div class="admin-cupones-container">
+  <!-- Encabezado de la página -->
+  <div class="header-bar">
+    <div>
+      <h2>Gestión de Cupones de Descuento</h2>
+      <p>Administra porcentajes de descuento, cupones de registro y promociones por edad.</p>
+    </div>
+    <button class="btn-primary" (click)="abrirCreacion()">
+      + Nuevo Cupón
+    </button>
+  </div>
+
+  <!-- Barra de Filtros -->
+  <div class="filtros-bar">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Buscar por código o nombre..."
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+      />
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <main class="content-body">
+    @if (cargando()) {
+      <div class="loading-box">
+        <p>Cargando cupones...</p>
+      </div>
+    } @else if (cuponesFiltrados.length === 0) {
+      <div class="empty-state">
+        <p>No se encontraron cupones de descuento.</p>
+      </div>
+    } @else {
+      <!-- Grilla de Tarjetas -->
+      <div class="cupones-grid">
+        @for (c of cuponesFiltrados; track c.id) {
+          <div
+            class="cupon-card"
+            [class.selected]="cuponSeleccionado()?.id === c.id"
+            [class.inactivo]="!c.activo"
+          >
+            <div class="badges">
+              <span class="badge badge-discount">-{{ c.porcentajeDescuento }}% OFF</span>
+              @if (c.esPrimeraCompra) {
+                <span class="badge badge-info">1ª Compra</span>
+              }
+              @if (c.edadMinimaRequerida) {
+                <span class="badge badge-age">+{{ c.edadMinimaRequerida }} Años</span>
+              }
+              <span class="badge badge-status" [class.active]="c.activo">
+                {{ c.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+
+            <div class="cupon-code">
+              <code>{{ c.codigo }}</code>
+            </div>
+
+            <h3 class="cupon-title">{{ c.nombre }}</h3>
+            <p class="cupon-desc">{{ c.descripcion }}</p>
+
+            <div class="card-actions">
+              <button class="btn-secondary" (click)="abrirEdicion(c)">
+                Editar
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </main>
+
+  <!-- MODAL CREACIÓN / EDICIÓN -->
+  @if (modoModal()) {
+    <div class="modal-overlay" (click)="cerrarEdicion()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ modoModal() === 'crear' ? 'Crear Nuevo Cupón' : 'Editar Cupón' }}</h3>
+          <button class="btn-close" (click)="cerrarEdicion()">✖</button>
+        </div>
+
+        <form [formGroup]="editForm" (ngSubmit)="guardarCambios()" class="edit-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="codigo">Código Promocional *</label>
+              <input
+                id="codigo"
+                type="text"
+                formControlName="codigo"
+                placeholder="Ej: REGISTRO20"
+                style="text-transform: uppercase;"
+              />
+              @if (codigo?.invalid && (codigo?.touched || codigo?.dirty)) {
+                <span class="alert-error">Código requerido (3-20 caracteres).</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="porcentajeDescuento">% Descuento *</label>
+              <input
+                id="porcentajeDescuento"
+                type="number"
+                min="1"
+                max="100"
+                formControlName="porcentajeDescuento"
+                placeholder="Ej: 20"
+              />
+              @if (porcentajeDescuento?.invalid && (porcentajeDescuento?.touched || porcentajeDescuento?.dirty)) {
+                <span class="alert-error">% Descuento válido entre 1 y 100.</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nombre">Nombre del Cupón *</label>
+            <input
+              id="nombre"
+              type="text"
+              formControlName="nombre"
+              placeholder="Ej: Descuento de Bienvenida"
+            />
+            @if (nombre?.invalid && (nombre?.touched || nombre?.dirty)) {
+              <span class="alert-error">Nombre requerido (mínimo 3 letras).</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="descripcion">Descripción *</label>
+            <textarea
+              id="descripcion"
+              rows="2"
+              formControlName="descripcion"
+              placeholder="Términos del cupón..."
+            ></textarea>
+            @if (descripcion?.invalid && (descripcion?.touched || descripcion?.dirty)) {
+              <span class="alert-error">Descripción requerida (mínimo 5 caracteres).</span>
+            }
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edadMinimaRequerida">Edad Mínima (opcional)</label>
+              <input
+                id="edadMinimaRequerida"
+                type="number"
+                formControlName="edadMinimaRequerida"
+                placeholder="Ej: 50"
+              />
+              @if (edadMinimaRequerida?.invalid && (edadMinimaRequerida?.touched || edadMinimaRequerida?.dirty)) {
+                <span class="alert-error">Edad mínima inválida (0 a 120).</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="esPrimeraCompra" />
+              <span>Restringir a 1ª Compra / Registro</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="activo" />
+              <span>Cupón Activo</span>
+            </label>
+          </div>
+
+          @if (mensajeError()) {
+            <div class="alert-error">{{ mensajeError() }}</div>
+          }
+          @if (mensajeExito()) {
+            <div class="alert-success">{{ mensajeExito() }}</div>
+          }
+
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="cerrarEdicion()">Cancelar</button>
+            <button type="submit" class="btn-primary" [disabled]="guardando()">
+              {{ guardando() ? 'Guardando...' : 'Guardar Cupón' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
