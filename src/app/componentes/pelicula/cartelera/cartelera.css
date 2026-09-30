@@ -13,6 +13,11 @@
   margin-bottom: 2rem;
 }
 
+.proximamente-seccion {
+  margin-top: 3rem;
+  width: 100%;
+}
+
 .seccion-divider {
   border: 0;
   border-top: 1px solid #cbd5e1;
@@ -569,4 +574,35 @@
 
 .btn-fn-elegir:hover {
   background: #2563eb;
+}
+
+.badge-preventa-mini {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+
+.btn-comprar-fn {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.btn-comprar-fn:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
 }

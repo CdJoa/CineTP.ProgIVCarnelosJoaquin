@@ -42,6 +42,90 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
   filtroSala = signal<string>('todas');
   filtroEstado = signal<string>('todas');
 
+  esPeliculaPreventa(peliculaId: string | undefined): boolean {
+    if (!peliculaId) return false;
+    return this.funciones().some((f) => f.peliculaId === peliculaId && f.esPreventa);
+  }
+
+  obtenerPelicula(peliculaId: string | undefined): Pelicula | undefined {
+    if (!peliculaId) return undefined;
+    return this.peliculas().find((item) => item.id === peliculaId);
+  }
+
+  obtenerRangoPreventa(peliculaId: string | undefined): { inicio: string; fin: string; estreno: string } | null {
+    if (!peliculaId) return null;
+    const p = this.peliculas().find((item) => item.id === peliculaId);
+    if (!p || !p.fechaEstreno) return null;
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const estrenoDate = new Date(`${p.fechaEstreno}T00:00:00`);
+    if (isNaN(estrenoDate.getTime())) return null;
+
+    const preventaInicioDate = new Date(estrenoDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const fPreventaInicio = `${preventaInicioDate.getFullYear()}-${pad(preventaInicioDate.getMonth() + 1)}-${pad(preventaInicioDate.getDate())}`;
+    const fEstreno = `${estrenoDate.getFullYear()}-${pad(estrenoDate.getMonth() + 1)}-${pad(estrenoDate.getDate())}`;
+
+    return {
+      inicio: fPreventaInicio,
+      fin: fEstreno,
+      estreno: fEstreno,
+    };
+  }
+
+  onAutoFormPeliculaOrPreventaChange(): void {
+    const pId = this.autoForm.get('peliculaId')?.value;
+    if (!pId) return;
+    const p = this.obtenerPelicula(pId);
+    if (p && p.fechaEstreno) {
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      const estrenoDate = new Date(`${p.fechaEstreno}T00:00:00`);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const baseInicio = estrenoDate > hoy ? estrenoDate : hoy;
+      const fInicio = `${baseInicio.getFullYear()}-${pad(baseInicio.getMonth() + 1)}-${pad(baseInicio.getDate())}`;
+      const finDate = new Date(baseInicio.getTime() + 15 * 24 * 60 * 60 * 1000);
+      const fFin = `${finDate.getFullYear()}-${pad(finDate.getMonth() + 1)}-${pad(finDate.getDate())}`;
+
+      this.autoForm.patchValue({
+        fechaInicio: fInicio,
+        fechaFin: fFin,
+      });
+    }
+  }
+
+  onEditFormPeliculaOrPreventaChange(): void {
+    const pId = this.editForm.get('peliculaId')?.value;
+    if (!pId) return;
+    const p = this.obtenerPelicula(pId);
+    if (p && p.fechaEstreno) {
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      const estrenoDate = new Date(`${p.fechaEstreno}T00:00:00`);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const baseInicio = estrenoDate > hoy ? estrenoDate : hoy;
+      const fInicio = `${baseInicio.getFullYear()}-${pad(baseInicio.getMonth() + 1)}-${pad(baseInicio.getDate())}`;
+
+      this.editForm.patchValue({
+        fecha: fInicio,
+      });
+    }
+    this.onFechaOrSalaChange();
+  }
+
+  // Estado y Formulario para Generación Automática
+  modoAutoGeneracion = signal<boolean>(false);
+  autoForm: FormGroup = this.fb.group({
+    peliculaId: ['', []],
+    fechaInicio: [this.minFechaActual],
+    fechaFin: [this.minFechaActual],
+    turnoMañana: [true],
+    turnoTarde: [true],
+    turnoNoche: [true],
+    prioridad: ['alta' as 'alta' | 'media' | 'baja'],
+    precio: [5000],
+    esPreventa: [false],
+  });
+
   editForm: FormGroup = crearFormularioFuncion(this.fb);
 
   readonly opcionesHora: string[] = (() => {
@@ -61,6 +145,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
   get hora() { return this.editForm.get('hora'); }
   get inicio() { return this.editForm.get('inicio'); }
   get precio() { return this.editForm.get('precio'); }
+  get esPreventa() { return this.editForm.get('esPreventa'); }
   get formato() { return this.editForm.get('formato'); }
   get idioma() { return this.editForm.get('idioma'); }
   get estado() { return this.editForm.get('estado'); }
@@ -262,6 +347,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
       hora: hVal,
       inicio: funcion.inicio,
       precio: funcion.precio,
+      esPreventa: funcion.esPreventa || false,
       formato: formatoCalculado,
       idioma: funcion.idioma || 'español',
       estado: funcion.estado || 'programada',
@@ -297,6 +383,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
       hora: hDefault,
       inicio: inicioIso,
       precio: 5000,
+      esPreventa: false,
       formato: defaultFormato,
       idioma: 'español',
       estado: 'programada',
@@ -421,6 +508,89 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
       );
     } finally {
       this.guardando.set(false);
+    }
+  }
+
+  abrirAutoGeneracion(): void {
+    const defaultPeliObj = this.peliculas()[0];
+    const defaultPeli = defaultPeliObj?.id || '';
+
+    const hoy = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    const fInicio = `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;
+    const fecha15Dias = new Date(hoy.getTime() + 15 * 24 * 60 * 60 * 1000);
+    const fFin = `${fecha15Dias.getFullYear()}-${pad(fecha15Dias.getMonth() + 1)}-${pad(fecha15Dias.getDate())}`;
+
+    this.autoForm.patchValue({
+      peliculaId: defaultPeli,
+      fechaInicio: fInicio,
+      fechaFin: fFin,
+      turnoMañana: true,
+      turnoTarde: true,
+      turnoNoche: true,
+      prioridad: 'alta',
+      precio: 5000,
+      esPreventa: false,
+    });
+    this.onAutoFormPeliculaOrPreventaChange();
+    this.mensajeError.set(null);
+    this.mensajeExito.set(null);
+    this.modoAutoGeneracion.set(true);
+  }
+
+  cerrarAutoGeneracion(): void {
+    this.modoAutoGeneracion.set(false);
+  }
+
+  async ejecutarAutoGeneracion(): Promise<void> {
+    const val = this.autoForm.value;
+    if (!val.peliculaId) {
+      this.mensajeError.set('Debes seleccionar una película.');
+      return;
+    }
+    if (!val.fechaInicio || !val.fechaFin) {
+      this.mensajeError.set('Debes seleccionar el rango de fechas.');
+      return;
+    }
+
+    const turnosSeleccionados: ('mañana' | 'tarde' | 'noche')[] = [];
+    if (val.turnoMañana) turnosSeleccionados.push('mañana');
+    if (val.turnoTarde) turnosSeleccionados.push('tarde');
+    if (val.turnoNoche) turnosSeleccionados.push('noche');
+
+    if (turnosSeleccionados.length === 0) {
+      this.mensajeError.set('Debes seleccionar al menos un turno (Mañana, Tarde o Noche).');
+      return;
+    }
+
+    this.guardando.set(true);
+    this.mensajeError.set(null);
+    this.mensajeExito.set(null);
+
+    try {
+      const funcionesActualizadas = await this.funcionesService.generarFuncionesAutomaticas({
+        peliculaId: val.peliculaId,
+        fechaInicio: val.fechaInicio,
+        fechaFin: val.fechaFin,
+        turnos: turnosSeleccionados,
+        prioridad: val.prioridad,
+        precio: Number(val.precio || 5000),
+        esPreventa: Boolean(val.esPreventa),
+      });
+
+      this.items.set(funcionesActualizadas);
+      this.mensajeExito.set('¡Funciones automáticas generadas exitosamente con varianza de formato e idioma!');
+      this.guardando.set(false);
+      setTimeout(() => {
+        this.cerrarAutoGeneracion();
+        this.mensajeExito.set(null);
+      }, 1500);
+    } catch (err) {
+      this.guardando.set(false);
+      this.mensajeError.set(
+        err instanceof Error ? err.message : 'Error al generar funciones automáticas.'
+      );
     }
   }
 }

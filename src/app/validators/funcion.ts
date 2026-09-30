@@ -21,6 +21,7 @@ export function crearFormularioFuncion(fb: FormBuilder): FormGroup {
     hora: ['12:00', funcionValidators.hora],
     inicio: [''],
     precio: [5000, funcionValidators.precio],
+    esPreventa: [false],
     formato: ['2D'],
     idioma: ['español'],
     estado: ['programada'],

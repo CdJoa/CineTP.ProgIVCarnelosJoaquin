@@ -9,6 +9,7 @@ export interface Funcion {
   inicio: string;           // ISO date time string (ej: 2026-09-28T18:00)
   fin?: string;             // ISO date time string (inicio + duracionPelicula + 30 min limpieza)
   precio: number;
+  esPreventa?: boolean;
   formato?: Formato;
   idioma?: Idioma;
   estado: EstadoFuncion;
@@ -26,6 +27,7 @@ export interface CrearFuncionDto {
   inicio: string;
   fin?: string;
   precio: number;
+  esPreventa?: boolean;
   formato?: Formato;
   idioma?: Idioma;
   estado?: EstadoFuncion;

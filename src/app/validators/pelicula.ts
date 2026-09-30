@@ -23,7 +23,6 @@ export const peliculaValidators = {
   generos: [Validators.required],
   restriccionEdad: [Validators.required, Validators.min(0), Validators.max(18)],
   puntajeCompra: [Validators.required, Validators.min(0)],
-  precioNormal: [Validators.required, Validators.min(0.01)],
   fechaEstreno: [Validators.required],
 };
 
@@ -34,10 +33,7 @@ export function crearFormularioPelicula(fb: FormBuilder): FormGroup {
     duracion: ['', peliculaValidators.duracion],
     restriccionEdad: [0, peliculaValidators.restriccionEdad],
     puntajeCompra: [0, peliculaValidators.puntajeCompra],
-    precioNormal: ['', peliculaValidators.precioNormal],
     fechaEstreno: ['', peliculaValidators.fechaEstreno],
-    esPreventa: [false],
-    precioPreventa: [''],
     poster: [''],
     enCartelera: [true],
     boletosVendidos: [0],
@@ -58,9 +54,6 @@ export function generarPreviewPelicula(
     restriccionEdad: val['restriccionEdad'] !== undefined && val['restriccionEdad'] !== '' ? Number(val['restriccionEdad']) : (basePelicula?.restriccionEdad || 0),
     puntajeCompra: val['puntajeCompra'] !== undefined && val['puntajeCompra'] !== '' ? Number(val['puntajeCompra']) : (basePelicula?.puntajeCompra || 0),
     poster: val['poster'] !== undefined ? val['poster'] : basePelicula?.poster,
-    esPreventa: val['esPreventa'] !== undefined ? val['esPreventa'] : (basePelicula?.esPreventa || false),
-    precioPreventa: val['precioPreventa'] ? Number(val['precioPreventa']) : basePelicula?.precioPreventa,
-    precioNormal: val['precioNormal'] !== undefined && val['precioNormal'] !== '' ? Number(val['precioNormal']) : (basePelicula?.precioNormal || 0),
     fechaEstreno: val['fechaEstreno'] || basePelicula?.fechaEstreno || 'YYYY-MM-DD',
     activa: basePelicula?.activa ?? true,
     enCartelera: val['enCartelera'] !== undefined ? val['enCartelera'] : (basePelicula?.enCartelera ?? true),

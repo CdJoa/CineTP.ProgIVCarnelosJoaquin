@@ -131,8 +131,8 @@
               </div>
             </div>
 
-            <!-- Fila: Restricción edad, Puntaje, Precio normal -->
-            <div class="form-row form-row-3">
+            <!-- Fila: Restricción edad y Puntaje -->
+            <div class="form-row form-row-2">
               <div class="form-group">
                 <label for="restriccionEdad">Restricción Edad</label>
                 <select id="restriccionEdad" formControlName="restriccionEdad">
@@ -146,11 +146,6 @@
               <div class="form-group">
                 <label for="puntajeCompra">Puntos por compra</label>
                 <input id="puntajeCompra" type="number" formControlName="puntajeCompra" />
-              </div>
-
-              <div class="form-group">
-                <label for="precioNormal">Precio ($)</label>
-                <input id="precioNormal" type="number" formControlName="precioNormal" />
               </div>
             </div>
 
@@ -186,21 +181,6 @@
                 <input id="boletosVendidos" type="number" formControlName="boletosVendidos" min="0" />
               </div>
             </div>
-
-            <!-- Preventa -->
-            <div class="form-group form-group-check">
-              <label class="check-label">
-                <input type="checkbox" formControlName="esPreventa" />
-                Habilitar preventa
-              </label>
-            </div>
-
-            @if (esPreventa?.value) {
-              <div class="form-group">
-                <label for="precioPreventa">Precio Preventa ($)</label>
-                <input id="precioPreventa" type="number" formControlName="precioPreventa" />
-              </div>
-            }
 
             <!-- Botones Modal -->
             <div class="form-actions">

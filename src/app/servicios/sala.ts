@@ -96,7 +96,10 @@ export class SalaService extends BaseSupabaseService<Sala> {
     const filas = this.generarFilas();
     const capacidadTotal = this.calcularCapacidadTotal(filas);
 
+    const idGenerado = `sala-${Date.now()}`;
+
     const nuevaSala = await this.insertar({
+      id: idGenerado,
       nombre: dto.nombre,
       formato: dto.formato || '2D',
       capacidad_total: capacidadTotal,

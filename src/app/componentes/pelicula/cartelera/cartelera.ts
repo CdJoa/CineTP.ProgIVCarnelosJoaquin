@@ -75,20 +75,41 @@ export class CarteleraComponent implements OnInit {
     return Array.from(set);
   }
 
+  private obtenerFechaLocalKey(d: Date): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
   get topTresVendidas(): Pelicula[] {
+    const hoyStr = this.obtenerFechaLocalKey(new Date());
     return [...this.peliculas()]
-      .filter((p) => p.activa !== false && p.enCartelera !== false)
+      .filter((p) => p.activa !== false && p.enCartelera !== false && (!p.fechaEstreno || p.fechaEstreno <= hoyStr))
       .sort((a, b) => (b.boletosVendidos || 0) - (a.boletosVendidos || 0))
       .slice(0, 3);
   }
 
+  get peliculasProximamente(): Pelicula[] {
+    const hoyStr = this.obtenerFechaLocalKey(new Date());
+    return this.peliculas()
+      .filter((p) => p.activa !== false && p.fechaEstreno && p.fechaEstreno > hoyStr)
+      .sort((a, b) => a.fechaEstreno.localeCompare(b.fechaEstreno));
+  }
+
+  esPeliculaPreventa(peliculaId: string): boolean {
+    return this.funciones().some((f) => f.peliculaId === peliculaId && f.esPreventa);
+  }
+
   get peliculasFiltradas(): Pelicula[] {
+    const hoyStr = this.obtenerFechaLocalKey(new Date());
     let lista = this.peliculas().filter((p) => p.activa !== false && p.enCartelera !== false);
 
     if (this.filtroTipo() === 'cartelera') {
-      lista = lista.filter((p) => !p.esPreventa);
+      lista = lista.filter((p) => (!p.fechaEstreno || p.fechaEstreno <= hoyStr) && !this.esPeliculaPreventa(p.id));
     } else if (this.filtroTipo() === 'preventa') {
-      lista = lista.filter((p) => p.esPreventa);
+      lista = lista.filter((p) => this.esPeliculaPreventa(p.id));
+    } else {
+      // 'todas' en cartelera principal: estrenadas o que tienen preventa activa
+      lista = lista.filter((p) => (!p.fechaEstreno || p.fechaEstreno <= hoyStr) || this.esPeliculaPreventa(p.id));
     }
 
     if (this.generoSeleccionado() !== 'todos') {
@@ -121,10 +142,12 @@ export class CarteleraComponent implements OnInit {
       const d = new Date(f.inicio);
       if (isNaN(d.getTime())) continue;
 
-      const key = d.toISOString().split('T')[0];
+      const key = this.obtenerFechaLocalKey(d);
       mapa.set(key, this.formatearFechaCorta(d));
     }
-    return Array.from(mapa.entries()).map(([valor, etiqueta]) => ({ valor, etiqueta }));
+    return Array.from(mapa.entries())
+      .map(([valor, etiqueta]) => ({ valor, etiqueta }))
+      .sort((a, b) => a.valor.localeCompare(b.valor));
   }
 
   get formatosDisponiblesPelicula(): string[] {
@@ -148,7 +171,11 @@ export class CarteleraComponent implements OnInit {
 
     const dia = this.filtroFuncionDia();
     if (dia !== 'todos') {
-      list = list.filter((f) => f.inicio && f.inicio.startsWith(dia));
+      list = list.filter((f) => {
+        if (!f.inicio) return false;
+        const d = new Date(f.inicio);
+        return !isNaN(d.getTime()) && this.obtenerFechaLocalKey(d) === dia;
+      });
     }
 
     const formato = this.filtroFuncionFormato();

@@ -3,11 +3,16 @@
   <header class="header-seccion">
     <div>
       <h1 class="titulo-seccion">Administrar Funciones</h1>
-      <p class="subtitulo-seccion">Programe funciones asignando película, sala y horario (incluye +30 min de limpieza y preparación)</p>
+      <p class="subtitulo-seccion">Programe funciones individualmente o utilice la asignación automática inteligente con varianza de formato e idioma.</p>
     </div>
-    <button type="button" (click)="abrirCreacion()" class="btn-crear">
-      + Nueva Función
-    </button>
+    <div style="display: flex; gap: 8px;">
+      <button type="button" (click)="abrirAutoGeneracion()" class="btn-crear" style="background: #2563eb; border-color: #2563eb;">
+        ⚡ Programación Automática
+      </button>
+      <button type="button" (click)="abrirCreacion()" class="btn-crear">
+        + Nueva Función
+      </button>
+    </div>
   </header>
 
   <!-- Barra de Filtros -->
@@ -38,7 +43,10 @@
     <div *ngIf="funcionesFiltradas.length > 0" class="funciones-grid">
       <div *ngFor="let funcion of funcionesFiltradas" class="funcion-card" [class.cancelada]="funcion.estado === 'cancelada'">
         <div class="card-header">
-          <h3 class="pelicula-nombre">{{ funcion.peliculaTitulo }}</h3>
+          <h3 class="pelicula-nombre">
+            {{ funcion.peliculaTitulo }}
+            <span *ngIf="funcion.esPreventa" style="background:#8b5cf6; color:white; font-size:10px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">PREVENTA</span>
+          </h3>
           <span class="estado-badge" [class]="funcion.estado">
             {{ funcion.estado | titlecase }}
           </span>
@@ -126,12 +134,15 @@
         <!-- Película -->
         <div class="form-group">
           <label class="form-label">Película</label>
-          <select formControlName="peliculaId" class="form-input">
+          <select formControlName="peliculaId" (change)="onEditFormPeliculaOrPreventaChange()" class="form-input">
             <option value="" disabled>Seleccione una película</option>
             <option *ngFor="let p of peliculas()" [value]="p.id">
-              {{ p.titulo }}
+              {{ esPeliculaPreventa(p.id) ? '⭐ [PREVENTA] ' : '' }}{{ p.titulo }}
             </option>
           </select>
+          <p *ngIf="esPeliculaPreventa(editForm.get('peliculaId')?.value)" style="font-size: 12px; color: #8b5cf6; margin: 4px 0 0; font-weight: 500;">
+            ⭐ Película en PREVENTA (Estreno: {{ obtenerPelicula(editForm.get('peliculaId')?.value)?.fechaEstreno }}). Las funciones se realizan a partir del estreno, pero la compra de entradas queda habilitada anticipadamente.
+          </p>
         </div>
 
         <!-- Sala -->
@@ -188,7 +199,7 @@
           </div>
         </div>
 
-        <!-- Precio y Estado -->
+        <!-- Precio, Preventa y Estado -->
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Precio ($)</label>
@@ -203,6 +214,13 @@
           </div>
         </div>
 
+        <div class="form-group" style="margin-top: 8px;">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: #8b5cf6;">
+            <input type="checkbox" formControlName="esPreventa" (change)="onEditFormPeliculaOrPreventaChange()" />
+            ⭐ Marcar como Función en PREVENTA (Habilita la compra anticipada de entradas)
+          </label>
+        </div>
+
         <div class="modal-footer">
           <button type="button" class="btn-cancel" (click)="cerrarEdicion()">
             Cancelar
@@ -213,6 +231,102 @@
             [disabled]="guardando() || editForm.invalid || esHoraBloqueada(hora?.value)"
           >
             {{ guardando() ? 'Guardando...' : (modoModal() === 'crear' ? 'Crear Función' : 'Guardar Cambios') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE GENERACIÓN AUTOMÁTICA DE FUNCIONES -->
+  <div class="modal-overlay" *ngIf="modoAutoGeneracion()" (click)="cerrarAutoGeneracion()">
+    <div class="modal-content" (click)="$event.stopPropagation()" style="max-width: 650px;">
+      <div class="modal-header">
+        <h2>⚡ Programación Automática de Funciones</h2>
+        <button type="button" class="btn-close" (click)="cerrarAutoGeneracion()">✕</button>
+      </div>
+
+      <form [formGroup]="autoForm" (ngSubmit)="ejecutarAutoGeneracion()" class="modal-form">
+        <p style="font-size: 13px; color: #64748b; margin: 0 0 12px;">
+          Genera automáticamente las funciones para una película seleccionando rango de días, turnos y prioridad. El sistema aplica varianza automática entre formatos (2D/3D) e idiomas (español, subtitulado, doblado) respetando el margen de 30 min entre funciones.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Película a Programar *</label>
+          <select formControlName="peliculaId" (change)="onAutoFormPeliculaOrPreventaChange()" class="form-input">
+            <option value="" disabled>Seleccione una película</option>
+            <option *ngFor="let p of peliculas()" [value]="p.id">
+              {{ esPeliculaPreventa(p.id) ? '⭐ [PREVENTA] ' : '' }}{{ p.titulo }} ({{ p.duracion }} min)
+            </option>
+          </select>
+          <p *ngIf="esPeliculaPreventa(autoForm.get('peliculaId')?.value)" style="font-size: 12px; color: #8b5cf6; margin: 4px 0 0; font-weight: 500;">
+            ⭐ Película en PREVENTA (Estreno: {{ obtenerPelicula(autoForm.get('peliculaId')?.value)?.fechaEstreno }}). Las funciones se programan a partir del estreno, pero la compra de entradas queda habilitada anticipadamente.
+          </p>
+        </div>
+
+        <div class="form-row" style="margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">Fecha Desde *</label>
+            <input type="date" formControlName="fechaInicio" [min]="minFechaActual" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha Hasta *</label>
+            <input type="date" formControlName="fechaFin" [min]="minFechaActual" class="form-input" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Turnos / Rangos Horarios *</label>
+          <div style="display: flex; gap: 16px; margin-top: 6px; font-size: 13px;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              <input type="checkbox" formControlName="turnoMañana" />
+              🌅 Mañana (10:00 - 14:00)
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              <input type="checkbox" formControlName="turnoTarde" />
+              ☀️ Tarde (14:00 - 19:00)
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              <input type="checkbox" formControlName="turnoNoche" />
+              🌙 Noche (19:00 - 23:00)
+            </label>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">Prioridad de Programación *</label>
+            <select formControlName="prioridad" class="form-input">
+              <option value="alta">🔥 Alta (Hasta 25% de salas / max 2 funciones por turno)</option>
+              <option value="media">⚖️ Media (Hasta 10% de salas / 1 función por turno)</option>
+              <option value="baja">🌱 Baja (1 sala / 1 función por turno)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Precio Entrada ($) *</label>
+            <input type="number" formControlName="precio" min="0" class="form-input" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: #8b5cf6; font-size: 13px;">
+            <input type="checkbox" formControlName="esPreventa" (change)="onAutoFormPeliculaOrPreventaChange()" />
+            ⭐ Programar como Funciones en PREVENTA (Habilita la compra anticipada de entradas)
+          </label>
+        </div>
+
+        <div *ngIf="mensajeError()" class="alert alert-danger" style="margin-top: 12px; font-size: 13px; color: red;">
+          {{ mensajeError() }}
+        </div>
+        <div *ngIf="mensajeExito()" class="alert alert-success" style="margin-top: 12px; font-size: 13px; color: green;">
+          {{ mensajeExito() }}
+        </div>
+
+        <div class="modal-footer" style="margin-top: 20px;">
+          <button type="button" class="btn-cancel" (click)="cerrarAutoGeneracion()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-save" [disabled]="guardando()" style="background: #2563eb; border-color: #2563eb;">
+            {{ guardando() ? 'Generando...' : '⚡ Generar Funciones Automáticas' }}
           </button>
         </div>
       </form>

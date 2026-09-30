@@ -44,13 +44,76 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
     return lista;
   }
 
+  get proximoNumeroDisponible(): number {
+    const usadas = new Set<number>();
+    const editandoId = this.itemEditando()?.id;
+
+    for (const s of this.salas()) {
+      if (editandoId && s.id === editandoId) continue;
+      const match = s.nombre.match(/\d+/);
+      if (match) {
+        usadas.add(parseInt(match[0], 10));
+      }
+    }
+
+    let num = 1;
+    while (usadas.has(num)) {
+      num++;
+    }
+    return num;
+  }
+
+  get listaNumerosDisponibles(): number[] {
+    const usadas = new Set<number>();
+    const editandoId = this.itemEditando()?.id;
+
+    for (const s of this.salas()) {
+      if (editandoId && s.id === editandoId) continue;
+      const match = s.nombre.match(/\d+/);
+      if (match) {
+        usadas.add(parseInt(match[0], 10));
+      }
+    }
+
+    const numActual = this.itemEditando()?.nombre.match(/\d+/)?.[0];
+    const numEditandoInt = numActual ? parseInt(numActual, 10) : null;
+
+    const lista: number[] = [];
+    if (numEditandoInt) {
+      lista.push(numEditandoInt);
+    }
+
+    for (let n = 1; n <= 50; n++) {
+      if (!usadas.has(n) && !lista.includes(n)) {
+        lista.push(n);
+      }
+    }
+    return lista.sort((a, b) => a - b);
+  }
+
+  get numeroSalaSeleccionado(): number {
+    const nombreVal = this.editForm.get('nombre')?.value || '';
+    const match = nombreVal.match(/\d+/);
+    if (match) return parseInt(match[0], 10);
+    return this.proximoNumeroDisponible;
+  }
+
+  public onNumeroSalaChange(event: Event): void {
+    const val = (event.target as HTMLSelectElement).value;
+    if (val) {
+      this.editForm.patchValue({
+        nombre: `Sala ${val}`,
+      });
+    }
+  }
+
   protected override cargarData(): Promise<Sala[]> {
     return this.salaService.obtenerSalas();
   }
 
   protected override crearData(payload: any): Promise<Sala> {
     return this.salaService.crearSala({
-      nombre: payload.nombre,
+      nombre: payload.nombre || `Sala ${this.proximoNumeroDisponible}`,
       formato: payload.formato || '2D',
     });
   }
@@ -72,14 +135,23 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
   }
 
   protected override onFormularioReset(): void {
+    const proximoNum = this.proximoNumeroDisponible;
     this.editForm.patchValue({
-      nombre: '',
+      nombre: `Sala ${proximoNum}`,
       formato: '2D',
       activa: true,
     });
   }
 
   protected override onFormularioCargado(_sala: Sala): void {
+  }
+
+  protected override esValidoFormulario(): boolean {
+    const valido = this.editForm.valid;
+    if (!valido) {
+      this.mensajeError.set('Por favor seleccione un número de sala válido.');
+    }
+    return valido;
   }
 
   public seleccionarSala(sala: Sala): void {

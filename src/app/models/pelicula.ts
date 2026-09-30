@@ -25,9 +25,6 @@ export interface Pelicula {
   restriccionEdad: number;   // edad mínima requerida (ej: 0, 13, 16, 18)
   puntajeCompra: number;     // puntos que otorga la compra
   poster?: string;           // URL de imagen de poster
-  esPreventa: boolean;
-  precioPreventa?: number;
-  precioNormal: number;
   fechaEstreno: string;      // ISO date string
   activa: boolean;
   enCartelera: boolean;      // Visibilidad en cartelera pública
@@ -45,9 +42,6 @@ export interface CrearPeliculaDto {
   restriccionEdad: number;
   puntajeCompra: number;
   poster?: string;
-  esPreventa: boolean;
-  precioPreventa?: number;
-  precioNormal: number;
   fechaEstreno: string;
   enCartelera?: boolean;
   boletosVendidos?: number;

@@ -35,10 +35,7 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
   get duracion() { return this.editForm.get('duracion'); }
   get restriccionEdad() { return this.editForm.get('restriccionEdad'); }
   get puntajeCompra() { return this.editForm.get('puntajeCompra'); }
-  get precioNormal() { return this.editForm.get('precioNormal'); }
   get fechaEstreno() { return this.editForm.get('fechaEstreno'); }
-  get esPreventa() { return this.editForm.get('esPreventa'); }
-  get precioPreventa() { return this.editForm.get('precioPreventa'); }
   get poster() { return this.editForm.get('poster'); }
   get enCartelera() { return this.editForm.get('enCartelera'); }
   get boletosVendidos() { return this.editForm.get('boletosVendidos'); }
@@ -67,10 +64,7 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
       duracion: pelicula.duracion,
       restriccionEdad: pelicula.restriccionEdad,
       puntajeCompra: pelicula.puntajeCompra,
-      precioNormal: pelicula.precioNormal,
       fechaEstreno: pelicula.fechaEstreno,
-      esPreventa: pelicula.esPreventa,
-      precioPreventa: pelicula.precioPreventa || '',
       poster: pelicula.poster || '',
       enCartelera: pelicula.enCartelera ?? true,
       boletosVendidos: pelicula.boletosVendidos || 0,
@@ -85,10 +79,7 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
       duracion: 120,
       restriccionEdad: 13,
       puntajeCompra: 100,
-      precioNormal: 5000,
       fechaEstreno: new Date().toISOString().split('T')[0],
-      esPreventa: false,
-      precioPreventa: '',
       poster: '',
       enCartelera: true,
       boletosVendidos: 0,

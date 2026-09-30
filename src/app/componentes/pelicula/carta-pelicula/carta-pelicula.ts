@@ -13,6 +13,7 @@ import { HoverZoomDirective } from '../../../directivas/hover-zoom.directive';
 export class CartaPelicula {
   pelicula = input.required<Pelicula>();
   seleccionada = input<boolean>(false);
+  esPreventa = input<boolean>(false);
   mostrarBotonEditar = input<boolean>(false);
   mostrarBoletosVendidos = input<boolean>(false);
 

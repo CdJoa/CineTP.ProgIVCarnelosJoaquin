@@ -1,8 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { BaseSupabaseService } from './base-supabase';
-import { CrearFuncionDto, EstadoFuncion, Funcion } from '../models/funcion';
+import { CrearFuncionDto, EstadoFuncion, Formato, Idioma, Funcion } from '../models/funcion';
 import { PeliculasService } from './peliculas';
 import { SalaService } from './sala';
+
+export interface OpcionesGeneracionAutomatica {
+  peliculaId: string;
+  fechaInicio: string; // YYYY-MM-DD
+  fechaFin: string;    // YYYY-MM-DD
+  turnos: ('mañana' | 'tarde' | 'noche')[];
+  prioridad: 'alta' | 'media' | 'baja';
+  precio: number;
+  esPreventa?: boolean;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -112,6 +122,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
       inicio: dto.inicio,
       fin: finIso,
       precio: Number(dto.precio),
+      es_preventa: Boolean(dto.esPreventa),
       formato: dto.formato || '2D',
       idioma: dto.idioma || 'español',
       estado: dto.estado || 'programada',
@@ -165,6 +176,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
       payload['fin'] = this.calcularFin(dto.inicio, duracionPelicula);
     }
     if (dto.precio !== undefined) payload['precio'] = Number(dto.precio);
+    if (dto.esPreventa !== undefined) payload['es_preventa'] = Boolean(dto.esPreventa);
     if (dto.formato) payload['formato'] = dto.formato;
     if (dto.idioma) payload['idioma'] = dto.idioma;
     if (dto.estado) payload['estado'] = dto.estado;
@@ -189,6 +201,203 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     };
   }
 
+  /**
+   * Generación automática de funciones alternando formatos, idiomas, turnos y prioridad.
+   */
+  async generarFuncionesAutomaticas(opciones: OpcionesGeneracionAutomatica): Promise<Funcion[]> {
+    const [peliculas, salas] = await Promise.all([
+      this.peliculasService.obtenerPeliculas().catch(() => []),
+      this.salaService.obtenerSalas().catch(() => []),
+    ]);
+
+    const pelicula = peliculas.find((p) => p.id === opciones.peliculaId);
+    if (!pelicula) {
+      throw new Error('Película no encontrada.');
+    }
+
+    const salasActivas = salas.filter((s) => s.activa !== false);
+    if (salasActivas.length === 0) {
+      throw new Error('No hay salas activas disponibles para programar funciones.');
+    }
+
+    const duracionPeli = pelicula.duracion || 120;
+    const duracionTotalMs = (duracionPeli + 30) * 60 * 1000; // Película + 30 min de limpieza
+
+    // Idiomas alternables para la varianza automática
+    const idiomasDisponibles: Idioma[] = ['español', 'subtitulado', 'doblado'];
+
+    // Determinar incremento / intervalo según la prioridad
+    let intervaloMs = duracionTotalMs;
+    if (opciones.prioridad === 'media') {
+      intervaloMs += 45 * 60 * 1000; // +45 min extra
+    } else if (opciones.prioridad === 'baja') {
+      intervaloMs += 90 * 60 * 1000; // +90 min extra
+    }
+
+    // Definición de rangos por turno
+    const rangosTurnos: Record<'mañana' | 'tarde' | 'noche', { inicioHora: number; finHora: number }> = {
+      mañana: { inicioHora: 10, finHora: 14 },
+      tarde: { inicioHora: 14, finHora: 19 },
+      noche: { inicioHora: 19, finHora: 23 },
+    };
+
+    const funcionesGeneradasPayload: any[] = [];
+    const funcionesExistentes = await this.obtenerFuncionesCompleta();
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    const fechaEstrenoDate = pelicula.fechaEstreno ? new Date(`${pelicula.fechaEstreno}T00:00:00`) : hoy;
+    const inicioMin = fechaEstrenoDate > hoy ? fechaEstrenoDate : hoy;
+
+    const userInicio = opciones.fechaInicio ? new Date(`${opciones.fechaInicio}T00:00:00`) : hoy;
+    const fechaInicioCalcular = userInicio > inicioMin ? userInicio : inicioMin;
+
+    const userFin = opciones.fechaFin ? new Date(`${opciones.fechaFin}T23:59:59`) : null;
+    const defaultFin = new Date(fechaInicioCalcular.getTime() + 15 * 24 * 60 * 60 * 1000);
+    const fechaFinCalcular = userFin && userFin >= fechaInicioCalcular ? userFin : defaultFin;
+
+    let inicioLoop = new Date(fechaInicioCalcular.getTime());
+    const finLoop = new Date(fechaFinCalcular.getTime());
+
+    // Precio a aplicar
+    const precioAplicar = Number(opciones.precio || 5000);
+
+    let contadorVariacion = 0;
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    const totalSalas = salasActivas.length;
+    let maxSalasPorTurno = 1;
+    let maxFuncionesPorSalaTurno = 1;
+
+    if (opciones.prioridad === 'alta') {
+      maxSalasPorTurno = Math.min(totalSalas, Math.max(1, Math.ceil(totalSalas * 0.25)));
+      maxFuncionesPorSalaTurno = 2;
+    } else if (opciones.prioridad === 'media') {
+      maxSalasPorTurno = Math.min(totalSalas, Math.max(1, Math.ceil(totalSalas * 0.15)));
+      maxFuncionesPorSalaTurno = 1;
+    } else {
+      maxSalasPorTurno = 1;
+      maxFuncionesPorSalaTurno = 1;
+    }
+
+    while (inicioLoop <= finLoop) {
+      const fechaStr = `${inicioLoop.getFullYear()}-${pad(inicioLoop.getMonth() + 1)}-${pad(inicioLoop.getDate())}`;
+
+      for (const turno of opciones.turnos) {
+        const configTurno = rangosTurnos[turno];
+        if (!configTurno) continue;
+
+        const horaInicioTurno = new Date(`${fechaStr}T${String(configTurno.inicioHora).padStart(2, '0')}:00:00`);
+        const horaFinTurno = new Date(`${fechaStr}T${String(configTurno.finHora).padStart(2, '0')}:00:00`);
+
+        let salasAsignadasEnTurno = 0;
+
+        for (let sIdx = 0; sIdx < totalSalas; sIdx++) {
+          if (salasAsignadasEnTurno >= maxSalasPorTurno) break;
+
+          const sala = salasActivas[(sIdx + contadorVariacion) % totalSalas];
+          let horaActual = new Date(horaInicioTurno.getTime());
+          let funcionesAgregadasEnSala = 0;
+
+          while (horaActual.getTime() + duracionTotalMs <= horaFinTurno.getTime() + 60 * 60 * 1000) {
+            if (funcionesAgregadasEnSala >= maxFuncionesPorSalaTurno) break;
+
+            const candInicioIso = horaActual.toISOString();
+            const candFinIso = new Date(horaActual.getTime() + duracionTotalMs).toISOString();
+
+            // Verificar que no sea pasado
+            if (horaActual.getTime() > new Date().getTime()) {
+              // Verificar solapamiento con existentes y con el batch en generación
+              const candInicioMs = horaActual.getTime();
+              const candFinMs = horaActual.getTime() + duracionTotalMs;
+
+              let haySolapamiento = false;
+
+              // Solapamiento con BD
+              for (const fEx of funcionesExistentes) {
+                if (fEx.salaId === sala.id && fEx.estado === 'programada') {
+                  const exInMs = new Date(fEx.inicio).getTime();
+                  const exFinIso = fEx.fin || this.calcularFin(fEx.inicio, fEx.duracionPelicula || 120);
+                  const exFinMs = new Date(exFinIso).getTime();
+                  if (candInicioMs < exFinMs && candFinMs > exInMs) {
+                    haySolapamiento = true;
+                    break;
+                  }
+                }
+              }
+
+              // Solapamiento con las recién generadas en memoria
+              if (!haySolapamiento) {
+                for (const fGen of funcionesGeneradasPayload) {
+                  if (fGen.sala_id === sala.id) {
+                    const genInMs = new Date(fGen.inicio).getTime();
+                    const genFinMs = new Date(fGen.fin).getTime();
+                    if (candInicioMs < genFinMs && candFinMs > genInMs) {
+                      haySolapamiento = true;
+                      break;
+                    }
+                  }
+                }
+              }
+
+              if (!haySolapamiento) {
+                // Alternar idioma entre 'español' y 'subtitulado'
+                const idiomasVariados: Idioma[] = ['español', 'subtitulado'];
+                const idiomaElegido = idiomasVariados[contadorVariacion % idiomasVariados.length];
+
+                // El formato de la función adopta estrictamente el formato configurado en la sala (2D o 3D)
+                const formatoElegido: Formato = (sala.formato as Formato) || '2D';
+
+                funcionesGeneradasPayload.push({
+                  pelicula_id: opciones.peliculaId,
+                  sala_id: sala.id,
+                  inicio: candInicioIso,
+                  fin: candFinIso,
+                  precio: precioAplicar,
+                  es_preventa: Boolean(opciones.esPreventa),
+                  formato: formatoElegido,
+                  idioma: idiomaElegido,
+                  estado: 'programada',
+                });
+
+                funcionesAgregadasEnSala++;
+                contadorVariacion++;
+              }
+            }
+
+            // Avanzar hora según intervalo de la prioridad
+            horaActual = new Date(horaActual.getTime() + intervaloMs);
+          }
+
+          if (funcionesAgregadasEnSala > 0) {
+            salasAsignadasEnTurno++;
+          }
+        }
+      }
+
+      // Avanzar al siguiente día
+      inicioLoop.setDate(inicioLoop.getDate() + 1);
+    }
+
+    if (funcionesGeneradasPayload.length === 0) {
+      throw new Error('No se pudieron generar funciones automáticas. Verifica que los horarios no estén ocupados o que las fechas sean válidas.');
+    }
+
+    // Insertar en lote (batch) en Supabase
+    const { data, error } = await this.supabase
+      .from(this.nombreTabla)
+      .insert(funcionesGeneradasPayload)
+      .select();
+
+    if (error) {
+      throw new Error(`Error al insertar funciones automáticas: ${error.message}`);
+    }
+
+    return this.obtenerFuncionesCompleta();
+  }
+
   protected override mapear(data: Record<string, any>): Funcion {
     return {
       id: data['id'],
@@ -197,6 +406,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
       inicio: data['inicio'],
       fin: data['fin'],
       precio: Number(data['precio'] || 0),
+      esPreventa: Boolean(data['es_preventa'] || data['esPreventa']),
       formato: data['formato'] || '2D',
       idioma: data['idioma'] || 'español',
       estado: data['estado'] || 'programada',

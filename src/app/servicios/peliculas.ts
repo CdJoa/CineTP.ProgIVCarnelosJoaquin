@@ -18,9 +18,6 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       restriccion_edad: Number(datos.restriccionEdad),
       puntaje_compra: Number(datos.puntajeCompra),
       poster: datos.poster || null,
-      es_preventa: datos.esPreventa,
-      precio_preventa: datos.esPreventa && datos.precioPreventa ? Number(datos.precioPreventa) : null,
-      precio_normal: Number(datos.precioNormal),
       fecha_estreno: datos.fechaEstreno,
       en_cartelera: datos.enCartelera ?? true,
       boletos_vendidos: Number(datos.boletosVendidos || 0),
@@ -42,12 +39,8 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
     if (datos.duracion !== undefined) payload['duracion'] = Number(datos.duracion);
     if (datos.restriccionEdad !== undefined) payload['restriccionEdad'] = Number(datos.restriccionEdad);
     if (datos.puntajeCompra !== undefined) payload['puntajeCompra'] = Number(datos.puntajeCompra);
-    if (datos.precioNormal !== undefined) payload['precioNormal'] = Number(datos.precioNormal);
     if (datos.boletosVendidos !== undefined) payload['boletosVendidos'] = Number(datos.boletosVendidos);
     if (datos.enCartelera !== undefined) payload['enCartelera'] = Boolean(datos.enCartelera);
-    if (datos.precioPreventa !== undefined) {
-      payload['precioPreventa'] = datos.esPreventa && datos.precioPreventa ? Number(datos.precioPreventa) : null;
-    }
     if (datos.poster !== undefined) payload['poster'] = datos.poster || null;
 
     return this.actualizarAuto(id, payload);
@@ -96,9 +89,6 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       restriccionEdad: data['restriccion_edad'],
       puntajeCompra: data['puntaje_compra'],
       poster: data['poster'],
-      esPreventa: data['es_preventa'],
-      precioPreventa: data['precio_preventa'],
-      precioNormal: data['precio_normal'],
       fechaEstreno: data['fecha_estreno'],
       activa: data['activa'] ?? true,
       enCartelera: data['en_cartelera'] ?? true,

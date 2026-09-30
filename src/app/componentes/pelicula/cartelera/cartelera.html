@@ -10,6 +10,7 @@
       <div *ngFor="let pelicula of topTresVendidas" class="grid-item">
         <app-carta-pelicula
           [pelicula]="pelicula"
+          [esPreventa]="esPeliculaPreventa(pelicula.id)"
           [mostrarBoletosVendidos]="true"
           (seleccionar)="abrirDetalle($event)"
         ></app-carta-pelicula>
@@ -97,8 +98,29 @@
     >
       <app-carta-pelicula
         [pelicula]="pelicula"
+        [esPreventa]="esPeliculaPreventa(pelicula.id)"
         (seleccionar)="abrirDetalle($event)"
       ></app-carta-pelicula>
+    </div>
+  </div>
+
+  <!-- Sección Próximamente (Películas que aún no llegaron a su fecha de estreno) -->
+  <div *ngIf="!cargando() && peliculasProximamente.length > 0" class="proximamente-seccion">
+    <hr class="seccion-divider" />
+
+    <div class="cartelera-titulo-box" style="margin-bottom: 1.5rem;">
+      <h2>✨ Próximamente en Cines</h2>
+      <p>Descubrí los próximos estrenos que llegarán a nuestras pantallas</p>
+    </div>
+
+    <div class="cartelera-grid-layout">
+      <div *ngFor="let pelicula of peliculasProximamente" class="grid-item">
+        <app-carta-pelicula
+          [pelicula]="pelicula"
+          [esPreventa]="esPeliculaPreventa(pelicula.id)"
+          (seleccionar)="abrirDetalle($event)"
+        ></app-carta-pelicula>
+      </div>
     </div>
   </div>
 
@@ -115,7 +137,7 @@
         </div>
 
         <div class="detail-info-col">
-          <span *ngIf="p.esPreventa" class="badge-preventa">PREVENTA</span>
+          <span *ngIf="esPeliculaPreventa(p.id)" class="badge-preventa">PREVENTA</span>
           <h2 class="detail-titulo">{{ p.titulo }}</h2>
 
           <div class="detail-meta">
@@ -129,11 +151,6 @@
           </div>
 
           <p class="detail-sinopsis">{{ p.sinopsis || 'Sin descripción disponible.' }}</p>
-
-          <div class="detail-precio-box">
-            <span class="precio-label">Precio Entrada:</span>
-            <strong class="precio-valor">${{ p.esPreventa && p.precioPreventa ? p.precioPreventa : p.precioNormal }}</strong>
-          </div>
         </div>
       </div>
     </div>
@@ -215,11 +232,12 @@
             *ngFor="let fn of funcionesDePeliculaFiltradas"
             class="fn-card-vertical"
             [class.active]="funcionSeleccionada()?.id === fn.id"
-            (click)="seleccionarFuncion(fn)"
+            (click)="irASala(fn)"
           >
             <div class="fn-card-top">
               <span class="fn-hora-bold">{{ formatearFechaHora(fn.inicio).hora }}</span>
               <span class="fn-dia-badge">{{ formatearFechaHora(fn.inicio).dia }}</span>
+              <span *ngIf="fn.esPreventa" class="badge-preventa-mini">⭐ PREVENTA</span>
             </div>
 
             <div class="fn-card-mid">
@@ -232,6 +250,9 @@
 
             <div class="fn-card-bot">
               <span class="fn-precio-txt">${{ fn.precio }}</span>
+              <button type="button" class="btn-comprar-fn" (click)="$event.stopPropagation(); irASala(fn)">
+                {{ fn.esPreventa ? '⭐ Compra Anticipada' : '🎟️ Comprar' }}
+              </button>
             </div>
           </div>
         </div>
