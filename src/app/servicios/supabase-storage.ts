@@ -1,20 +1,13 @@
-import { Injectable, WritableSignal } from '@angular/core';
+import { inject, Injectable, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../environments/environments';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClientService } from './supabase-client';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SupabaseStorageService {
-  private supabase: SupabaseClient;
-
-  constructor() {
-    this.supabase = createClient(
-      environment.supabaseUrl,
-      environment.supabasePublishableKey
-    );
-  }
+  private supabase: SupabaseClient = inject(SupabaseClientService).client;
 
   /**
    * Sube una imagen a Supabase Storage y retorna la URL pública.

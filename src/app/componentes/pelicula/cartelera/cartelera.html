@@ -231,7 +231,6 @@
           <div
             *ngFor="let fn of funcionesDePeliculaFiltradas"
             class="fn-card-vertical"
-            [class.active]="funcionSeleccionada()?.id === fn.id"
             (click)="irASala(fn)"
           >
             <div class="fn-card-top">

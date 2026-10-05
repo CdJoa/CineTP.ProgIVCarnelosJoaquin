@@ -32,8 +32,6 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
   readonly estadosList = ESTADOS_FUNCION;
 
   funciones = this.items;
-  funcionSeleccionada = this.itemSeleccionado;
-  funcionEditando = this.itemEditando;
 
   peliculas = signal<Pelicula[]>([]);
   salas = signal<Sala[]>([]);
@@ -50,26 +48,6 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
   obtenerPelicula(peliculaId: string | undefined): Pelicula | undefined {
     if (!peliculaId) return undefined;
     return this.peliculas().find((item) => item.id === peliculaId);
-  }
-
-  obtenerRangoPreventa(peliculaId: string | undefined): { inicio: string; fin: string; estreno: string } | null {
-    if (!peliculaId) return null;
-    const p = this.peliculas().find((item) => item.id === peliculaId);
-    if (!p || !p.fechaEstreno) return null;
-
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    const estrenoDate = new Date(`${p.fechaEstreno}T00:00:00`);
-    if (isNaN(estrenoDate.getTime())) return null;
-
-    const preventaInicioDate = new Date(estrenoDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const fPreventaInicio = `${preventaInicioDate.getFullYear()}-${pad(preventaInicioDate.getMonth() + 1)}-${pad(preventaInicioDate.getDate())}`;
-    const fEstreno = `${estrenoDate.getFullYear()}-${pad(estrenoDate.getMonth() + 1)}-${pad(estrenoDate.getDate())}`;
-
-    return {
-      inicio: fPreventaInicio,
-      fin: fEstreno,
-      estreno: fEstreno,
-    };
   }
 
   onAutoFormPeliculaOrPreventaChange(): void {
@@ -391,13 +369,6 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
 
     const primeraDisponible = this.opcionesHora.find((h) => !this.esHoraBloqueada(h)) || hDefault;
     this.editForm.patchValue({ hora: primeraDisponible });
-  }
-
-  formatearHora(isoString: string): string {
-    if (!isoString) return '-';
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return isoString;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   protected override onFormularioCargado(_item: Funcion): void {

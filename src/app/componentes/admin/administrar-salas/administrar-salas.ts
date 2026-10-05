@@ -19,15 +19,10 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
 
   salas = this.items;
   salaSeleccionada = this.itemSeleccionado;
-  salaEditando = this.itemEditando;
 
   busqueda = signal<string>('');
 
   editForm: FormGroup = crearFormularioSala(this.fb);
-
-  get nombre() {
-    return this.editForm.get('nombre');
-  }
 
   get salaEditandoPreview(): Sala | null {
     if (!this.modoModal()) return null;
@@ -158,7 +153,4 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
     this.seleccionarItem(sala);
   }
 
-  public getCapacidadTotal(sala: Sala): number {
-    return sala.capacidadTotal || 0;
-  }
 }

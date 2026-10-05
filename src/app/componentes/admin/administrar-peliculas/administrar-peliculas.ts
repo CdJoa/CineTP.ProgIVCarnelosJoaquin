@@ -105,10 +105,6 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
     };
   }
 
-  seleccionarPelicula(pelicula: Pelicula): void {
-    this.seleccionarItem(pelicula);
-  }
-
   toggleGenero(genero: GenerosPelicula): void {
     const actual = this.generosSeleccionados();
     if (actual.includes(genero)) {

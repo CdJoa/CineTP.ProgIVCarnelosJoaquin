@@ -20,7 +20,7 @@ export const routes: Routes = [
   { path: 'registro', component: Registro, canActivate: [authGuard] },
   { path: 'register', redirectTo: 'registro', pathMatch: 'full' },
   { path: 'home', component: Home },
-  { path: 'sala', component: MapaSalaComponent, canActivate: [authGuard] },
+  { path: 'sala', component: MapaSalaComponent },
   {
     path: 'admin',
     component: Admin,

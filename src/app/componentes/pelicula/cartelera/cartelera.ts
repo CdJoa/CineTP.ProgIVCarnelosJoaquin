@@ -30,7 +30,6 @@ export class CarteleraComponent implements OnInit {
   filtroTipo = signal<'todas' | 'cartelera' | 'preventa'>('todas');
 
   peliculaSeleccionada = signal<Pelicula | null>(null);
-  funcionSeleccionada = signal<Funcion | null>(null);
 
   // Filtros para el panel vertical de funciones
   filtroFuncionDia = signal<string>('todos');
@@ -193,7 +192,6 @@ export class CarteleraComponent implements OnInit {
 
   abrirDetalle(pelicula: Pelicula): void {
     this.peliculaSeleccionada.set(pelicula);
-    this.funcionSeleccionada.set(null);
     this.filtroFuncionDia.set('todos');
     this.filtroFuncionFormato.set('todos');
     this.filtroFuncionIdioma.set('todos');
@@ -202,11 +200,6 @@ export class CarteleraComponent implements OnInit {
 
   cerrarDetalle(): void {
     this.peliculaSeleccionada.set(null);
-    this.funcionSeleccionada.set(null);
-  }
-
-  seleccionarFuncion(funcion: Funcion): void {
-    this.funcionSeleccionada.set(funcion);
   }
 
   irASala(funcion: Funcion): void {

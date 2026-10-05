@@ -114,7 +114,4 @@ export class AdministrarCuponesComponent extends AdministrarBase<Cupon> {
     return valido;
   }
 
-  seleccionarCupon(cupon: Cupon): void {
-    this.seleccionarItem(cupon);
-  }
 }

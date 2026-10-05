@@ -24,10 +24,6 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
     return this.obtenerTodos('nombre', true);
   }
 
-  async obtenerProductoPorId(id: string): Promise<ProductoCandy | null> {
-    return this.obtenerPorId(id);
-  }
-
   async actualizarProducto(id: string, datos: Partial<CrearCandyDto & { activo: boolean }>): Promise<ProductoCandy> {
     const payload: Record<string, any> = { ...datos };
     if (datos.precio !== undefined) payload['precio'] = Number(datos.precio);

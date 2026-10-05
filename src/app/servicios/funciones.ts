@@ -37,6 +37,70 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     return finDate.toISOString();
   }
 
+  private seSolapan(inicioA: number, finA: number, inicioB: number, finB: number): boolean {
+    return inicioA < finB && finA > inicioB;
+  }
+
+  private async validarDisponibilidad(
+    salaId: string,
+    inicioIso: string,
+    finIso: string,
+    idFuncionActual?: string
+  ): Promise<void> {
+    const { solapada, funcionSolapada } = await this.verificarSolapamiento(
+      salaId,
+      inicioIso,
+      finIso,
+      idFuncionActual
+    );
+    if (!solapada || !funcionSolapada) return;
+
+    const horaInicio = new Date(funcionSolapada.inicio).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const finSolapado = funcionSolapada.fin || this.calcularFin(
+      funcionSolapada.inicio,
+      funcionSolapada.duracionPelicula || 120
+    );
+    const horaFin = finSolapado
+      ? new Date(finSolapado).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : 'fin';
+
+    throw new Error(
+      `La sala elegida ya está ocupada por "${funcionSolapada.peliculaTitulo}" de ${horaInicio} a ${horaFin} (incluyendo los 30 min de limpieza y preparación).`
+    );
+  }
+
+  private mapearConRelaciones(
+    funcion: Funcion,
+    pelicula: Awaited<ReturnType<PeliculasService['obtenerPeliculas']>>[number] | undefined,
+    sala: Awaited<ReturnType<SalaService['obtenerSalas']>>[number] | undefined,
+    duracionFallback = 120
+  ): Funcion {
+    const duracionPeli = pelicula?.duracion || duracionFallback || 120;
+    return {
+      ...funcion,
+      fin: this.calcularFin(funcion.inicio, duracionPeli),
+      peliculaTitulo: pelicula?.titulo || 'Película no encontrada',
+      duracionPelicula: duracionPeli,
+      salaNombre: sala?.nombre || 'Sala no encontrada',
+    };
+  }
+
+  private async enriquecerFuncion(funcion: Funcion, duracionFallback = 120): Promise<Funcion> {
+    const [peliculas, salas] = await Promise.all([
+      this.peliculasService.obtenerPeliculas().catch(() => []),
+      this.salaService.obtenerSalas().catch(() => []),
+    ]);
+    return this.mapearConRelaciones(
+      funcion,
+      peliculas.find((pelicula) => pelicula.id === funcion.peliculaId),
+      salas.find((sala) => sala.id === funcion.salaId),
+      duracionFallback
+    );
+  }
+
   /**
    * Verifica si la sala dada ya tiene una función programada que se solape
    * en el rango [inicio, fin] (que contempla la película + 30 min de limpieza).
@@ -59,8 +123,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
       const inicioExistente = new Date(f.inicio).getTime();
       const finExistente = new Date(f.fin || this.calcularFin(f.inicio, f.duracionPelicula || 120)).getTime();
 
-      // Hay solapamiento si (inicioNuevo < finExistente) && (finNuevo > inicioExistente)
-      if (inicioNuevo < finExistente && finNuevo > inicioExistente) {
+      if (this.seSolapan(inicioNuevo, finNuevo, inicioExistente, finExistente)) {
         return { solapada: true, funcionSolapada: f };
       }
     }
@@ -85,36 +148,16 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     const mapPeliculas = new Map(peliculas.map((p) => [p.id, p]));
     const mapSalas = new Map(salas.map((s) => [s.id, s]));
 
-    return funciones.map((f) => {
-      const p = mapPeliculas.get(f.peliculaId);
-      const s = mapSalas.get(f.salaId || '');
-
-      const duracionPeli = p?.duracion || 120;
-      const finCalculado = this.calcularFin(f.inicio, duracionPeli);
-
-      return {
-        ...f,
-        fin: finCalculado,
-        peliculaTitulo: p?.titulo || 'Película no encontrada',
-        duracionPelicula: duracionPeli,
-        salaNombre: s?.nombre || 'Sala no encontrada',
-      };
-    });
+    return funciones.map((funcion) => this.mapearConRelaciones(
+      funcion,
+      mapPeliculas.get(funcion.peliculaId),
+      mapSalas.get(funcion.salaId || '')
+    ));
   }
 
   async crearFuncionConValidacion(dto: CrearFuncionDto, duracionPelicula: number): Promise<Funcion> {
     const finIso = this.calcularFin(dto.inicio, duracionPelicula);
-    const { solapada, funcionSolapada } = await this.verificarSolapamiento(dto.salaId || '', dto.inicio, finIso);
-
-    if (solapada && funcionSolapada) {
-      const horaInicio = new Date(funcionSolapada.inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const horaFin = funcionSolapada.fin
-        ? new Date(funcionSolapada.fin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        : 'fin';
-      throw new Error(
-        `La sala elegida ya está ocupada por "${funcionSolapada.peliculaTitulo}" de ${horaInicio} a ${horaFin} (incluyendo los 30 min de limpieza y preparación).`
-      );
-    }
+    await this.validarDisponibilidad(dto.salaId || '', dto.inicio, finIso);
 
     const payload = {
       pelicula_id: dto.peliculaId,
@@ -129,23 +172,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     };
 
     const creada = await this.insertar(payload);
-    const [peliculas, salas] = await Promise.all([
-      this.peliculasService.obtenerPeliculas().catch(() => []),
-      this.salaService.obtenerSalas().catch(() => []),
-    ]);
-    const p = peliculas.find((pel) => pel.id === creada.peliculaId);
-    const s = salas.find((sal) => sal.id === creada.salaId);
-
-    const durPeli = p?.duracion || duracionPelicula || 120;
-    const finCalc = this.calcularFin(creada.inicio, durPeli);
-
-    return {
-      ...creada,
-      fin: finCalc,
-      peliculaTitulo: p?.titulo || 'Película',
-      duracionPelicula: durPeli,
-      salaNombre: s?.nombre || 'Sala',
-    };
+    return this.enriquecerFuncion(creada, duracionPelicula);
   }
 
   async actualizarFuncionConValidacion(
@@ -155,17 +182,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
   ): Promise<Funcion> {
     if (dto.inicio && dto.salaId) {
       const finIso = this.calcularFin(dto.inicio, duracionPelicula);
-      const { solapada, funcionSolapada } = await this.verificarSolapamiento(dto.salaId, dto.inicio, finIso, id);
-
-      if (solapada && funcionSolapada) {
-        const horaInicio = new Date(funcionSolapada.inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const horaFin = funcionSolapada.fin
-          ? new Date(funcionSolapada.fin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          : 'fin';
-        throw new Error(
-          `La sala elegida ya está ocupada por "${funcionSolapada.peliculaTitulo}" de ${horaInicio} a ${horaFin} (incluyendo los 30 min de limpieza).`
-        );
-      }
+      await this.validarDisponibilidad(dto.salaId, dto.inicio, finIso, id);
     }
 
     const payload: Record<string, any> = {};
@@ -182,23 +199,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     if (dto.estado) payload['estado'] = dto.estado;
 
     const actualizada = await this.actualizar(id, payload);
-    const [peliculas, salas] = await Promise.all([
-      this.peliculasService.obtenerPeliculas().catch(() => []),
-      this.salaService.obtenerSalas().catch(() => []),
-    ]);
-    const p = peliculas.find((pel) => pel.id === actualizada.peliculaId);
-    const s = salas.find((sal) => sal.id === actualizada.salaId);
-
-    const durPeli = p?.duracion || duracionPelicula || 120;
-    const finCalc = this.calcularFin(actualizada.inicio, durPeli);
-
-    return {
-      ...actualizada,
-      fin: finCalc,
-      peliculaTitulo: p?.titulo || 'Película',
-      duracionPelicula: durPeli,
-      salaNombre: s?.nombre || 'Sala',
-    };
+    return this.enriquecerFuncion(actualizada, duracionPelicula);
   }
 
   /**
@@ -222,9 +223,6 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
 
     const duracionPeli = pelicula.duracion || 120;
     const duracionTotalMs = (duracionPeli + 30) * 60 * 1000; // Película + 30 min de limpieza
-
-    // Idiomas alternables para la varianza automática
-    const idiomasDisponibles: Idioma[] = ['español', 'subtitulado', 'doblado'];
 
     // Determinar incremento / intervalo según la prioridad
     let intervaloMs = duracionTotalMs;
@@ -321,7 +319,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
                   const exInMs = new Date(fEx.inicio).getTime();
                   const exFinIso = fEx.fin || this.calcularFin(fEx.inicio, fEx.duracionPelicula || 120);
                   const exFinMs = new Date(exFinIso).getTime();
-                  if (candInicioMs < exFinMs && candFinMs > exInMs) {
+                  if (this.seSolapan(candInicioMs, candFinMs, exInMs, exFinMs)) {
                     haySolapamiento = true;
                     break;
                   }
@@ -334,7 +332,7 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
                   if (fGen.sala_id === sala.id) {
                     const genInMs = new Date(fGen.inicio).getTime();
                     const genFinMs = new Date(fGen.fin).getTime();
-                    if (candInicioMs < genFinMs && candFinMs > genInMs) {
+                    if (this.seSolapan(candInicioMs, candFinMs, genInMs, genFinMs)) {
                       haySolapamiento = true;
                       break;
                     }
@@ -386,10 +384,9 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     }
 
     // Insertar en lote (batch) en Supabase
-    const { data, error } = await this.supabase
+    const { error } = await this.supabase
       .from(this.nombreTabla)
-      .insert(funcionesGeneradasPayload)
-      .select();
+      .insert(funcionesGeneradasPayload);
 
     if (error) {
       throw new Error(`Error al insertar funciones automáticas: ${error.message}`);

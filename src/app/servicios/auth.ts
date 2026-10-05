@@ -1,15 +1,16 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
-import { environment } from '../environments/environments';
+import { SupabaseClient, User } from '@supabase/supabase-js';
 import { CredencialesLoginDto, RegistroUsuarioDto, Usuario } from '../models/usuario';
 import { CuponesService } from './cupones';
+import { SupabaseClientService } from './supabase-client';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
-  private supabase: SupabaseClient;
+  private supabase: SupabaseClient = inject(SupabaseClientService).client;
   private cuponesService = inject(CuponesService);
+  private perfilesEnCarga = new Map<string, Promise<Usuario>>();
 
   // Estados reactivos con Signals de Angular
   readonly usuarioActual = signal<Usuario | null>(null);
@@ -17,11 +18,6 @@ export class Auth {
   readonly estaAutenticado = computed(() => !!this.usuarioActual());
 
   constructor() {
-    this.supabase = createClient(
-      environment.supabaseUrl,
-      environment.supabasePublishableKey
-    );
-
     this.inicializarSesion();
   }
 
@@ -41,11 +37,15 @@ export class Auth {
       }
 
       // Escuchar cambios de autenticación
-      this.supabase.auth.onAuthStateChange(async (_event, session) => {
-        if (session?.user) {
-          await this.cargarPerfil(session.user);
-        } else {
+      this.supabase.auth.onAuthStateChange(async (event, session) => {
+        if (!session?.user) {
           this.usuarioActual.set(null);
+          return;
+        }
+
+        // The initial session and token refresh do not require another profile query.
+        if (this.usuarioActual()?.id !== session.user.id || event === 'USER_UPDATED') {
+          await this.cargarPerfil(session.user);
         }
       });
     } catch (err) {
@@ -56,7 +56,18 @@ export class Auth {
     }
   }
 
-  private async cargarPerfil(authUser: User): Promise<Usuario> {
+  private cargarPerfil(authUser: User): Promise<Usuario> {
+    const existente = this.perfilesEnCarga.get(authUser.id);
+    if (existente) return existente;
+
+    const carga = this.consultarPerfil(authUser).finally(() => {
+      this.perfilesEnCarga.delete(authUser.id);
+    });
+    this.perfilesEnCarga.set(authUser.id, carga);
+    return carga;
+  }
+
+  private async consultarPerfil(authUser: User): Promise<Usuario> {
     try {
       const { data, error } = await this.supabase
         .from('usuarios')
@@ -65,17 +76,7 @@ export class Auth {
         .maybeSingle();
 
       if (data && !error) {
-        const usuario: Usuario = {
-          id: data.id,
-          email: data.email || authUser.email || '',
-          nombre: data.nombre,
-          apellido: data.apellido,
-          fechaNacimiento: data.fecha_nacimiento || data.fechaNacimiento || '',
-          rol: data.rol || 'cliente',
-          puntos: data.puntos ?? 0,
-          credito: data.credito ?? 0,
-          creadoEn: data.creado_en || data.creadoEn,
-        };
+        const usuario = this.mapearPerfil(authUser, data);
         this.usuarioActual.set(usuario);
         return usuario;
       }
@@ -84,19 +85,24 @@ export class Auth {
     }
 
     // Perfil por defecto con metadata de auth
-    const metadata = authUser.user_metadata || {};
-    const usuarioFallback: Usuario = {
-      id: authUser.id,
-      email: authUser.email || '',
-      nombre: metadata['nombre'] || '',
-      apellido: metadata['apellido'] || '',
-      fechaNacimiento: metadata['fechaNacimiento'] || '',
-      rol: (metadata['rol'] as any) || 'cliente',
-      puntos: metadata['puntos'] ?? 0,
-      credito: metadata['credito'] ?? 0,
-    };
+    const usuarioFallback = this.mapearPerfil(authUser);
     this.usuarioActual.set(usuarioFallback);
     return usuarioFallback;
+  }
+
+  private mapearPerfil(authUser: User, perfil?: Record<string, any>): Usuario {
+    const datos = perfil || authUser.user_metadata || {};
+    return {
+      id: authUser.id,
+      email: datos['email'] || authUser.email || '',
+      nombre: datos['nombre'] || '',
+      apellido: datos['apellido'] || '',
+      fechaNacimiento: datos['fecha_nacimiento'] || datos['fechaNacimiento'] || '',
+      rol: datos['rol'] || 'cliente',
+      puntos: datos['puntos'] ?? 0,
+      credito: datos['credito'] ?? 0,
+      creadoEn: datos['creado_en'] || datos['creadoEn'],
+    };
   }
 
   async login(credenciales: CredencialesLoginDto): Promise<{ exito: boolean; mensaje?: string; usuario?: Usuario }> {
@@ -141,19 +147,19 @@ export class Auth {
         sesionPrevia = session;
       }
 
+      const metadata = {
+        nombre: datos.nombre.trim(),
+        apellido: datos.apellido.trim(),
+        fechaNacimiento: datos.fechaNacimiento,
+        rol,
+        puntos: 0,
+        credito: 0,
+      };
+
       const { data, error } = await this.supabase.auth.signUp({
         email: datos.email.trim(),
         password: datos.password,
-        options: {
-          data: {
-            nombre: datos.nombre.trim(),
-            apellido: datos.apellido.trim(),
-            fechaNacimiento: datos.fechaNacimiento,
-            rol,
-            puntos: 0,
-            credito: 0,
-          },
-        },
+        options: { data: metadata },
       });
 
       if (error) {
@@ -164,17 +170,11 @@ export class Auth {
         return { exito: false, mensaje: 'No se pudo completar el registro del usuario.' };
       }
 
-      const nuevoUsuario: Usuario = {
-        id: data.user.id,
+      const nuevoUsuario = this.mapearPerfil(data.user, {
+        ...metadata,
         email: datos.email.trim(),
-        nombre: datos.nombre.trim(),
-        apellido: datos.apellido.trim(),
-        fechaNacimiento: datos.fechaNacimiento,
-        rol,
-        puntos: 0,
-        credito: 0,
         creadoEn: new Date().toISOString(),
-      };
+      });
 
       try {
         await this.supabase.from('usuarios').insert([{

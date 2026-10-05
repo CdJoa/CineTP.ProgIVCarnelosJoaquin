@@ -1,5 +1,6 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../environments/environments';
+import { inject } from '@angular/core';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClientService } from './supabase-client';
 
 export function camelToSnakeKey(key: string): string {
   return key.replace(/([A-Z])/g, '_$1').toLowerCase();
@@ -16,15 +17,8 @@ export function objectToSnakeCase(obj: Record<string, any>): Record<string, any>
 }
 
 export abstract class BaseSupabaseService<T> {
-  protected readonly supabase: SupabaseClient;
+  protected readonly supabase: SupabaseClient = inject(SupabaseClientService).client;
   protected abstract readonly nombreTabla: string;
-
-  constructor() {
-    this.supabase = createClient(
-      environment.supabaseUrl,
-      environment.supabasePublishableKey
-    );
-  }
 
   protected abstract mapear(data: Record<string, any>): T;
 

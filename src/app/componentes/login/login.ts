@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Auth } from '../../servicios/auth';
 import { loginValidators } from '../../validators/login';
 
@@ -16,6 +16,7 @@ export class Login {
   private fb = inject(FormBuilder);
   private authService = inject(Auth);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loginForm: FormGroup = this.fb.group({
     email: ['', loginValidators.email],
@@ -48,6 +49,12 @@ export class Login {
     this.cargando.set(false);
 
     if (resultado.exito) {
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+      if (returnUrl?.startsWith('/') && !returnUrl.startsWith('//')) {
+        this.router.navigateByUrl(returnUrl);
+        return;
+      }
+
       const rol = resultado.usuario?.rol;
       if (rol === 'admin') {
         this.router.navigate(['/admin']);
