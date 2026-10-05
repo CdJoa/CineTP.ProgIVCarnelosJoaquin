@@ -1,0 +1,22 @@
+{
+  "name": "CineTP",
+  "short_name": "CineTP",
+  "description": "Sistema de cine - Compra de entradas y candy",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e94560",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "pochoclo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "pochoclo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

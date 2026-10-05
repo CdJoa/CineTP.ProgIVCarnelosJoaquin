@@ -5,6 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "postbuild": "cp dist/cineTP/browser/index.csr.html dist/cineTP/browser/index.html",
+    "deploy": "npm run build -- --configuration production && firebase deploy --only hosting",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:cineTP": "node dist/cineTP/server/server.mjs"
@@ -19,6 +21,7 @@
     "@angular/platform-browser": "^22.1.0",
     "@angular/platform-server": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "@angular/service-worker": "^22.2.1",
     "@angular/ssr": "^22.1.7",
     "@supabase/supabase-js": "^2.116.0",
     "express": "^5.1.0",
