@@ -1,0 +1,750 @@
+.pago-page-container {
+  min-height: calc(100vh - 70px);
+  padding: 2.5rem 1.5rem 4rem;
+  max-width: 1040px;
+  margin: 0 auto;
+  color: #000000;
+  font-family: inherit;
+}
+
+/* --- Estados de Carga y Error --- */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 50vh;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-card {
+  background: #ffffff;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 2.5rem;
+  border-radius: 16px;
+  max-width: 480px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.error-icono {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.error-card h2 {
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.error-card p {
+  color: #334155;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primario {
+  display: inline-block;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.btn-primario:hover {
+  background: #1d4ed8;
+}
+
+/* --- Banner de Construcción (Texto negro para máxima legibilidad) --- */
+.banner-construccion {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 14px;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);
+  color: #000000;
+}
+
+.construccion-icono {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.construccion-info {
+  flex: 1;
+}
+
+.construccion-titulo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.construccion-titulo-row h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #000000;
+  font-weight: 800;
+}
+
+.badge-simulacion {
+  background: #f59e0b;
+  color: #000000;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  border: 1px solid #d97706;
+}
+
+.construccion-info p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #000000;
+  line-height: 1.5;
+}
+
+.construccion-info p strong {
+  color: #000000;
+  font-weight: 800;
+}
+
+/* --- Ticket Principal (Fondos Grises, Letras Negras, Acentos Azules) --- */
+.ticket-wrapper {
+  margin-bottom: 2.5rem;
+}
+
+.ticket-card {
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  position: relative;
+  color: #000000;
+}
+
+.ticket-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 2rem;
+  background: #1e40af;
+  border-bottom: 1px solid #1d4ed8;
+  color: #ffffff;
+}
+
+.ticket-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.brand-cine {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.ticket-tipo {
+  color: #dbeafe;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.badge-confirmado {
+  background: #ffffff;
+  border: none;
+  color: #1e40af;
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* --- Cuerpo del Ticket --- */
+.ticket-body {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  background: #f1f5f9;
+}
+
+/* Columna Izquierda: Detalles del Espectáculo */
+.ticket-detalles {
+  flex: 1.35;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  background: #f1f5f9;
+}
+
+.eyebrow-pelicula {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: 0.08em;
+}
+
+.pelicula-titulo {
+  font-size: 1.85rem;
+  font-weight: 900;
+  margin: 0.25rem 0 0.75rem;
+  color: #000000;
+  line-height: 1.2;
+}
+
+.pelicula-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-formato,
+.tag-idioma,
+.tag-sala {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.tag-formato {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.tag-idioma,
+.tag-sala {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #cbd5e1;
+  text-transform: capitalize;
+}
+
+.funcion-datos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.dato-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dato-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: 0.05em;
+}
+
+.dato-valor {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #000000;
+}
+
+.asientos-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.asiento-pill {
+  background: #1e40af;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+/* Desglose Candy */
+.candy-desglose {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+}
+
+.candy-desglose .dato-label {
+  color: #000000;
+}
+
+.candy-lista {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.candy-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #000000;
+}
+
+.candy-subtotal {
+  font-weight: 700;
+  color: #000000;
+}
+
+/* Totales */
+.ticket-totales {
+  border-top: 1px solid #cbd5e1;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.total-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.92rem;
+  color: #000000;
+}
+
+.total-fila span,
+.total-fila strong {
+  color: #000000;
+}
+
+.descuento-fila {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+.descuento-monto {
+  color: #1e40af;
+  font-weight: 800;
+}
+
+.total-pagado {
+  font-size: 1.15rem;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed #94a3b8;
+  color: #000000;
+  font-weight: 900;
+}
+
+.monto-final {
+  color: #1e40af;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.puntos-sumados {
+  font-size: 0.85rem;
+  color: #1e40af;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+/* --- Perforación Visual Simplificada --- */
+.ticket-perforacion {
+  position: relative;
+  width: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 2px dashed #94a3b8;
+  margin: 1rem 0;
+}
+
+.muesca {
+  display: none;
+}
+
+.linea-puntos {
+  display: none;
+}
+
+/* --- Columna Derecha QR --- */
+.ticket-qr-col {
+  flex: 1;
+  padding: 2rem;
+  background: #e2e8f0;
+  border-left: 1px solid #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.qr-titulo {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.qr-imagen-wrapper {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.qr-imagen {
+  width: 190px;
+  height: 190px;
+  display: block;
+}
+
+.qr-placeholder {
+  width: 190px;
+  height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.qr-instruccion {
+  font-size: 0.82rem;
+  color: #000000;
+  margin: 0;
+  max-width: 240px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+/* --- Código Alternativo por si no tiene QR --- */
+.codigo-alternativo-card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  display: flex;
+  gap: 0.85rem;
+}
+
+.codigo-icono {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.codigo-textos {
+  flex: 1;
+}
+
+.codigo-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: 0.05em;
+}
+
+.codigo-aclaracion {
+  font-size: 0.78rem;
+  color: #000000;
+  margin: 2px 0 6px;
+}
+
+.codigo-valor-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.codigo-display {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #000000;
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-copiar {
+  background: #2563eb;
+  border: none;
+  color: #ffffff;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-copiar:hover {
+  background: #1d4ed8;
+}
+
+/* --- Footer Ticket --- */
+.ticket-footer {
+  padding: 0.9rem 2rem;
+  background: #e2e8f0;
+  border-top: 1px solid #cbd5e1;
+  text-align: center;
+}
+
+.ticket-footer p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #000000;
+  font-weight: 600;
+}
+
+/* --- Acciones Finales --- */
+.acciones-finales {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  border: none;
+}
+
+.btn-imprimir {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-imprimir:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+}
+
+.btn-perfil {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-perfil:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+}
+
+.btn-volver {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.btn-volver:hover {
+  background: #0369a1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+}
+
+.aviso-edad-ticket {
+  margin: 1rem 0 0;
+  padding: 0.6rem 0.8rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  color: #92400e;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* --- Cancelación de la compra --- */
+.badge-cancelado {
+  color: #b91c1c;
+}
+
+.btn-cancelar {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn-cancelar:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+}
+
+.btn-accion:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.aviso-cancelacion {
+  max-width: 720px;
+  margin: 0 auto 1.25rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.aviso-ok {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.aviso-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.confirmar-cancelacion {
+  max-width: 720px;
+  margin: 0 auto 1.25rem;
+  padding: 1.1rem 1.25rem;
+  background: #ffffff;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.confirmar-cancelacion p {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.confirmar-cancelacion-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+
+/* --- Media Queries --- */
+@media (max-width: 820px) {
+  .ticket-body {
+    flex-direction: column;
+  }
+
+  .ticket-perforacion {
+    width: 100%;
+    height: 0;
+    border-left: none;
+    border-top: 2px dashed #94a3b8;
+    margin: 0;
+  }
+
+  .ticket-qr-col {
+    border-left: none;
+    border-top: 1px solid #cbd5e1;
+  }
+
+  .funcion-datos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Impresión (Print Styles) --- */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  app-navbar,
+  .banner-construccion,
+  .acciones-finales,
+  .aviso-cancelacion,
+  .confirmar-cancelacion,
+  .btn-copiar {
+    display: none !important;
+  }
+
+  .pago-page-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .ticket-card {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    box-shadow: none !important;
+  }
+
+  .ticket-header,
+  .ticket-footer,
+  .ticket-detalles,
+  .ticket-qr-col {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .pelicula-titulo,
+  .dato-valor,
+  .total-pagado,
+  .monto-final {
+    color: #000000 !important;
+  }
+
+  .asiento-pill {
+    background: #e2e8f0 !important;
+    color: #000000 !important;
+    border: 1px solid #000 !important;
+  }
+
+  .codigo-display {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+  }
+}

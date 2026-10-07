@@ -13,6 +13,9 @@ import { MapaSalaComponent } from './componentes/sala/mapa-sala/mapa-sala';
 import { SeleccionCandyComponent } from './componentes/candy/seleccion-candy/seleccion-candy';
 import { AdministrarCuponesComponent } from './componentes/admin/administrar-cupones/administrar-cupones';
 import { PerfilComponent } from './componentes/perfil/perfil';
+import { PagoComponent } from './componentes/pago/pago';
+import { Auditoria } from './componentes/admin/auditoria/auditoria';
+import { ValidarEntrada } from './componentes/empleado/validar-entrada/validar-entrada';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 
@@ -25,6 +28,13 @@ export const routes: Routes = [
   { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },
   { path: 'sala', component: MapaSalaComponent },
   { path: 'candy', component: SeleccionCandyComponent },
+  { path: 'pago', component: PagoComponent },
+  {
+    path: 'empleado/validar',
+    component: ValidarEntrada,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['empleado', 'admin'] },
+  },
   {
     path: 'admin',
     component: Admin,
@@ -43,6 +53,7 @@ export const routes: Routes = [
       { path: 'cupones', component: AdministrarCuponesComponent },
       { path: 'cupones/nuevo', redirectTo: 'cupones', pathMatch: 'full' },
       { path: 'empleados/nuevo', component: RegistrarEmpleado },
+      { path: 'auditoria', component: Auditoria },
     ],
   },
   { path: '**', redirectTo: 'login' },

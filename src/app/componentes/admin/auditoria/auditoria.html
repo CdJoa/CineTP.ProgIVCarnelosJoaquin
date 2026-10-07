@@ -1,0 +1,40 @@
+<div class="auditoria-container">
+  <div class="header-bar">
+    <div>
+      <h2>Auditoría</h2>
+      <p>Log de actividad: funciones creadas, precios modificados y QR validados, con fecha y hora.</p>
+    </div>
+    <button class="btn-primary" [disabled]="cargando()" (click)="cargar()">Actualizar</button>
+  </div>
+
+  @if (cargando()) {
+    <p class="estado-box">Cargando registros...</p>
+  } @else if (error()) {
+    <p class="estado-box estado-error">{{ error() }}</p>
+  } @else if (registros().length === 0) {
+    <p class="estado-box">Todavía no hay actividad registrada.</p>
+  } @else {
+    <div class="tabla-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Usuario</th>
+            <th>Acción</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of registros(); track r.id) {
+            <tr>
+              <td class="celda-fecha">{{ formatearFechaHora(r.creadoEn) }}</td>
+              <td>{{ r.usuarioEmail || '-' }}</td>
+              <td>{{ nombreAccion(r.accion) }}</td>
+              <td>{{ r.detalle }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

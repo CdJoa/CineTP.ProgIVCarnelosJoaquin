@@ -1,0 +1,213 @@
+<div class="pago-page-container">
+  <!-- Spinner de Carga -->
+  <div *ngIf="cargando()" class="loading-state">
+    <div class="spinner"></div>
+    <h2>Generando tu orden y código QR...</h2>
+    <p>Estamos confirmando tus butacas y registrando tu ticket.</p>
+  </div>
+
+  <!-- Mensaje de Error si no hay compra -->
+  <div *ngIf="!cargando() && errorMensaje()" class="error-state">
+    <div class="error-card">
+      <div class="error-icono">⚠️</div>
+      <h2>No se pudo procesar la compra</h2>
+      <p>{{ errorMensaje() }}</p>
+      <div class="error-acciones">
+        <a routerLink="/home" class="btn-primario">Ir a la Cartelera</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Principal de Compra Confirmada con "En Construcción" -->
+  <div *ngIf="!cargando() && compra() as c" class="pago-contenido">
+    <!-- Banner de Pasarela En Construcción -->
+    <div class="banner-construccion">
+      <div class="construccion-icono">🚧</div>
+      <div class="construccion-info">
+        <div class="construccion-titulo-row">
+          <h3>Módulo de Pago en Construcción</h3>
+          <span class="badge-simulacion">MODO DEMO</span>
+        </div>
+        <p>
+          de momento no manejamos pagos reales, es todo fantasía
+
+        </p>
+      </div>
+    </div>
+
+    <!-- Contenedor del Ticket y QR -->
+    <div class="ticket-wrapper">
+      <div class="ticket-card" id="ticket-imprimible">
+        <!-- Encabezado del Ticket -->
+        <header class="ticket-header">
+          <div class="ticket-brand">
+            <span class="brand-cine">🎬 CineTP</span>
+            <span class="ticket-tipo">Ticket de Entrada Oficial</span>
+          </div>
+          <div class="ticket-estado">
+            <span *ngIf="c.estado === 'confirmada'" class="badge-confirmado">✓ COMPRA CONFIRMADA</span>
+            <span *ngIf="c.estado === 'usado'" class="badge-confirmado">✓ ENTRADA USADA</span>
+            <span *ngIf="c.estado === 'cancelada'" class="badge-confirmado badge-cancelado">✕ COMPRA CANCELADA</span>
+          </div>
+        </header>
+
+        <!-- Cuerpo del Ticket Dividido en 2 Columnas -->
+        <div class="ticket-body">
+          <!-- Columna Izquierda: Datos del Espectáculo -->
+          <div class="ticket-detalles">
+            <div class="pelicula-bloque">
+              <span class="eyebrow-pelicula">PELÍCULA SELECCIONADA</span>
+              <h1 class="pelicula-titulo">{{ c.peliculaTitulo }}</h1>
+              <div class="pelicula-tags">
+                <span class="tag-formato">{{ c.formato || '2D' }}</span>
+                <span class="tag-idioma">{{ c.idioma || 'español' }}</span>
+                <span class="tag-sala">🏛️ {{ c.salaNombre }}</span>
+              </div>
+            </div>
+
+            <div class="funcion-datos-grid">
+              <div class="dato-bloque">
+                <span class="dato-label">FECHA Y HORA</span>
+                <strong class="dato-valor">{{ formatearFechaHora(c.funcionInicio) }}</strong>
+              </div>
+
+              <div class="dato-bloque">
+                <span class="dato-label">BUTACAS ASIGNADAS ({{ c.asientos.length }})</span>
+                <div class="asientos-badges">
+                  <span *ngFor="let asiento of c.asientos" class="asiento-pill">{{ asiento }}</span>
+                </div>
+              </div>
+            </div>
+
+            <p *ngIf="(c.restriccionEdad || 0) > 0" class="aviso-edad-ticket">
+              🔞 Película para mayores de {{ c.restriccionEdad }} años. Los menores deben ingresar acompañados por un adulto responsable.
+            </p>
+
+            <!-- Desglose de Candy Bar si compró -->
+            <div *ngIf="c.itemsCandy && c.itemsCandy.length > 0" class="candy-desglose">
+              <span class="dato-label">🍿 SECTOR CANDY BAR VINCULADO</span>
+              <div class="candy-lista">
+                <div *ngFor="let item of c.itemsCandy" class="candy-fila">
+                  <span class="candy-nombre">{{ item.cantidad }}x {{ item.nombre }}</span>
+                  <span class="candy-subtotal">${{ item.subtotal }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Totales y Puntos -->
+            <div class="ticket-totales">
+              <div class="total-fila">
+                <span>Subtotal Entradas:</span>
+                <strong>${{ c.totalEntradas }}</strong>
+              </div>
+              <div *ngIf="c.totalCandy > 0" class="total-fila">
+                <span>Subtotal Candy Bar:</span>
+                <strong>${{ c.totalCandy }}</strong>
+              </div>
+              <div *ngIf="c.descuento > 0" class="total-fila descuento-fila">
+                <span>Cupón de Descuento ({{ c.cuponCodigo || 'PROMO' }}):</span>
+                <strong class="descuento-monto">-${{ c.descuento }}</strong>
+              </div>
+              <div class="total-fila total-pagado">
+                <span>Total Abonado:</span>
+                <strong class="monto-final">${{ c.totalFinal }}</strong>
+              </div>
+              <div *ngIf="c.puntosGanados > 0" class="puntos-sumados">
+                ✨ ¡Sumaste <strong>+{{ c.puntosGanados }} puntos</strong> con esta compra!
+              </div>
+            </div>
+          </div>
+
+          <!-- Separador Estilo Ticket Perforado -->
+          <div class="ticket-perforacion">
+            <div class="muesca muesca-arriba"></div>
+            <div class="linea-puntos"></div>
+            <div class="muesca muesca-abajo"></div>
+          </div>
+
+          <!-- Columna Derecha: QR y Código Alternativo -->
+          <div class="ticket-qr-col">
+            <div class="qr-box">
+              <span class="qr-titulo">Acceso a Sala y Candy</span>
+              <div class="qr-imagen-wrapper">
+                <img *ngIf="c.qrImage && c.estado !== 'cancelada'" [src]="c.qrImage" alt="Código QR de Entrada" class="qr-imagen" />
+                <div *ngIf="c.estado === 'cancelada'" class="qr-placeholder">
+                  <span>Entrada cancelada</span>
+                </div>
+                <div *ngIf="!c.qrImage && c.estado !== 'cancelada'" class="qr-placeholder">
+                  <span>Generando QR...</span>
+                </div>
+              </div>
+              <p class="qr-instruccion">Presentá este código QR en la entrada o mostralo desde tu celular.</p>
+            </div>
+
+            <!-- Código por si no tiene QR -->
+            <div class="codigo-alternativo-card">
+              <div class="codigo-icono">🔢</div>
+              <div class="codigo-textos">
+                <span class="codigo-label">¿NO TENÉS CÓDIGO QR?</span>
+                <p class="codigo-aclaracion">Podés dictar este código en boletería o en el Candy Bar:</p>
+                <div class="codigo-valor-row">
+                  <code class="codigo-display">{{ c.codigo }}</code>
+                  <button type="button" class="btn-copiar" (click)="copiarCodigo()" title="Copiar código de validación">
+                    {{ copiado() ? '✓ Copiado' : '📋 Copiar' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pie del Ticket -->
+        <footer class="ticket-footer">
+          <p>
+            Conserva este comprobante digital. Podrás consultarlo en cualquier momento desde tu perfil.
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Cancelación de la compra -->
+    <p *ngIf="creditoAcreditado() !== null" class="aviso-cancelacion aviso-ok">
+      ✓ Compra cancelada. Se acreditaron ${{ creditoAcreditado() }} como crédito a favor en tu cuenta.
+    </p>
+    <p *ngIf="errorCancelacion()" class="aviso-cancelacion aviso-error">{{ errorCancelacion() }}</p>
+
+    <div *ngIf="confirmandoCancelacion()" class="confirmar-cancelacion">
+      <p>
+        ¿Cancelar esta compra? No se devuelve dinero: los <strong>{{ c.puntosGanados }} puntos</strong> pasan a ser
+        <strong>${{ c.puntosGanados }} de crédito a favor</strong> y tus butacas quedan liberadas.
+      </p>
+      <div class="confirmar-cancelacion-acciones">
+        <button type="button" class="btn-accion btn-perfil" [disabled]="cancelando()" (click)="cerrarCancelacion()">
+          Volver
+        </button>
+        <button type="button" class="btn-accion btn-cancelar" [disabled]="cancelando()" (click)="confirmarCancelacion()">
+          {{ cancelando() ? 'Cancelando...' : 'Sí, cancelar compra' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="acciones-finales">
+      <button
+        *ngIf="c.estado === 'confirmada' && !confirmandoCancelacion()"
+        type="button"
+        class="btn-accion btn-cancelar"
+        title="Disponible hasta 2 horas antes de la función"
+        (click)="pedirCancelacion()"
+      >
+        ✕ Cancelar Compra
+      </button>
+      <button type="button" class="btn-accion btn-imprimir" (click)="imprimirTicket()">
+        🖨️ Imprimir / Guardar Ticket
+      </button>
+      <a routerLink="/perfil" class="btn-accion btn-perfil">
+        👤 Ver en Mi Perfil
+      </a>
+      <a routerLink="/home" class="btn-accion btn-volver">
+        🎬 Volver a la Cartelera
+      </a>
+    </div>
+  </div>
+</div>

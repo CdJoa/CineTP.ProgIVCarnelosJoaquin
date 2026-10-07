@@ -8,6 +8,7 @@ import { Funcion } from '../../../models/funcion';
 import { PeliculasService } from '../../../servicios/peliculas';
 import { FuncionesService } from '../../../servicios/funciones';
 import { AsientosRealtimeService } from '../../../servicios/asientos-realtime';
+import { Auth } from '../../../servicios/auth';
 import { CartaPelicula } from '../carta-pelicula/carta-pelicula';
 
 @Component({
@@ -22,6 +23,7 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   private funcionesService = inject(FuncionesService);
   private asientosRealtimeService = inject(AsientosRealtimeService);
   private router = inject(Router);
+  private authService = inject(Auth);
 
   peliculas = signal<Pelicula[]>([]);
   funciones = signal<Funcion[]>([]);
@@ -30,7 +32,7 @@ export class CarteleraComponent implements OnInit, OnDestroy {
 
   busqueda = signal<string>('');
   generoSeleccionado = signal<string>('todos');
-  filtroTipo = signal<'todas' | 'cartelera' | 'preventa'>('todas');
+  filtroTipo = signal<'cartelera' | 'preventa' | 'todas'>('cartelera');
 
   peliculaSeleccionada = signal<Pelicula | null>(null);
 
@@ -167,7 +169,7 @@ export class CarteleraComponent implements OnInit, OnDestroy {
 
   get topTresVendidas(): Pelicula[] {
     return [...this.peliculas()]
-      .filter((p) => p.activa !== false && p.enCartelera !== false)
+      .filter((p) => p.activa !== false && p.enCartelera !== false && !this.esPeliculaPreventa(p.id))
       .sort((a, b) => (b.boletosVendidos || 0) - (a.boletosVendidos || 0))
       .slice(0, 3);
   }
@@ -175,7 +177,7 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   get peliculasProximamente(): Pelicula[] {
     const hoyStr = this.obtenerFechaLocalKey(new Date());
     return this.peliculas()
-      .filter((p) => p.activa !== false && p.fechaEstreno && p.fechaEstreno > hoyStr)
+      .filter((p) => p.activa !== false && p.fechaEstreno && p.fechaEstreno > hoyStr && !this.esPeliculaPreventa(p.id))
       .sort((a, b) => a.fechaEstreno.localeCompare(b.fechaEstreno));
   }
 
@@ -190,15 +192,16 @@ export class CarteleraComponent implements OnInit, OnDestroy {
 
   get peliculasFiltradas(): Pelicula[] {
     const hoyStr = this.obtenerFechaLocalKey(new Date());
-    let lista = this.peliculas().filter((p) => p.activa !== false && p.enCartelera !== false);
+    let lista = this.peliculas().filter((p) => p.activa !== false);
 
     if (this.filtroTipo() === 'cartelera') {
-      lista = lista.filter((p) => (!p.fechaEstreno || p.fechaEstreno <= hoyStr) && !this.esPeliculaPreventa(p.id));
+      // Si está en preventa, NO está en cartelera
+      lista = lista.filter((p) => p.enCartelera !== false && (!p.fechaEstreno || p.fechaEstreno <= hoyStr) && !this.esPeliculaPreventa(p.id));
     } else if (this.filtroTipo() === 'preventa') {
       lista = lista.filter((p) => this.esPeliculaPreventa(p.id));
     } else {
-      // 'todas' en cartelera principal: estrenadas o que tienen preventa activa
-      lista = lista.filter((p) => (!p.fechaEstreno || p.fechaEstreno <= hoyStr) || this.esPeliculaPreventa(p.id));
+      // 'todas'
+      lista = lista.filter((p) => (p.enCartelera !== false && (!p.fechaEstreno || p.fechaEstreno <= hoyStr) && !this.esPeliculaPreventa(p.id)) || this.esPeliculaPreventa(p.id));
     }
 
     if (this.generoSeleccionado() !== 'todos') {
@@ -292,7 +295,14 @@ export class CarteleraComponent implements OnInit, OnDestroy {
     this.peliculaSeleccionada.set(null);
   }
 
+  bloqueoPorEdad(pelicula: Pelicula): string | null {
+    return this.authService.motivoBloqueoPorEdad(pelicula.restriccionEdad);
+  }
+
   irASala(funcion: Funcion): void {
+    const pelicula = this.peliculaSeleccionada();
+    if (pelicula && this.bloqueoPorEdad(pelicula)) return;
+
     this.router.navigate(['/sala'], { queryParams: { funcionId: funcion.id, salaId: funcion.salaId } });
   }
 

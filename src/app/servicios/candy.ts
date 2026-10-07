@@ -1,12 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CrearCandyDto, ProductoCandy } from '../models/candy';
 import { BaseSupabaseService } from './base-supabase';
+import { AuditoriaService } from './auditoria';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CandyService extends BaseSupabaseService<ProductoCandy> {
   protected readonly nombreTabla = 'productos_candy';
+
+  private auditoriaService = inject(AuditoriaService);
 
   async crearProducto(datos: CrearCandyDto): Promise<ProductoCandy> {
     return this.insertar({
@@ -32,7 +35,16 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
     if (datos.imagen !== undefined) payload['imagen'] = datos.imagen || null;
     if (datos.cantidadVendida !== undefined) payload['cantidad_vendida'] = Number(datos.cantidadVendida);
 
-    return this.actualizarAuto(id, payload);
+    const precioAnterior = datos.precio !== undefined ? (await this.obtenerPorId(id))?.precio : undefined;
+
+    const actualizado = await this.actualizarAuto(id, payload);
+    if (precioAnterior !== undefined && Number(precioAnterior) !== Number(actualizado.precio)) {
+      void this.auditoriaService.registrar(
+        'precio_modificado',
+        `Producto de Candy "${actualizado.nombre}": $${precioAnterior} → $${actualizado.precio}`
+      );
+    }
+    return actualizado;
   }
 
   async incrementarCantidadVendida(id: string, cantidad: number = 1): Promise<void> {

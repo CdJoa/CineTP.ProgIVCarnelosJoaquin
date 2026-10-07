@@ -705,3 +705,189 @@
   padding: 3rem 1rem;
   color: #64748b;
 }
+
+/* --- Sección Cupones de Descuento --- */
+.cupones-seccion {
+  margin: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cupones-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cupones-titulo {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.badge-cupones-count {
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+}
+
+.alerta-cupon {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.alerta-cupon.exito {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.alerta-cupon.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.cupon-anonimo-aviso {
+  font-size: 0.75rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+}
+
+/* Tarjetas de cupones disponibles */
+.cupones-disponibles-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.cupon-tarjeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cupon-tarjeta:hover {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.cupon-tarjeta-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cupon-dto-tag {
+  background: #f59e0b;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.cupon-detalles {
+  display: flex;
+  flex-direction: column;
+}
+
+.cupon-nombre {
+  font-size: 0.8rem;
+  color: #0f172a;
+}
+
+.cupon-desc-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.25;
+}
+
+.cupon-decision-box {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.cupon-checkbox {
+  cursor: pointer;
+  accent-color: #059669;
+  width: 15px;
+  height: 15px;
+}
+
+.cupon-decision-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #334155;
+  transition: color 0.2s ease;
+}
+
+/* Estado cuando el usuario decide tildar / canjear el cupón (Verde esmeralda) */
+.cupon-tarjeta.seleccionado {
+  background: #ecfdf5;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+.cupon-tarjeta.seleccionado .cupon-dto-tag {
+  background: #059669;
+}
+
+.cupon-tarjeta.seleccionado .cupon-decision-box {
+  background: #059669;
+  border-color: #047857;
+}
+
+.cupon-tarjeta.seleccionado .cupon-decision-lbl {
+  color: #ffffff;
+}
+
+/* Desglose de Totales */
+.totales-desglose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.total-linea-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.descuento-linea {
+  color: #059669;
+  font-weight: 600;
+}
+
+.descuento-num {
+  color: #059669;
+  font-size: 0.95rem;
+}

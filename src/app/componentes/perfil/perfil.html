@@ -86,11 +86,95 @@
       <a routerLink="/home" class="link-explorar">Explorar Funciones →</a>
     </div>
 
-    <div class="historial-vacio-card">
+    <!-- Spinner si está cargando -->
+    <div *ngIf="cargandoCompras()" class="cargando-compras-box">
+      <div class="spinner-mini"></div>
+      <p>Cargando tus entradas...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!cargandoCompras() && compras().length === 0" class="historial-vacio-card">
       <div class="icono-vacio">🎟️</div>
       <h3>Todavía no tenés entradas compradas</h3>
       <p>Cuando compres entradas para tus películas favoritas, vas a poder ver acá tus funciones, asientos reservados y código QR de acceso.</p>
       <a routerLink="/home" class="btn-comprar-entradas">Ver Cartelera de Películas</a>
     </div>
+
+    <!-- Grilla de Compras Realizadas -->
+    <p *ngIf="mensajeCancelacion()" class="aviso-cancelacion">✓ {{ mensajeCancelacion() }}</p>
+
+    <div *ngIf="!cargandoCompras() && compras().length > 0" class="compras-grid">
+      <div *ngFor="let c of compras()" class="compra-card" [class.compra-cancelada]="c.estado === 'cancelada'">
+        <div class="compra-card-header">
+          <span class="compra-sala">🏛️ {{ c.salaNombre }}</span>
+          <span *ngIf="c.estado === 'cancelada'" class="badge-cancelada">CANCELADA</span>
+          <span *ngIf="c.estado === 'usado'" class="badge-usada">USADA</span>
+          <span class="compra-codigo">Cod: <strong>{{ c.codigo }}</strong></span>
+        </div>
+
+        <div class="compra-card-body">
+          <div class="compra-poster-box" *ngIf="c.peliculaPoster">
+            <img [src]="c.peliculaPoster" [alt]="c.peliculaTitulo" class="compra-poster-img" />
+          </div>
+          <div class="compra-detalles-col">
+            <h3 class="compra-pelicula-titulo">{{ c.peliculaTitulo }}</h3>
+            <p class="compra-fecha-hora">📅 {{ formatearFechaHora(c.funcionInicio) }}</p>
+            <p class="compra-formato">Format: {{ c.formato || '2D' }} ({{ c.idioma || 'español' }})</p>
+
+            <div class="compra-asientos-row">
+              <span class="compra-asientos-lbl">Butacas:</span>
+              <div class="compra-asientos-tags">
+                <span *ngFor="let a of c.asientos" class="asiento-badge">{{ a }}</span>
+              </div>
+            </div>
+
+            <div *ngIf="c.itemsCandy && c.itemsCandy.length > 0" class="compra-candy-mini">
+              🍿 Candy: {{ c.itemsCandy.length }} producto(s) incluido(s)
+            </div>
+          </div>
+        </div>
+
+        <div class="compra-card-footer">
+          <div class="compra-monto-puntos">
+            <strong class="compra-total">${{ c.totalFinal }}</strong>
+            <span *ngIf="c.puntosGanados > 0 && c.estado !== 'cancelada'" class="compra-puntos">+{{ c.puntosGanados }} pts</span>
+            <span *ngIf="c.estado === 'cancelada'" class="compra-credito">${{ c.puntosGanados }} a crédito</span>
+          </div>
+
+          <div class="compra-acciones" *ngIf="c.estado !== 'cancelada'">
+            <button *ngIf="puedeCancelar(c)" type="button" class="btn-cancelar-compra" (click)="pedirCancelacion(c)">
+              Cancelar
+            </button>
+            <button type="button" class="btn-ver-qr" (click)="verTicketCompleto(c)">
+              🎟️ Ver Ticket / QR
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
+
+  <!-- Confirmación de cancelación -->
+  <div *ngIf="compraACancelar() as cc" class="modal-overlay" (click)="cerrarCancelacion()">
+    <div class="modal-cancelacion" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <h3>¿Cancelar esta compra?</h3>
+      <p>
+        <strong>{{ cc.peliculaTitulo }}</strong> · {{ formatearFechaHora(cc.funcionInicio) }} ·
+        Butacas {{ cc.asientos.join(', ') }}
+      </p>
+      <p>
+        No se devuelve dinero: los <strong>{{ cc.puntosGanados }} puntos</strong> de esta compra pasan a ser
+        <strong>${{ cc.puntosGanados }} de crédito a favor</strong> y tus butacas quedan liberadas.
+      </p>
+      <p *ngIf="errorCancelacion()" class="modal-error">{{ errorCancelacion() }}</p>
+      <div class="modal-acciones">
+        <button type="button" class="btn-cartelera" [disabled]="cancelando()" (click)="cerrarCancelacion()">
+          Volver
+        </button>
+        <button type="button" class="btn-confirmar-cancelacion" [disabled]="cancelando()" (click)="confirmarCancelacion()">
+          {{ cancelando() ? 'Cancelando...' : 'Sí, cancelar compra' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

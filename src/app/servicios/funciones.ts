@@ -3,6 +3,7 @@ import { BaseSupabaseService } from './base-supabase';
 import { CrearFuncionDto, EstadoFuncion, Formato, Idioma, Funcion } from '../models/funcion';
 import { PeliculasService } from './peliculas';
 import { SalaService } from './sala';
+import { AuditoriaService } from './auditoria';
 
 export interface OpcionesGeneracionAutomatica {
   peliculaId: string;
@@ -23,6 +24,18 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
 
   private peliculasService = inject(PeliculasService);
   private salaService = inject(SalaService);
+  private auditoriaService = inject(AuditoriaService);
+
+  private describirFuncion(funcion: Funcion): string {
+    const inicio = new Date(funcion.inicio).toLocaleString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `"${funcion.peliculaTitulo}" en ${funcion.salaNombre} el ${inicio}`;
+  }
 
   /**
    * Calcula la fecha/hora de finalización incluyendo el tiempo de la película
@@ -172,8 +185,12 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
       estado: dto.estado || 'programada',
     };
 
-    const creada = await this.insertar(payload);
-    return this.enriquecerFuncion(creada, duracionPelicula);
+    const creada = await this.enriquecerFuncion(await this.insertar(payload), duracionPelicula);
+    void this.auditoriaService.registrar(
+      'funcion_creada',
+      `Función de ${this.describirFuncion(creada)} (${creada.formato}, ${creada.idioma}) a $${creada.precio}`
+    );
+    return creada;
   }
 
   async actualizarFuncionConValidacion(
@@ -199,8 +216,16 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     if (dto.idioma) payload['idioma'] = dto.idioma;
     if (dto.estado) payload['estado'] = dto.estado;
 
-    const actualizada = await this.actualizar(id, payload);
-    return this.enriquecerFuncion(actualizada, duracionPelicula);
+    const precioAnterior = dto.precio !== undefined ? (await this.obtenerPorId(id))?.precio : undefined;
+
+    const actualizada = await this.enriquecerFuncion(await this.actualizar(id, payload), duracionPelicula);
+    if (precioAnterior !== undefined && precioAnterior !== actualizada.precio) {
+      void this.auditoriaService.registrar(
+        'precio_modificado',
+        `Función de ${this.describirFuncion(actualizada)}: $${precioAnterior} → $${actualizada.precio}`
+      );
+    }
+    return actualizada;
   }
 
   /**
@@ -398,6 +423,11 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     if (error) {
       throw new Error(`Error al insertar funciones automáticas: ${error.message}`);
     }
+
+    void this.auditoriaService.registrar(
+      'funcion_creada',
+      `Generación automática: ${funcionesGeneradasPayload.length} funciones de "${pelicula.titulo}" a $${precioAplicar}`
+    );
 
     return this.obtenerFuncionesCompleta();
   }

@@ -606,3 +606,32 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
 }
+
+/* --- Restricción de edad --- */
+.aviso-edad {
+  margin: 0.5rem 0 0;
+  padding: 0.6rem 0.8rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  color: #92400e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.aviso-edad-bloqueo {
+  margin: 0 0 0.75rem;
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.fn-card-vertical.fn-bloqueada {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fn-bloqueada .btn-comprar-fn {
+  cursor: not-allowed;
+}

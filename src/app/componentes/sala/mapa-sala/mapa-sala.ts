@@ -8,6 +8,7 @@ import { SalaService } from '../../../servicios/sala';
 import { FuncionesService } from '../../../servicios/funciones';
 import { PeliculasService } from '../../../servicios/peliculas';
 import { AsientosRealtimeService, EstadoAsientoFuncion } from '../../../servicios/asientos-realtime';
+import { Auth } from '../../../servicios/auth';
 
 @Component({
   selector: 'app-mapa-sala',
@@ -21,6 +22,7 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
   private funcionesService = inject(FuncionesService);
   private peliculasService = inject(PeliculasService);
   private asientosService = inject(AsientosRealtimeService);
+  private authService = inject(Auth);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -82,6 +84,12 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
       if (!funcion || !funcion.salaId || funcion.estado !== 'programada') {
         throw new Error('La función no está disponible para la compra de entradas.');
       }
+
+      const peliculas = await this.peliculasService.obtenerPeliculas();
+      const pelicula = peliculas.find((item) => item.id === funcion.peliculaId);
+      await this.authService.obtenerUsuario();
+      const bloqueo = this.authService.motivoBloqueoPorEdad(pelicula?.restriccionEdad || 0);
+      if (bloqueo) throw new Error(bloqueo);
 
       this.funcion.set(funcion);
       const sala = await this.salaService.obtenerSalaPorId(funcion.salaId);

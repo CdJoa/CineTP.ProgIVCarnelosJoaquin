@@ -68,25 +68,58 @@ export class CuponesService extends BaseSupabaseService<Cupon> {
   }
 
   /**
-   * Obtiene los cupones asignados a un usuario y evalúa cuáles son aplicables
+   * Obtiene los cupones asignados a un usuario por su ID y evalúa cuáles son aplicables
    * considerando su edad y si es su primera compra.
    */
   async obtenerCuponesDisponiblesUsuario(usuarioId: string, edadUsuario: number, esPrimeraCompra: boolean): Promise<Cupon[]> {
     try {
-      const { data, error } = await this.supabase
+      // 1. Consultar directamente en cupones_usuario por usuario_id no usados
+      const { data: asignaciones, error: errorAsignaciones } = await this.supabase
         .from('cupones_usuario')
-        .select('*, cupon:cupones(*)')
+        .select('*')
         .eq('usuario_id', usuarioId)
         .eq('usado', false);
 
-      if (error || !data) return [];
+      if (errorAsignaciones) {
+        console.warn('Error al consultar cupones_usuario:', errorAsignaciones);
+      }
+
+      const cuponIds = (asignaciones || []).map((a: any) => a['cupon_id']).filter(Boolean);
+
+      // 2. Si no tiene cupones asignados y es primera compra, auto-asignar bienvenida
+      if (cuponIds.length === 0 && esPrimeraCompra) {
+        await this.asignarCuponRegistro(usuarioId);
+        const { data: nuevaAsig } = await this.supabase
+          .from('cupones_usuario')
+          .select('cupon_id')
+          .eq('usuario_id', usuarioId)
+          .eq('usado', false);
+        if (nuevaAsig) {
+          for (const item of nuevaAsig) {
+            if (item['cupon_id']) cuponIds.push(item['cupon_id']);
+          }
+        }
+      }
+
+      if (cuponIds.length === 0) {
+        return [];
+      }
+
+      // 3. Obtener los cupones correspondientes desde la tabla cupones
+      const { data: cuponesData, error: errorCupones } = await this.supabase
+        .from('cupones')
+        .select('*')
+        .in('id', cuponIds)
+        .eq('activo', true);
+
+      if (errorCupones || !cuponesData) {
+        console.warn('Error al obtener datos de cupones:', errorCupones);
+        return [];
+      }
 
       const cupones: Cupon[] = [];
-      for (const item of data) {
-        const cData = item.cupon;
-        if (!cData || !cData.activo) continue;
-
-        const cupon = this.mapear(cData);
+      for (const item of cuponesData) {
+        const cupon = this.mapear(item);
 
         // Validar filtro por edad si requiere edad mínima (ej: 50 años)
         if (cupon.edadMinimaRequerida && edadUsuario < cupon.edadMinimaRequerida) {
@@ -102,8 +135,27 @@ export class CuponesService extends BaseSupabaseService<Cupon> {
       }
 
       return cupones;
-    } catch {
+    } catch (err) {
+      console.warn('Error general obteniendo cupones disponibles:', err);
       return [];
+    }
+  }
+
+  /**
+   * Marca como utilizado un cupón asignado a un usuario
+   */
+  async marcarCuponUsado(usuarioId: string, cuponId: string): Promise<boolean> {
+    try {
+      const { error } = await this.supabase
+        .from('cupones_usuario')
+        .update({ usado: true, usado_en: new Date().toISOString() })
+        .eq('usuario_id', usuarioId)
+        .eq('cupon_id', cuponId);
+
+      return !error;
+    } catch (e) {
+      console.warn('Error marcando cupón como usado:', e);
+      return false;
     }
   }
 

@@ -1,0 +1,73 @@
+<div class="validar-container">
+  <h1>Validar entradas y Candy Bar</h1>
+  <p class="validar-ayuda">Escaneá el QR del ticket o ingresá el código. Al validarla, la compra pasa a <strong>usada</strong>.</p>
+
+  <section class="validar-card">
+    <div class="visor" [hidden]="!escaneando()">
+      <video #video playsinline muted></video>
+    </div>
+
+    @if (escaneando()) {
+      <button type="button" class="btn-secundario" (click)="detenerEscaner()">Detener cámara</button>
+    } @else {
+      <button type="button" class="btn-primario" [disabled]="procesando()" (click)="iniciarEscaner()">
+        📷 Escanear QR
+      </button>
+    }
+
+    <form class="codigo-form" (submit)="$event.preventDefault(); validarManual()">
+      <input
+        type="text"
+        placeholder="CINE-XXXXXX"
+        autocomplete="off"
+        [value]="codigo()"
+        (input)="codigo.set($any($event.target).value)"
+      />
+      <button type="submit" class="btn-primario" [disabled]="procesando() || !codigo().trim()">
+        {{ procesando() ? 'Validando...' : 'Validar código' }}
+      </button>
+    </form>
+
+    @if (error()) {
+      <p class="estado estado-error">{{ error() }}</p>
+    }
+  </section>
+
+  @if (resultado(); as r) {
+    <section class="validar-card">
+      @switch (r.resultado) {
+        @case ('usada') {
+          <p class="estado estado-ok">✓ Compra válida. Quedó marcada como usada.</p>
+        }
+        @case ('ya_usada') {
+          <p class="estado estado-error">✕ Esta compra ya fue usada.</p>
+        }
+        @case ('cancelada') {
+          <p class="estado estado-error">✕ Esta compra fue cancelada.</p>
+        }
+        @case ('inexistente') {
+          <p class="estado estado-error">✕ No existe ninguna compra con ese código.</p>
+        }
+      }
+
+      @if (r.compra; as c) {
+        <dl class="detalle">
+          <div><dt>Código</dt><dd>{{ c.codigo }}</dd></div>
+          <div><dt>Película</dt><dd>{{ c.peliculaTitulo }}</dd></div>
+          <div><dt>Función</dt><dd>{{ formatearFechaHora(c.funcionInicio) }} · {{ c.salaNombre }}</dd></div>
+          <div><dt>Butacas</dt><dd>{{ c.asientos.join(', ') }}</dd></div>
+          <div>
+            <dt>Candy Bar</dt>
+            <dd>
+              @for (item of c.itemsCandy; track item.productoId) {
+                <span class="candy-item">{{ item.cantidad }}x {{ item.nombre }}</span>
+              } @empty {
+                Sin productos
+              }
+            </dd>
+          </div>
+        </dl>
+      }
+    </section>
+  }
+</div>

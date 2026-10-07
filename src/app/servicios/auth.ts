@@ -56,6 +56,21 @@ export class Auth {
     }
   }
 
+  async obtenerUsuario(): Promise<Usuario | null> {
+    const actual = this.usuarioActual();
+    if (actual) return actual;
+
+    try {
+      const { data: { session } } = await this.supabase.auth.getSession();
+      if (session?.user) {
+        return await this.cargarPerfil(session.user);
+      }
+    } catch (e) {
+      console.warn('Error obteniendo usuario en sesión:', e);
+    }
+    return null;
+  }
+
   private cargarPerfil(authUser: User): Promise<Usuario> {
     const existente = this.perfilesEnCarga.get(authUser.id);
     if (existente) return existente;
@@ -268,6 +283,70 @@ export class Auth {
     } catch (err: any) {
       return { exito: false, mensaje: err?.message || 'Error al cerrar sesión.' };
     }
+  }
+
+  async actualizarPuntos(puntosSumar: number): Promise<void> {
+    const usuario = this.usuarioActual();
+    if (!usuario || puntosSumar <= 0) return;
+
+    const nuevosPuntos = (usuario.puntos || 0) + puntosSumar;
+    const usuarioActualizado = { ...usuario, puntos: nuevosPuntos };
+    this.usuarioActual.set(usuarioActualizado);
+
+    try {
+      await this.supabase
+        .from('usuarios')
+        .update({ puntos: nuevosPuntos })
+        .eq('id', usuario.id);
+    } catch (e) {
+      console.warn('Aviso: no se pudo persistir puntos en tabla usuarios:', e);
+    }
+  }
+
+  /**
+   * Edad en años del usuario en sesión, o null si no hay sesión o fecha de nacimiento válida.
+   */
+  edadUsuario(): number | null {
+    const partes = (this.usuarioActual()?.fechaNacimiento || '').split('-').map(Number);
+    if (partes.length !== 3 || partes.some((n) => isNaN(n))) return null;
+
+    const [anio, mes, dia] = partes;
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - anio;
+    if (hoy.getMonth() + 1 < mes || (hoy.getMonth() + 1 === mes && hoy.getDate() < dia)) {
+      edad--;
+    }
+    return edad;
+  }
+
+  /**
+   * Devuelve por qué el usuario en sesión no puede comprar entradas para una
+   * película con esa edad mínima, o null si la compra está permitida.
+   */
+  motivoBloqueoPorEdad(restriccionEdad: number): string | null {
+    const edadMinima = Number(restriccionEdad || 0);
+    if (edadMinima <= 0) return null;
+
+    if (!this.usuarioActual()) {
+      return `Esta película es para mayores de ${edadMinima} años. Iniciá sesión para verificar tu edad y comprar.`;
+    }
+    const edad = this.edadUsuario();
+    if (edad === null) {
+      return `Esta película es para mayores de ${edadMinima} años y tu cuenta no tiene una fecha de nacimiento válida.`;
+    }
+    if (edad < edadMinima) {
+      return `Esta película es para mayores de ${edadMinima} años. No podés comprar entradas porque tenés ${edad}.`;
+    }
+    return null;
+  }
+
+  /**
+   * Refleja en la sesión actual un saldo de puntos y crédito ya persistido en la base.
+   */
+  establecerSaldo(puntos: number, credito: number): void {
+    const usuario = this.usuarioActual();
+    if (!usuario) return;
+    this.usuarioActual.set({ ...usuario, puntos, credito });
   }
 
   private traducirError(msg: string): string {

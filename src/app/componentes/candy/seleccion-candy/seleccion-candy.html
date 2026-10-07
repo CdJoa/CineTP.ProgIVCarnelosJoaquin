@@ -225,15 +225,80 @@
 
         <hr class="carrito-divider" />
 
-        <!-- Total Final -->
-        <div class="total-row">
-          <span>Total a Pagar</span>
-          <strong class="total-monto">${{ totalFinal() }}</strong>
+        <!-- Sección Cupones de Descuento (Asignados al usuario por ID) -->
+        <div class="cupones-seccion">
+          <div class="cupones-header-row">
+            <span class="cupones-titulo">🎟️ Cupones Disponibles</span>
+            <span *ngIf="cuponesDisponibles().length > 0" class="badge-cupones-count">
+              {{ cuponesDisponibles().length }} disponible(s)
+            </span>
+          </div>
+
+          <!-- Spinner cargando cupones -->
+          <div *ngIf="cargandoCupones()" class="cargando-cupones-mini">
+            <span>Buscando tus cupones asignados...</span>
+          </div>
+
+          <!-- Si el usuario no tiene cupones -->
+          <div *ngIf="!cargandoCupones() && cuponesDisponibles().length === 0" class="cupon-vacio-aviso">
+            <span>No tenés cupones de descuento asignados a tu cuenta.</span>
+          </div>
+
+          <!-- Lista de cupones asignados al usuario en la BD -->
+          <div *ngIf="!cargandoCupones() && cuponesDisponibles().length > 0" class="cupones-disponibles-lista">
+            <div
+              *ngFor="let cup of cuponesDisponibles()"
+              class="cupon-tarjeta"
+              [class.seleccionado]="cuponSeleccionado()?.id === cup.id"
+              (click)="toggleCupon(cup)"
+            >
+              <div class="cupon-tarjeta-left">
+                <span class="cupon-dto-tag">{{ cup.porcentajeDescuento }}% OFF</span>
+                <div class="cupon-detalles">
+                  <strong class="cupon-nombre">{{ cup.nombre }}</strong>
+                  <span class="cupon-desc-sub">{{ cup.descripcion }}</span>
+                </div>
+              </div>
+
+              <div class="cupon-decision-box">
+                <input
+                  type="checkbox"
+                  class="cupon-checkbox"
+                  [checked]="cuponSeleccionado()?.id === cup.id"
+                  (click)="$event.stopPropagation(); toggleCupon(cup)"
+                />
+                <span class="cupon-decision-lbl">
+                  {{ cuponSeleccionado()?.id === cup.id ? '✓ Canjeado' : 'Canjear' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="carrito-divider" />
+
+        <!-- Totales con Desglose -->
+        <div class="totales-desglose">
+          <div class="total-linea-item">
+            <span>Subtotal General</span>
+            <strong>${{ subtotalBruto() }}</strong>
+          </div>
+
+          <div *ngIf="descuentoMonto() > 0" class="total-linea-item descuento-linea">
+            <span>Descuento ({{ cuponSeleccionado()?.porcentajeDescuento }}% OFF)</span>
+            <strong class="descuento-num">-${{ descuentoMonto() }}</strong>
+          </div>
+
+          <!-- Total Final -->
+          <div class="total-row">
+            <span>Total a Pagar</span>
+            <strong class="total-monto">${{ totalFinal() }}</strong>
+          </div>
         </div>
 
         <!-- Acciones -->
         <div class="carrito-acciones">
-          <button type="button" class="btn-continuar" (click)="guardarContexto()">
+          <button type="button" class="btn-continuar" (click)="continuarAlPago()">
             Continuar al Pago →
           </button>
           <button type="button" class="btn-omitir" (click)="volverASala()">

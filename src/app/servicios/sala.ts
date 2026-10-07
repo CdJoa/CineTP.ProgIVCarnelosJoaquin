@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { BaseSupabaseService } from './base-supabase';
+import { AuditoriaService } from './auditoria';
 import {
   Asiento,
   CONFIG_PRECIOS_DEFAULT,
@@ -23,6 +24,8 @@ const STORAGE_KEY_PRECIOS = 'cinetp_precios_butacas';
 })
 export class SalaService extends BaseSupabaseService<Sala> {
   protected readonly nombreTabla = 'salas';
+
+  private auditoriaService = inject(AuditoriaService);
 
   public readonly configuracionPrecios = signal<ConfiguracionPreciosButacas>(this.cargarConfiguracionPreciosLocal());
 
@@ -79,6 +82,16 @@ export class SalaService extends BaseSupabaseService<Sala> {
   }
 
   public async guardarConfiguracionPrecios(config: ConfiguracionPreciosButacas): Promise<void> {
+    const anterior = this.configuracionPrecios();
+    const cambios = [
+      ['precio base', `$${anterior.precioBaseReferencia}`, `$${config.precioBaseReferencia}`],
+      ['multiplicador común', `x${anterior.multiplicadorComun}`, `x${config.multiplicadorComun}`],
+      ['multiplicador VIP', `x${anterior.multiplicadorVip}`, `x${config.multiplicadorVip}`],
+      ['multiplicador discapacitado', `x${anterior.multiplicadorDiscapacitado}`, `x${config.multiplicadorDiscapacitado}`],
+    ]
+      .filter(([, antes, despues]) => antes !== despues)
+      .map(([nombre, antes, despues]) => `${nombre} ${antes} → ${despues}`);
+
     this.configuracionPrecios.set({ ...config });
     if (typeof localStorage !== 'undefined') {
       try {
@@ -102,6 +115,8 @@ export class SalaService extends BaseSupabaseService<Sala> {
 
       if (error) {
         console.warn('Aviso al guardar en Supabase (verifique si ejecutó configuracion_cine.sql):', error.message);
+      } else if (cambios.length > 0) {
+        void this.auditoriaService.registrar('precio_modificado', `Tarifas de butacas: ${cambios.join(', ')}`);
       }
     } catch (err) {
       console.warn('Aviso al conectar con Supabase:', err);

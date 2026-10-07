@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Auth } from '../../servicios/auth';
 import { loginValidators } from '../../validators/login';
+import { rutaInicioPorRol } from '../../guards/role-guard';
 
 @Component({
   selector: 'app-login',
@@ -55,12 +56,7 @@ export class Login {
         return;
       }
 
-      const rol = resultado.usuario?.rol;
-      if (rol === 'admin') {
-        this.router.navigate(['/admin']);
-      } else {
-        this.router.navigate(['/home']);
-      }
+      this.router.navigateByUrl(rutaInicioPorRol(resultado.usuario?.rol));
     } else {
       this.mensajeError.set(resultado.mensaje || 'Error al iniciar sesión');
     }

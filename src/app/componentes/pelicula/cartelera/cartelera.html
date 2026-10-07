@@ -32,18 +32,10 @@
       <button
         type="button"
         class="tab-btn"
-        [class.active]="filtroTipo() === 'todas'"
-        (click)="filtroTipo.set('todas')"
-      >
-        Todas
-      </button>
-      <button
-        type="button"
-        class="tab-btn"
         [class.active]="filtroTipo() === 'cartelera'"
         (click)="filtroTipo.set('cartelera')"
       >
-        En Cartelera
+        🎬 En Cartelera
       </button>
       <button
         type="button"
@@ -51,7 +43,15 @@
         [class.active]="filtroTipo() === 'preventa'"
         (click)="filtroTipo.set('preventa')"
       >
-        Preventas
+        ⭐ Preventas
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="filtroTipo() === 'todas'"
+        (click)="filtroTipo.set('todas')"
+      >
+        Todas
       </button>
     </div>
   </div>
@@ -145,7 +145,7 @@
           <div class="detail-meta">
             <span>⏱️ {{ p.duracion }} min</span>
             <span>📅 Estreno: {{ p.fechaEstreno }}</span>
-            <span class="badge-edad">+{{ p.restriccionEdad }}</span>
+            <span class="badge-edad">{{ p.restriccionEdad > 0 ? '+' + p.restriccionEdad : 'ATP' }}</span>
             <span>🎟️ {{ p.boletosVendidos || 0 }} boletos vendidos</span>
           </div>
 
@@ -154,6 +154,10 @@
           </div>
 
           <p class="detail-sinopsis">{{ p.sinopsis || 'Sin descripción disponible.' }}</p>
+
+          <p *ngIf="p.restriccionEdad > 0" class="aviso-edad">
+            🔞 Venta solo a mayores de {{ p.restriccionEdad }} años. Si llevás menores, deben ir acompañados por un adulto responsable.
+          </p>
         </div>
       </div>
     </div>
@@ -220,6 +224,8 @@
 
       <!-- Lista de Funciones Filtradas -->
       <div class="sidebar-body">
+        <p *ngIf="bloqueoPorEdad(p) as motivo" class="aviso-edad aviso-edad-bloqueo">{{ motivo }}</p>
+
         <div *ngIf="cargandoFunciones()" class="loading-sidebar">
           <div class="mini-spinner"></div>
           <span>Buscando funciones...</span>
@@ -234,6 +240,7 @@
           <div
             *ngFor="let fn of funcionesDePeliculaFiltradas"
             class="fn-card-vertical"
+            [class.fn-bloqueada]="bloqueoPorEdad(p)"
             (click)="irASala(fn)"
           >
             <div class="fn-card-top">
@@ -252,7 +259,7 @@
 
             <div class="fn-card-bot">
               <span class="fn-precio-txt">${{ fn.precio }}</span>
-              <button type="button" class="btn-comprar-fn" (click)="$event.stopPropagation(); irASala(fn)">
+              <button type="button" class="btn-comprar-fn" [disabled]="!!bloqueoPorEdad(p)" (click)="$event.stopPropagation(); irASala(fn)">
                 {{ fn.esPreventa ? '⭐ Compra Anticipada' : '🎟️ Comprar' }}
               </button>
             </div>
