@@ -1,105 +1,61 @@
 .mapa-sala-wrapper {
   background: #ffffff;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 1.25rem;
   color: #212121;
   font-family: system-ui, -apple-system, sans-serif;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.04);
+}
+
+.mapa-sala-wrapper.modo-compra-layout {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 1720px;
+  margin: 0 auto;
 }
 
 .compra-cargando,
 .compra-alerta {
   max-width: 960px;
   margin: 1rem auto;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 10px;
-  font: 500 0.95rem/1.45 system-ui, sans-serif;
+  font: 500 0.9rem/1.45 system-ui, sans-serif;
 }
 
 .compra-alerta.error {
   color: #991b1b;
   background: #fee2e2;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .compra-alerta.exito {
-  margin: 0.75rem 0 0;
   color: #166534;
   background: #dcfce7;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.compra-resumen {
-  max-width: 960px;
-  margin: 0 auto 1.5rem;
-  padding: 1.25rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #f8fafc;
-}
-
-.compra-resumen h1 {
-  margin: 0.25rem 0;
-  color: #111827;
-  font-size: 1.5rem;
-}
-
-.compra-resumen p { margin: 0.35rem 0; }
-.compra-resumen .eyebrow { color: #64748b; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; }
-.funcion-detalle, .compra-ayuda { color: #475569; }
-.precio-unitario { color: #334155; }
-
-.volver-cartelera {
-  float: right;
-  border: 0;
-  color: #334155;
-  background: transparent;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.checkout-footer {
-  max-width: 960px;
-  margin: 1.75rem auto 0;
-  padding: 1.25rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #f8fafc;
-}
-
-.checkout-total {
+/* Columna Izquierda: Mapa de Sala */
+.sala-mapa-area {
+  flex: 1;
+  min-width: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  color: #334155;
+  overflow-x: auto;
 }
-
-.checkout-total strong { color: #111827; font-size: 1.5rem; }
-
-.btn-comprar-grande {
-  width: 100%;
-  min-height: 64px;
-  border: 0;
-  border-radius: 12px;
-  color: #fff;
-  background: #e94560;
-  box-shadow: 0 8px 18px rgba(233, 69, 96, 0.22);
-  font-size: 1.25rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 120ms ease, background-color 120ms ease, opacity 120ms ease;
-}
-
-.btn-comprar-grande:not(:disabled):hover { background: #d73550; transform: translateY(-1px); }
-.btn-comprar-grande:disabled { cursor: not-allowed; opacity: 0.48; box-shadow: none; }
 
 .header-titulos {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   text-align: center;
 }
 
 .titulo-pantalla {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 800;
   margin: 0;
   color: #111827;
@@ -107,27 +63,40 @@
 
 /* Pantalla Curved Arc */
 .pantalla-container {
-  margin: 0.75rem 0 1.5rem 0;
+  margin: 0.25rem 0 1.25rem 0;
   text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .pantalla-arco {
-  width: 80%;
-  height: 22px;
+  width: 90%;
+  height: 24px;
   margin: 0 auto;
   border-top: 12px solid #94a3b8;
   border-radius: 50% 50% 0 0;
   box-shadow: 0 -3px 10px rgba(148, 163, 184, 0.4);
 }
 
+.pantalla-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.2em;
+  margin-top: 5px;
+}
+
 /* Leyenda */
 .leyenda-bar {
   display: flex;
   justify-content: center;
-  gap: 1.25rem;
+  gap: 1.5rem;
   margin-bottom: 1.25rem;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #4b5563;
+  flex-wrap: wrap;
 }
 
 .leyenda-item {
@@ -137,43 +106,69 @@
 }
 
 .seat-badge {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px 4px 2px 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   color: #fff;
 }
 
-.seat-badge.disponible-comun { background: #388e3c; }
-.seat-badge.disponible-disc { background: #1976d2; }
-.seat-badge.disponible-vip { background: #f57c00; }
-.seat-badge.estado-elegido { background: #7c3aed; }
-.seat-badge.estado-bloqueado { background: #64748b; }
+.seat-badge.disponible-comun {
+  background: #388e3c;
+}
+
+.seat-badge.disponible-disc {
+  background: #1976d2;
+}
+
+.seat-badge.disponible-vip {
+  background: #f57c00;
+}
+
+.leyenda-precio-chip {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  margin-left: 0.2rem;
+}
+
+.seat-badge.estado-elegido {
+  background: #7c3aed;
+}
+
+.seat-badge.estado-bloqueado {
+  background: #64748b;
+}
 
 /* Grid de Asientos */
 .grid-asientos {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 4px;
   align-items: center;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding: 0.25rem 0 1rem;
+  max-width: 100%;
 }
 
 .fila-linea {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 4px;
 }
 
 .row-label {
   font-weight: 800;
-  font-size: 0.75rem;
-  color: #334155;
-  width: 22px;
+  font-size: 0.88rem;
+  color: #64748b;
+  width: 26px;
   text-align: center;
   user-select: none;
   display: inline-block;
@@ -181,19 +176,19 @@
 
 .bloque {
   display: flex;
-  gap: 0.2rem;
+  gap: 4px;
 }
 
 .pasillo {
-  width: 14px;
+  width: 22px;
 }
 
-/* Butacas estilo imagen de referencia */
+/* Butacas agrandadas y legibles */
 .asiento-box {
-  width: 24px;
-  height: 24px;
-  border-radius: 5px 5px 2px 2px;
-  font-size: 0.6rem;
+  width: 36px;
+  height: 32px;
+  border-radius: 6px 6px 3px 3px;
+  font-size: 0.74rem;
   font-weight: 700;
   color: #ffffff;
   display: flex;
@@ -203,11 +198,19 @@
   user-select: none;
   border: 0;
   cursor: pointer;
+  letter-spacing: -0.3px;
   transition: transform 120ms ease, filter 120ms ease;
 }
 
-.asiento-box:disabled { cursor: default; }
-.asiento-box:not(:disabled):hover { transform: translateY(-2px); filter: brightness(1.1); }
+.asiento-box:disabled {
+  cursor: default;
+}
+
+.asiento-box:not(:disabled):hover {
+  transform: scale(1.18);
+  filter: brightness(1.1);
+  z-index: 5;
+}
 
 .asiento-box.comun {
   background-color: #388e3c;
@@ -221,17 +224,239 @@
   background-color: #f57c00;
 }
 
-.asiento-box.seleccionado { background-color: #7c3aed; box-shadow: 0 0 0 2px #ddd6fe; }
-.asiento-box.ocupado, .asiento-box.vendido { background-color: #64748b; color: #e2e8f0; }
-.asiento-box.vendido::after { content: '×'; font-size: 1rem; }
+.asiento-box.seleccionado {
+  background-color: #7c3aed;
+  box-shadow: 0 0 0 2px #ddd6fe;
+}
 
-@media (max-width: 600px) {
-  .mapa-sala-wrapper { padding: 0.75rem; overflow-x: auto; }
-  .checkout-footer { padding: 1rem; }
-  .checkout-total { align-items: flex-start; flex-direction: column; gap: 0.3rem; }
-  .leyenda-bar { flex-wrap: wrap; }
+.asiento-box.ocupado,
+.asiento-box.vendido {
+  background-color: #64748b;
+  color: #e2e8f0;
+}
+
+.asiento-box.vendido::after {
+  content: '×';
+  font-size: 1.1rem;
 }
 
 .icon-disc {
-  font-size: 0.65rem;
+  font-size: 0.85rem;
+}
+
+/* Columna Derecha: Sidebar de Compra */
+.sala-sidebar-compra {
+  width: 330px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 1.5rem;
+}
+
+.sidebar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.btn-volver-cartelera {
+  background: transparent;
+  border: 0;
+  color: #475569;
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.btn-volver-cartelera:hover {
+  color: #0f172a;
+}
+
+.sidebar-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.08em;
+}
+
+.pelicula-info-card {
+  margin-bottom: 0.5rem;
+}
+
+.pelicula-titulo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.25rem;
+  line-height: 1.25;
+}
+
+.funcion-detalle-linea {
+  font-size: 0.825rem;
+  color: #64748b;
+  margin: 0 0 0.5rem;
+}
+
+.chips-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.chip-item {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.sidebar-sep {
+  border: 0;
+  border-top: 1px solid #f1f5f9;
+  margin: 0.85rem 0;
+}
+
+.seccion-asientos-elegidos {
+  margin-bottom: 0.5rem;
+}
+
+.asientos-header-linea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.asientos-titulo-lbl {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.asientos-contador-tag {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+}
+
+.sin-seleccion-aviso {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 0.35rem 0;
+}
+
+.asientos-elegidos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.asiento-elegido-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.8rem;
+}
+
+.asiento-item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.asiento-id-txt {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.asiento-tipo-txt {
+  font-size: 0.7rem;
+  color: #64748b;
+  text-transform: capitalize;
+}
+
+.asiento-precio-txt {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.sidebar-totales-area {
+  margin-bottom: 0.85rem;
+}
+
+.totales-linea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.totales-valor {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.retencion-timer {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+.btn-continuar-flujo {
+  width: 100%;
+  padding: 0.85rem;
+  border: 0;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-continuar-flujo:hover:not(:disabled) {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+.btn-continuar-flujo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 960px) {
+  .mapa-sala-wrapper.modo-compra-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sala-sidebar-compra {
+    width: 100%;
+    position: static;
+  }
 }

@@ -46,6 +46,17 @@ export const registroValidators = {
     Validators.required,
     fechaNacimientoValidator,
   ],
+  tipoSangre: [
+    Validators.required,
+  ],
+  colorOjos: [
+    Validators.required,
+  ],
+  diasVacaciones: [
+    Validators.required,
+    Validators.min(0),
+    Validators.pattern(/^[0-9]+$/),
+  ],
   password: [
     Validators.required,
     Validators.minLength(6),

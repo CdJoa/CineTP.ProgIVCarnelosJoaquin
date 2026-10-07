@@ -98,6 +98,14 @@ export class Auth {
       nombre: datos['nombre'] || '',
       apellido: datos['apellido'] || '',
       fechaNacimiento: datos['fecha_nacimiento'] || datos['fechaNacimiento'] || '',
+      tipoSangre: datos['tipo_sangre'] || datos['tipoSangre'] || '',
+      colorOjos: datos['color_ojos'] || datos['colorOjos'] || '',
+      diasVacaciones:
+        datos['dias_vacaciones'] !== undefined && datos['dias_vacaciones'] !== null
+          ? Number(datos['dias_vacaciones'])
+          : datos['diasVacaciones'] !== undefined && datos['diasVacaciones'] !== null
+          ? Number(datos['diasVacaciones'])
+          : undefined,
       rol: datos['rol'] || 'cliente',
       puntos: datos['puntos'] ?? 0,
       credito: datos['credito'] ?? 0,
@@ -147,7 +155,7 @@ export class Auth {
         sesionPrevia = session;
       }
 
-      const metadata = {
+      const metadata: Record<string, any> = {
         nombre: datos.nombre.trim(),
         apellido: datos.apellido.trim(),
         fechaNacimiento: datos.fechaNacimiento,
@@ -155,6 +163,19 @@ export class Auth {
         puntos: 0,
         credito: 0,
       };
+
+      if (datos.tipoSangre) {
+        metadata['tipo_sangre'] = datos.tipoSangre;
+        metadata['tipoSangre'] = datos.tipoSangre;
+      }
+      if (datos.colorOjos) {
+        metadata['color_ojos'] = datos.colorOjos;
+        metadata['colorOjos'] = datos.colorOjos;
+      }
+      if (datos.diasVacaciones !== undefined && datos.diasVacaciones !== null) {
+        metadata['dias_vacaciones'] = Number(datos.diasVacaciones);
+        metadata['diasVacaciones'] = Number(datos.diasVacaciones);
+      }
 
       const { data, error } = await this.supabase.auth.signUp({
         email: datos.email.trim(),
@@ -177,7 +198,7 @@ export class Auth {
       });
 
       try {
-        await this.supabase.from('usuarios').insert([{
+        const payloadUsuario: Record<string, any> = {
           id: nuevoUsuario.id,
           email: nuevoUsuario.email,
           nombre: nuevoUsuario.nombre,
@@ -186,7 +207,32 @@ export class Auth {
           rol: nuevoUsuario.rol,
           puntos: nuevoUsuario.puntos,
           credito: nuevoUsuario.credito,
-        }]);
+        };
+
+        if (nuevoUsuario.tipoSangre) {
+          payloadUsuario['tipo_sangre'] = nuevoUsuario.tipoSangre;
+        }
+        if (nuevoUsuario.colorOjos) {
+          payloadUsuario['color_ojos'] = nuevoUsuario.colorOjos;
+        }
+        if (nuevoUsuario.diasVacaciones !== undefined && nuevoUsuario.diasVacaciones !== null) {
+          payloadUsuario['dias_vacaciones'] = nuevoUsuario.diasVacaciones;
+        }
+
+        const { error: insertError } = await this.supabase.from('usuarios').insert([payloadUsuario]);
+        if (insertError) {
+          console.warn('Inserción extendida falló en usuarios, reintentando inserción básica:', insertError);
+          await this.supabase.from('usuarios').insert([{
+            id: nuevoUsuario.id,
+            email: nuevoUsuario.email,
+            nombre: nuevoUsuario.nombre,
+            apellido: nuevoUsuario.apellido,
+            fecha_nacimiento: nuevoUsuario.fechaNacimiento,
+            rol: nuevoUsuario.rol,
+            puntos: nuevoUsuario.puntos,
+            credito: nuevoUsuario.credito,
+          }]);
+        }
 
         // Asignar cupón de registro si es cliente
         if (rol === 'cliente') {

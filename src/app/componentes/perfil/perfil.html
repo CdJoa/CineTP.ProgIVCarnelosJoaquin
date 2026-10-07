@@ -1,0 +1,96 @@
+<div class="perfil-container" *ngIf="usuario as u">
+  <!-- Cabecera de Perfil -->
+  <header class="perfil-header">
+    <div class="perfil-avatar">
+      <span>{{ u.nombre.charAt(0) | uppercase }}{{ u.apellido.charAt(0) | uppercase }}</span>
+    </div>
+    <div class="perfil-titular">
+      <div class="perfil-nombre-row">
+        <h1>{{ u.nombre }} {{ u.apellido }}</h1>
+        <span class="rol-badge">{{ u.rol | uppercase }}</span>
+      </div>
+      <p class="perfil-email">{{ u.email }}</p>
+    </div>
+    <div class="perfil-header-acciones">
+      <a routerLink="/home" class="btn-cartelera">← Cartelera</a>
+      <button type="button" (click)="cerrarSesion()" class="btn-salir">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <!-- Métricas Rápidas: Puntos y Créditos -->
+  <section class="metricas-grid">
+    <div class="metrica-card puntos">
+      <div class="metrica-icon">✨</div>
+      <div class="metrica-content">
+        <span class="metrica-lbl">Puntos Acumulados</span>
+        <strong class="metrica-valor">{{ u.puntos || 0 }} pts</strong>
+        <p class="metrica-desc">Sumás puntos con cada compra en funciones y Candy Bar</p>
+      </div>
+    </div>
+
+    <div class="metrica-card credito">
+      <div class="metrica-icon">💳</div>
+      <div class="metrica-content">
+        <span class="metrica-lbl">Crédito a Favor</span>
+        <strong class="metrica-valor">${{ u.credito || 0 }}</strong>
+        <p class="metrica-desc">Saldo disponible para canjear en tus próximas entradas</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Datos de la Cuenta -->
+  <section class="perfil-seccion">
+    <h2 class="seccion-titulo">Datos de tu Cuenta</h2>
+    <div class="datos-grid">
+      <div class="dato-item">
+        <span class="dato-lbl">Nombre</span>
+        <strong class="dato-val">{{ u.nombre }}</strong>
+      </div>
+
+      <div class="dato-item">
+        <span class="dato-lbl">Apellido</span>
+        <strong class="dato-val">{{ u.apellido }}</strong>
+      </div>
+
+      <div class="dato-item">
+        <span class="dato-lbl">Correo Electrónico</span>
+        <strong class="dato-val">{{ u.email }}</strong>
+      </div>
+
+      <div class="dato-item">
+        <span class="dato-lbl">Fecha de Nacimiento</span>
+        <strong class="dato-val">{{ formatearFecha(u.fechaNacimiento) }}</strong>
+      </div>
+
+      <div class="dato-item">
+        <span class="dato-lbl">Tipo de Sangre</span>
+        <strong class="dato-val">{{ u.tipoSangre || 'No especificado' }}</strong>
+      </div>
+
+      <div class="dato-item">
+        <span class="dato-lbl">Color de Ojos</span>
+        <strong class="dato-val">{{ u.colorOjos || 'No especificado' }}</strong>
+      </div>
+
+      <div class="dato-item">
+        <span class="dato-lbl">Días de Vacaciones / Año</span>
+        <strong class="dato-val">{{ u.diasVacaciones ?? 0 }} días</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- Historial de Películas / Compras -->
+  <section class="perfil-seccion">
+    <div class="seccion-header-row">
+      <h2 class="seccion-titulo">Mis Películas y Entradas</h2>
+      <a routerLink="/home" class="link-explorar">Explorar Funciones →</a>
+    </div>
+
+    <div class="historial-vacio-card">
+      <div class="icono-vacio">🎟️</div>
+      <h3>Todavía no tenés entradas compradas</h3>
+      <p>Cuando compres entradas para tus películas favoritas, vas a poder ver acá tus funciones, asientos reservados y código QR de acceso.</p>
+      <a routerLink="/home" class="btn-comprar-entradas">Ver Cartelera de Películas</a>
+    </div>
+  </section>
+</div>

@@ -96,6 +96,7 @@
             <p><strong>Descripción:</strong> {{ sel.descripcion }}</p>
             <p><strong>Precio:</strong> ${{ sel.precio }}</p>
             <p><strong>Puntos por compra:</strong> {{ sel.puntajeCompra }} pts</p>
+            <p><strong>Unidades vendidas:</strong> {{ sel.cantidadVendida || 0 }}</p>
             <p><strong>Estado:</strong> {{ sel.activo ? 'Activo' : 'Inactivo' }}</p>
           </div>
         </div>

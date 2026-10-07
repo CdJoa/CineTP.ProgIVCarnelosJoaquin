@@ -69,7 +69,9 @@ export class SupabaseStorageService {
       const url = await this.subirImagen(archivo, bucket);
       formGroup.patchValue({ [controlName]: url });
     } catch (error) {
-      console.warn('Aviso: Supabase Storage no guardó la imagen remota, se mantiene DataURL local:', error);
+      formGroup.patchValue({ [controlName]: '' });
+      console.error('Error al subir imagen a Supabase Storage:', error);
+      throw error;
     } finally {
       if (subiendoSignal) {
         subiendoSignal.set(false);

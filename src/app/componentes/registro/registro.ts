@@ -23,6 +23,9 @@ export class Registro {
       apellido: ['', registroValidators.apellido],
       email: ['', registroValidators.email],
       fechaNacimiento: ['', registroValidators.fechaNacimiento],
+      tipoSangre: ['', registroValidators.tipoSangre],
+      colorOjos: ['', registroValidators.colorOjos],
+      diasVacaciones: ['', registroValidators.diasVacaciones],
       password: ['', registroValidators.password],
       confirmPassword: ['', registroValidators.confirmPassword],
     },
@@ -44,6 +47,18 @@ export class Registro {
 
   get fechaNacimiento() {
     return this.registroForm.get('fechaNacimiento');
+  }
+
+  get tipoSangre() {
+    return this.registroForm.get('tipoSangre');
+  }
+
+  get colorOjos() {
+    return this.registroForm.get('colorOjos');
+  }
+
+  get diasVacaciones() {
+    return this.registroForm.get('diasVacaciones');
   }
 
   get password() {
@@ -68,13 +83,25 @@ export class Registro {
     this.mensajeError.set(null);
     this.mensajeExito.set(null);
 
-    const { nombre, apellido, email, fechaNacimiento, password } = this.registroForm.value;
+    const {
+      nombre,
+      apellido,
+      email,
+      fechaNacimiento,
+      tipoSangre,
+      colorOjos,
+      diasVacaciones,
+      password,
+    } = this.registroForm.value;
 
     const resultado = await this.authService.registro({
       nombre,
       apellido,
       email,
       fechaNacimiento,
+      tipoSangre,
+      colorOjos,
+      diasVacaciones: Number(diasVacaciones),
       password,
     });
 

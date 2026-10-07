@@ -1,4 +1,4 @@
-export type CategoriaCandy = 'pochoclo' | 'bebida' | 'snacks' | 'comida';
+export type CategoriaCandy = 'pochoclo' | 'bebida' | 'snacks' | 'comida' | 'combo';
 
 export interface ProductoCandy {
   id: string;
@@ -8,6 +8,7 @@ export interface ProductoCandy {
   precio: number;
   imagen?: string;       // URL de Supabase Storage
   puntajeCompra: number; // Puntos que otorga la compra
+  cantidadVendida: number; // Cantidad de unidades vendidas
   activo: boolean;
   creadoEn?: string;
 }
@@ -19,4 +20,5 @@ export interface CrearCandyDto {
   precio: number;
   imagen?: string;
   puntajeCompra: number;
+  cantidadVendida?: number;
 }

@@ -9,6 +9,7 @@ export interface OpcionesGeneracionAutomatica {
   fechaInicio: string; // YYYY-MM-DD
   fechaFin: string;    // YYYY-MM-DD
   turnos: ('mañana' | 'tarde' | 'noche')[];
+  diasSemana?: number[]; // [0 = Domingo, 1 = Lunes, ..., 6 = Sábado]
   prioridad: 'alta' | 'media' | 'baja';
   precio: number;
   esPreventa?: boolean;
@@ -281,6 +282,12 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     }
 
     while (inicioLoop <= finLoop) {
+      const diaSemana = inicioLoop.getDay();
+      if (opciones.diasSemana && opciones.diasSemana.length > 0 && !opciones.diasSemana.includes(diaSemana)) {
+        inicioLoop.setDate(inicioLoop.getDate() + 1);
+        continue;
+      }
+
       const fechaStr = `${inicioLoop.getFullYear()}-${pad(inicioLoop.getMonth() + 1)}-${pad(inicioLoop.getDate())}`;
 
       for (const turno of opciones.turnos) {

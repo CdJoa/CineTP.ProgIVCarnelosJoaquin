@@ -74,6 +74,7 @@ export class AdministrarCandy extends AdministrarBase<ProductoCandy> {
       categoria: producto.categoria,
       precio: producto.precio,
       puntajeCompra: producto.puntajeCompra,
+      cantidadVendida: producto.cantidadVendida || 0,
       imagen: producto.imagen || '',
       activo: producto.activo,
     };
@@ -83,9 +84,10 @@ export class AdministrarCandy extends AdministrarBase<ProductoCandy> {
     this.editForm.patchValue({
       nombre: '',
       descripcion: '',
-      categoria: 'combos',
+      categoria: 'combo',
       precio: 0,
       puntajeCompra: 0,
+      cantidadVendida: 0,
       imagen: '',
       activo: true,
     });

@@ -95,6 +95,27 @@ export class AsientosRealtimeService {
       .subscribe();
   }
 
+  suscribirBoletosVendidos(alVender: (funcionId: string) => void): RealtimeChannel {
+    return this.auth.clienteSupabase
+      .channel('cartelera-asientos-vendidos-global')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'asientos_funcion',
+          filter: 'estado=eq.vendido',
+        },
+        (payload) => {
+          const row = payload.new as Record<string, any> | undefined;
+          if (row?.['funcion_id']) {
+            alVender(row['funcion_id']);
+          }
+        }
+      )
+      .subscribe();
+  }
+
   async desuscribir(channel: RealtimeChannel): Promise<void> {
     await this.auth.clienteSupabase.removeChannel(channel);
   }

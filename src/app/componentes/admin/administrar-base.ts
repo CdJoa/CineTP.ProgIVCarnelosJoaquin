@@ -82,12 +82,19 @@ export abstract class AdministrarBase<T extends { id: string }> implements OnIni
   }
 
   async subirImagenControl(event: Event, controlName: string): Promise<void> {
-    return this.storageService.procesarInputImagen(
-      event,
-      this.editForm,
-      controlName,
-      this.subiendoImagen
-    );
+    this.mensajeError.set(null);
+    try {
+      await this.storageService.procesarInputImagen(
+        event,
+        this.editForm,
+        controlName,
+        this.subiendoImagen
+      );
+    } catch (err) {
+      this.mensajeError.set(
+        err instanceof Error ? `Error al subir la imagen: ${err.message}` : 'Error al subir la imagen a Supabase Storage.'
+      );
+    }
   }
 
   protected esValidoFormulario(): boolean {
@@ -104,6 +111,17 @@ export abstract class AdministrarBase<T extends { id: string }> implements OnIni
 
     if (!this.esValidoFormulario()) {
       this.editForm.markAllAsTouched();
+      return;
+    }
+
+    const payload = this.obtenerPayload();
+    const poster = payload?.['poster'];
+    const imagen = payload?.['imagen'];
+    if (
+      (typeof poster === 'string' && poster.startsWith('data:image')) ||
+      (typeof imagen === 'string' && imagen.startsWith('data:image'))
+    ) {
+      this.mensajeError.set('La imagen todavía se está subiendo o falló la subida a Supabase Storage.');
       return;
     }
 

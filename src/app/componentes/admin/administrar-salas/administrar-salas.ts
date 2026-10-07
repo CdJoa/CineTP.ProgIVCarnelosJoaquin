@@ -1,8 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SalaService } from '../../../servicios/sala';
-import { Sala } from '../../../models/sala';
+import { ConfiguracionPreciosButacas, Sala, TipoFila } from '../../../models/sala';
 import { AdministrarBase } from '../administrar-base';
 import { crearFormularioSala, generarPreviewSala } from '../../../validators/sala';
 import { MapaSalaComponent } from '../../sala/mapa-sala/mapa-sala';
@@ -14,8 +14,8 @@ import { MapaSalaComponent } from '../../sala/mapa-sala/mapa-sala';
   templateUrl: './administrar-salas.html',
   styleUrl: './administrar-salas.css',
 })
-export class AdministrarSalas extends AdministrarBase<Sala> {
-  private salaService = inject(SalaService);
+export class AdministrarSalas extends AdministrarBase<Sala> implements OnInit {
+  public salaService = inject(SalaService);
 
   salas = this.items;
   salaSeleccionada = this.itemSeleccionado;
@@ -23,6 +23,77 @@ export class AdministrarSalas extends AdministrarBase<Sala> {
   busqueda = signal<string>('');
 
   editForm: FormGroup = crearFormularioSala(this.fb);
+
+  formTarifas: FormGroup = this.fb.group({
+    multiplicadorComun: [1, [Validators.required, Validators.min(0.1)]],
+    multiplicadorVip: [1.5, [Validators.required, Validators.min(0.1)]],
+    multiplicadorDiscapacitado: [1, [Validators.required, Validators.min(0.1)]],
+    precioBaseReferencia: [5000, [Validators.required, Validators.min(100)]],
+  });
+
+  guardandoTarifas = signal(false);
+  mensajeExitoTarifas = signal('');
+  mensajeErrorTarifas = signal('');
+
+  override async ngOnInit(): Promise<void> {
+    await super.ngOnInit();
+    const config = await this.salaService.sincronizarConfiguracionDesdeSupabase();
+    this.formTarifas.patchValue({
+      multiplicadorComun: config.multiplicadorComun,
+      multiplicadorVip: config.multiplicadorVip,
+      multiplicadorDiscapacitado: config.multiplicadorDiscapacitado,
+      precioBaseReferencia: config.precioBaseReferencia,
+    });
+  }
+
+  async guardarTarifas(): Promise<void> {
+    if (this.formTarifas.invalid) {
+      this.mensajeErrorTarifas.set('Por favor ingrese valores numéricos válidos para las tarifas.');
+      return;
+    }
+    const val = this.formTarifas.value;
+    const config: ConfiguracionPreciosButacas = {
+      multiplicadorComun: Number(val.multiplicadorComun),
+      multiplicadorVip: Number(val.multiplicadorVip),
+      multiplicadorDiscapacitado: Number(val.multiplicadorDiscapacitado),
+      precioBaseReferencia: Number(val.precioBaseReferencia),
+    };
+    this.guardandoTarifas.set(true);
+    try {
+      await this.salaService.guardarConfiguracionPrecios(config);
+      this.mensajeExitoTarifas.set('Tarifas de butacas actualizadas y guardadas con éxito.');
+      this.mensajeErrorTarifas.set('');
+      void this.cargarItems();
+      setTimeout(() => this.mensajeExitoTarifas.set(''), 4000);
+    } catch {
+      this.mensajeErrorTarifas.set('Ocurrió un error al guardar las tarifas.');
+    } finally {
+      this.guardandoTarifas.set(false);
+    }
+  }
+
+  restablecerTarifasDefault(): void {
+    this.formTarifas.patchValue({
+      multiplicadorComun: 1,
+      multiplicadorVip: 1.5,
+      multiplicadorDiscapacitado: 1,
+      precioBaseReferencia: 5000,
+    });
+    this.guardarTarifas();
+  }
+
+  calcularEjemplo(tipo: TipoFila): number {
+    const base = Number(this.formTarifas.get('precioBaseReferencia')?.value || 5000);
+    let mult = 1;
+    if (tipo === 'vip') {
+      mult = Number(this.formTarifas.get('multiplicadorVip')?.value ?? 1.5);
+    } else if (tipo === 'discapacitado') {
+      mult = Number(this.formTarifas.get('multiplicadorDiscapacitado')?.value ?? 1);
+    } else {
+      mult = Number(this.formTarifas.get('multiplicadorComun')?.value ?? 1);
+    }
+    return Math.round(base * mult);
+  }
 
   get salaEditandoPreview(): Sala | null {
     if (!this.modoModal()) return null;

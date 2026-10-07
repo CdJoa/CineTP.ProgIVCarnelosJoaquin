@@ -6,6 +6,7 @@ import { Asiento, Sala } from '../../../models/sala';
 import { Funcion } from '../../../models/funcion';
 import { SalaService } from '../../../servicios/sala';
 import { FuncionesService } from '../../../servicios/funciones';
+import { PeliculasService } from '../../../servicios/peliculas';
 import { AsientosRealtimeService, EstadoAsientoFuncion } from '../../../servicios/asientos-realtime';
 
 @Component({
@@ -16,8 +17,9 @@ import { AsientosRealtimeService, EstadoAsientoFuncion } from '../../../servicio
   styleUrl: './mapa-sala.css',
 })
 export class MapaSalaComponent implements OnInit, OnDestroy {
-  private salaService = inject(SalaService);
+  public salaService = inject(SalaService);
   private funcionesService = inject(FuncionesService);
+  private peliculasService = inject(PeliculasService);
   private asientosService = inject(AsientosRealtimeService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -185,6 +187,9 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
       const cantidad = await this.asientosService.confirmar(funcion.id, asientos);
       this.seleccionados.set([]);
       await this.recargarEstados();
+      if (funcion.peliculaId) {
+        await this.peliculasService.incrementarBoletosVendidos(funcion.peliculaId, cantidad);
+      }
       this.mensajeCompra.set(`Reserva confirmada: ${cantidad} asiento(s). Ahora figuran ocupados para esta función.`);
     } catch (error) {
       this.errorCompra.set(error instanceof Error ? error.message : 'No se pudo completar la reserva.');
@@ -209,14 +214,47 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
     return !this.esModoCompra() || !this.realtimeDisponible() || !!this.procesandoAsiento() || ['ocupado', 'vendido'].includes(this.estadoAsiento(asiento));
   }
 
+  continuarAlCandy(): void {
+    const funcion = this.funcion();
+    const asientos = this.asientosElegidos;
+    if (!funcion || !asientos.length || this.procesandoAsiento()) return;
+
+    if (typeof sessionStorage !== 'undefined') {
+      const contextoCompra = {
+        funcionId: funcion.id,
+        peliculaId: funcion.peliculaId,
+        peliculaTitulo: funcion.peliculaTitulo,
+        salaNombre: funcion.salaNombre || this.sala()?.nombre,
+        inicio: funcion.inicio,
+        formato: funcion.formato,
+        idioma: funcion.idioma,
+        precioUnitario: funcion.precio,
+        asientos: asientos.map((a) => a.id),
+        totalEntradas: this.totalCompra,
+      };
+      sessionStorage.setItem('cinetp_compra_actual', JSON.stringify(contextoCompra));
+    }
+
+    this.router.navigate(['/candy'], {
+      queryParams: { funcionId: funcion.id },
+    });
+  }
+
   get asientosElegidos(): Asiento[] {
     const ids = new Set(this.seleccionados().filter((id) => this.estadoAsientoPorId(id) === 'seleccionado'));
     return (this.sala()?.filas || []).flatMap((fila) => [...fila.bloque1, ...fila.bloque2, ...fila.bloque3])
       .filter((asiento) => ids.has(asiento.id));
   }
 
+  precioAsiento(asiento: Asiento): number {
+    const base = Number(this.funcion()?.precio || 0);
+    return this.salaService.calcularPrecioAsiento(asiento.tipo, base);
+  }
+
   get totalCompra(): number {
-    return this.asientosElegidos.length * Number(this.funcion()?.precio || 0);
+    return this.asientosElegidos.reduce((total, asiento) => {
+      return total + this.precioAsiento(asiento);
+    }, 0);
   }
 
   formatearInicio(inicio: string): string {

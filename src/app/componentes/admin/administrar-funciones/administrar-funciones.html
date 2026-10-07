@@ -291,6 +291,47 @@
           </div>
         </div>
 
+        <div class="form-group" style="margin-top: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom: 0;">Días de la Semana *</label>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn-dia-preset" (click)="seleccionarTodosDias(true)">Todos</button>
+              <button type="button" class="btn-dia-preset" (click)="seleccionarDiasHabiles()">Lun a Vie</button>
+              <button type="button" class="btn-dia-preset" (click)="seleccionarFinde()">Fin de semana</button>
+            </div>
+          </div>
+          <div class="dias-checkbox-grid">
+            <label class="dia-checkbox-label">
+              <input type="checkbox" formControlName="diaLunes" />
+              <span>Lun</span>
+            </label>
+            <label class="dia-checkbox-label">
+              <input type="checkbox" formControlName="diaMartes" />
+              <span>Mar</span>
+            </label>
+            <label class="dia-checkbox-label">
+              <input type="checkbox" formControlName="diaMiercoles" />
+              <span>Mié</span>
+            </label>
+            <label class="dia-checkbox-label">
+              <input type="checkbox" formControlName="diaJueves" />
+              <span>Jue</span>
+            </label>
+            <label class="dia-checkbox-label">
+              <input type="checkbox" formControlName="diaViernes" />
+              <span>Vie</span>
+            </label>
+            <label class="dia-checkbox-label">
+              <input type="checkbox" formControlName="diaSabado" />
+              <span>Sáb</span>
+            </label>
+            <label class="dia-checkbox-label">
+              <input type="checkbox" formControlName="diaDomingo" />
+              <span>Dom</span>
+            </label>
+          </div>
+        </div>
+
         <div class="form-row" style="margin-top: 12px;">
           <div class="form-group">
             <label class="form-label">Prioridad de Programación *</label>

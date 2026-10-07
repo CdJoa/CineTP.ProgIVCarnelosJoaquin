@@ -29,6 +29,10 @@
         }
       </div>
 
+      <span class="vendidos-tag" title="Cantidad vendida">
+        {{ producto().cantidadVendida || 0 }} vendidos
+      </span>
+
       @if (mostrarBotonEditar()) {
         <button type="button" class="btn-editar" (click)="onEditarClick($event)">
           Editar

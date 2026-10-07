@@ -20,4 +20,48 @@ describe('Registro', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('debe inicializar el formulario con los campos requeridos', () => {
+    expect(component.registroForm.contains('nombre')).toBe(true);
+    expect(component.registroForm.contains('apellido')).toBe(true);
+    expect(component.registroForm.contains('email')).toBe(true);
+    expect(component.registroForm.contains('fechaNacimiento')).toBe(true);
+    expect(component.registroForm.contains('tipoSangre')).toBe(true);
+    expect(component.registroForm.contains('colorOjos')).toBe(true);
+    expect(component.registroForm.contains('diasVacaciones')).toBe(true);
+    expect(component.registroForm.contains('password')).toBe(true);
+    expect(component.registroForm.contains('confirmPassword')).toBe(true);
+  });
+
+  it('debe marcar inválido el formulario si faltan los nuevos campos', () => {
+    component.registroForm.patchValue({
+      nombre: 'Juan',
+      apellido: 'Pérez',
+      email: 'juan@test.com',
+      fechaNacimiento: '1990-01-01',
+      password: 'password123',
+      confirmPassword: 'password123',
+    });
+
+    expect(component.registroForm.valid).toBe(false);
+    expect(component.tipoSangre?.valid).toBe(false);
+    expect(component.colorOjos?.valid).toBe(false);
+    expect(component.diasVacaciones?.valid).toBe(false);
+  });
+
+  it('debe validar cuando todos los campos incluyendo tipoSangre, colorOjos y diasVacaciones son válidos', () => {
+    component.registroForm.patchValue({
+      nombre: 'Juan',
+      apellido: 'Pérez',
+      email: 'juan@test.com',
+      fechaNacimiento: '1990-01-01',
+      tipoSangre: 'O+',
+      colorOjos: 'Marrón',
+      diasVacaciones: 15,
+      password: 'password123',
+      confirmPassword: 'password123',
+    });
+
+    expect(component.registroForm.valid).toBe(true);
+  });
 });

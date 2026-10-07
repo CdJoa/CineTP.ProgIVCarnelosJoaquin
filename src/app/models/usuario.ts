@@ -6,6 +6,9 @@ export interface Usuario {
   nombre: string;
   apellido: string;
   fechaNacimiento: string; // Formato YYYY-MM-DD
+  tipoSangre?: string;
+  colorOjos?: string;
+  diasVacaciones?: number;
   rol: RolUsuario;
   puntos: number;
   credito: number; // Saldo a favor en cuenta
@@ -18,6 +21,9 @@ export interface RegistroUsuarioDto {
   nombre: string;
   apellido: string;
   fechaNacimiento: string;
+  tipoSangre?: string;
+  colorOjos?: string;
+  diasVacaciones?: number;
 }
 
 export interface CredencialesLoginDto {

@@ -1,136 +1,194 @@
 <div class="compra-cargando" *ngIf="esModoCompra() && cargandoCompra()">Cargando función y disponibilidad de asientos…</div>
 <div class="compra-alerta error" *ngIf="esModoCompra() && errorCompra()">{{ errorCompra() }}</div>
 
-<div class="mapa-sala-wrapper" *ngIf="sala() as s">
-  <section class="compra-resumen" *ngIf="esModoCompra() && funcion() as fn">
-    <button type="button" class="volver-cartelera" (click)="volverACartelera()">← Cartelera</button>
-    <p class="eyebrow">COMPRA DE ENTRADAS</p>
-    <h1>{{ fn.peliculaTitulo || 'Función' }}</h1>
-    <p class="funcion-detalle">
-      {{ fn.salaNombre || s.nombre }} · {{ formatearInicio(fn.inicio) }} · {{ fn.formato || '2D' }} · {{ fn.idioma || 'español' }}
-    </p>
-    <p class="precio-unitario">Precio por asiento: <strong>${{ fn.precio }}</strong></p>
-    <p class="compra-ayuda">Elegí tus butacas. No necesitás iniciar sesión; la disponibilidad se actualiza en vivo.</p>
-    <p class="compra-ayuda" *ngIf="asientosElegidos.length">La selección queda reservada por 10 minutos.</p>
-  </section>
+<div class="mapa-sala-wrapper" *ngIf="sala() as s" [class.modo-compra-layout]="esModoCompra()">
+  
+  <!-- Columna Izquierda: Mapa de la Sala -->
+  <div class="sala-mapa-area">
+    <!-- Título cuando no está en modo compra -->
+    <div class="header-titulos" *ngIf="titulo() && !esModoCompra()">
+      <h2 class="titulo-pantalla">{{ titulo() }}</h2>
+    </div>
 
-  <!-- Título principal -->
-  <div class="header-titulos" *ngIf="titulo()">
-    <h2 class="titulo-pantalla">{{ titulo() }}</h2>
-  </div>
+    <!-- Arco de la Pantalla / Screen -->
+    <div class="pantalla-container" *ngIf="mostrarPantalla()">
+      <div class="pantalla-arco"></div>
+      <span class="pantalla-label">PANTALLA</span>
+    </div>
 
-  <!-- Arco de la Pantalla / Screen -->
-  <div class="pantalla-container" *ngIf="mostrarPantalla()">
-    <div class="pantalla-arco"></div>
-  </div>
-
-  <!-- Leyenda de tipos de butacas -->
-  <div class="leyenda-bar" *ngIf="mostrarLeyenda()">
-    <div class="leyenda-item"><span class="seat-badge disponible-comun"></span> Común (4-20-4)</div>
-    <div class="leyenda-item"><span class="seat-badge disponible-disc">♿</span> Discapacitado (2-10-2)</div>
-    <div class="leyenda-item"><span class="seat-badge disponible-vip"></span> VIP (4-20-4)</div>
-    <ng-container *ngIf="esModoCompra()">
-      <div class="leyenda-item"><span class="seat-badge estado-elegido"></span> Tu selección</div>
-      <div class="leyenda-item"><span class="seat-badge estado-bloqueado"></span> Ocupado</div>
-    </ng-container>
-  </div>
-
-  <!-- Plano de Butacas en 3 Bloques -->
-  <div class="grid-asientos">
-    <div *ngFor="let fila of s.filas" class="fila-linea">
-      <!-- Letra de Fila Izquierda -->
-      <span class="row-label">{{ fila.letra }}</span>
-
-      <!-- BLOQUE 1 (Izquierda) -->
-      <div class="bloque">
-        <button type="button"
-          *ngFor="let a of fila.bloque1"
-          class="asiento-box"
-          [class.comun]="a.tipo === 'comun'"
-          [class.discapacitado]="a.tipo === 'discapacitado'"
-          [class.vip]="a.tipo === 'vip'"
-          [class.seleccionado]="estadoAsiento(a) === 'seleccionado'"
-          [class.ocupado]="estadoAsiento(a) === 'ocupado'"
-          [class.vendido]="estadoAsiento(a) === 'vendido'"
-          [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero"
-          [attr.aria-label]="'Fila ' + fila.letra + ', asiento ' + a.numero + ': ' + estadoAsiento(a)"
-          [attr.aria-pressed]="estadoAsiento(a) === 'seleccionado'"
-          [disabled]="asientoDeshabilitado(a)"
-          (click)="alternarAsiento(a)"
-        >
-          <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
-          <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
-        </button>
+    <!-- Leyenda de tipos de butacas -->
+    <div class="leyenda-bar" *ngIf="mostrarLeyenda()">
+      <div class="leyenda-item">
+        <span class="seat-badge disponible-comun"></span>
+        Común (x{{ salaService.configuracionPrecios().multiplicadorComun }})
+        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('comun', funcion()?.precio) }}</span>
       </div>
-
-      <!-- Pasillo Izquierdo -->
-      <div class="pasillo"></div>
-
-      <!-- BLOQUE 2 (Centro) -->
-      <div class="bloque">
-        <button type="button"
-          *ngFor="let a of fila.bloque2"
-          class="asiento-box"
-          [class.comun]="a.tipo === 'comun'"
-          [class.discapacitado]="a.tipo === 'discapacitado'"
-          [class.vip]="a.tipo === 'vip'"
-          [class.seleccionado]="estadoAsiento(a) === 'seleccionado'"
-          [class.ocupado]="estadoAsiento(a) === 'ocupado'"
-          [class.vendido]="estadoAsiento(a) === 'vendido'"
-          [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero"
-          [attr.aria-label]="'Fila ' + fila.letra + ', asiento ' + a.numero + ': ' + estadoAsiento(a)"
-          [attr.aria-pressed]="estadoAsiento(a) === 'seleccionado'"
-          [disabled]="asientoDeshabilitado(a)"
-          (click)="alternarAsiento(a)"
-        >
-          <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
-          <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
-        </button>
+      <div class="leyenda-item">
+        <span class="seat-badge disponible-disc">♿</span>
+        Discapacitado (x{{ salaService.configuracionPrecios().multiplicadorDiscapacitado }})
+        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('discapacitado', funcion()?.precio) }}</span>
       </div>
-
-      <!-- Pasillo Derecho -->
-      <div class="pasillo"></div>
-
-      <!-- BLOQUE 3 (Derecha) -->
-      <div class="bloque">
-        <button type="button"
-          *ngFor="let a of fila.bloque3"
-          class="asiento-box"
-          [class.comun]="a.tipo === 'comun'"
-          [class.discapacitado]="a.tipo === 'discapacitado'"
-          [class.vip]="a.tipo === 'vip'"
-          [class.seleccionado]="estadoAsiento(a) === 'seleccionado'"
-          [class.ocupado]="estadoAsiento(a) === 'ocupado'"
-          [class.vendido]="estadoAsiento(a) === 'vendido'"
-          [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero"
-          [attr.aria-label]="'Fila ' + fila.letra + ', asiento ' + a.numero + ': ' + estadoAsiento(a)"
-          [attr.aria-pressed]="estadoAsiento(a) === 'seleccionado'"
-          [disabled]="asientoDeshabilitado(a)"
-          (click)="alternarAsiento(a)"
-        >
-          <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
-          <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
-        </button>
+      <div class="leyenda-item">
+        <span class="seat-badge disponible-vip"></span>
+        VIP (x{{ salaService.configuracionPrecios().multiplicadorVip }})
+        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('vip', funcion()?.precio) }}</span>
       </div>
+      <ng-container *ngIf="esModoCompra()">
+        <div class="leyenda-item"><span class="seat-badge estado-elegido"></span> Tu selección</div>
+        <div class="leyenda-item"><span class="seat-badge estado-bloqueado"></span> Ocupado</div>
+      </ng-container>
+    </div>
 
-      <!-- Letra de Fila Derecha -->
-      <span class="row-label">{{ fila.letra }}</span>
+    <!-- Plano de Butacas en 3 Bloques -->
+    <div class="grid-asientos">
+      <div *ngFor="let fila of s.filas" class="fila-linea">
+        <!-- Letra de Fila Izquierda -->
+        <span class="row-label">{{ fila.letra }}</span>
+
+        <!-- BLOQUE 1 (Izquierda) -->
+        <div class="bloque">
+          <button type="button"
+            *ngFor="let a of fila.bloque1"
+            class="asiento-box"
+            [class.comun]="a.tipo === 'comun'"
+            [class.discapacitado]="a.tipo === 'discapacitado'"
+            [class.vip]="a.tipo === 'vip'"
+            [class.seleccionado]="estadoAsiento(a) === 'seleccionado'"
+            [class.ocupado]="estadoAsiento(a) === 'ocupado'"
+            [class.vendido]="estadoAsiento(a) === 'vendido'"
+            [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero + ' ($' + precioAsiento(a) + ')'"
+            [attr.aria-label]="'Fila ' + fila.letra + ', asiento ' + a.numero + ': ' + estadoAsiento(a)"
+            [attr.aria-pressed]="estadoAsiento(a) === 'seleccionado'"
+            [disabled]="asientoDeshabilitado(a)"
+            (click)="alternarAsiento(a)"
+          >
+            <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
+            <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
+          </button>
+        </div>
+
+        <!-- Pasillo Izquierdo -->
+        <div class="pasillo"></div>
+
+        <!-- BLOQUE 2 (Centro) -->
+        <div class="bloque">
+          <button type="button"
+            *ngFor="let a of fila.bloque2"
+            class="asiento-box"
+            [class.comun]="a.tipo === 'comun'"
+            [class.discapacitado]="a.tipo === 'discapacitado'"
+            [class.vip]="a.tipo === 'vip'"
+            [class.seleccionado]="estadoAsiento(a) === 'seleccionado'"
+            [class.ocupado]="estadoAsiento(a) === 'ocupado'"
+            [class.vendido]="estadoAsiento(a) === 'vendido'"
+            [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero + ' ($' + precioAsiento(a) + ')'"
+            [attr.aria-label]="'Fila ' + fila.letra + ', asiento ' + a.numero + ': ' + estadoAsiento(a)"
+            [attr.aria-pressed]="estadoAsiento(a) === 'seleccionado'"
+            [disabled]="asientoDeshabilitado(a)"
+            (click)="alternarAsiento(a)"
+          >
+            <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
+            <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
+          </button>
+        </div>
+
+        <!-- Pasillo Derecho -->
+        <div class="pasillo"></div>
+
+        <!-- BLOQUE 3 (Derecha) -->
+        <div class="bloque">
+          <button type="button"
+            *ngFor="let a of fila.bloque3"
+            class="asiento-box"
+            [class.comun]="a.tipo === 'comun'"
+            [class.discapacitado]="a.tipo === 'discapacitado'"
+            [class.vip]="a.tipo === 'vip'"
+            [class.seleccionado]="estadoAsiento(a) === 'seleccionado'"
+            [class.ocupado]="estadoAsiento(a) === 'ocupado'"
+            [class.vendido]="estadoAsiento(a) === 'vendido'"
+            [title]="'Fila ' + fila.letra + ' - Butaca ' + a.numero + ' ($' + precioAsiento(a) + ')'"
+            [attr.aria-label]="'Fila ' + fila.letra + ', asiento ' + a.numero + ': ' + estadoAsiento(a)"
+            [attr.aria-pressed]="estadoAsiento(a) === 'seleccionado'"
+            [disabled]="asientoDeshabilitado(a)"
+            (click)="alternarAsiento(a)"
+          >
+            <span *ngIf="a.tipo === 'discapacitado'" class="icon-disc">♿</span>
+            <span *ngIf="a.tipo !== 'discapacitado'">{{ a.id }}</span>
+          </button>
+        </div>
+
+        <!-- Letra de Fila Derecha -->
+        <span class="row-label">{{ fila.letra }}</span>
+      </div>
     </div>
   </div>
 
-  <p class="compra-alerta exito" *ngIf="esModoCompra() && mensajeCompra()">{{ mensajeCompra() }}</p>
-  <footer class="checkout-footer" *ngIf="esModoCompra()">
-    <div class="checkout-total">
-      <span>{{ asientosElegidos.length }} asiento(s) seleccionado(s)</span>
-      <strong>Total: ${{ totalCompra }}</strong>
+  <!-- Columna Derecha: Panel de Compra (solo en modo compra) -->
+  <aside class="sala-sidebar-compra" *ngIf="esModoCompra() && funcion() as fn">
+    <div class="sidebar-top">
+      <button type="button" class="btn-volver-cartelera" (click)="volverACartelera()">
+        ← Cartelera
+      </button>
+      <span class="sidebar-eyebrow">COMPRA DE ENTRADAS</span>
     </div>
+
+    <div class="pelicula-info-card">
+      <h2 class="pelicula-titulo">{{ fn.peliculaTitulo || 'Función' }}</h2>
+      <p class="funcion-detalle-linea">
+        {{ fn.salaNombre || s.nombre }} · {{ formatearInicio(fn.inicio) }}
+      </p>
+      <div class="chips-row">
+        <span class="chip-item">{{ fn.formato || '2D' }}</span>
+        <span class="chip-item">{{ fn.idioma || 'español' }}</span>
+      </div>
+    </div>
+
+    <hr class="sidebar-sep" />
+
+    <div class="seccion-asientos-elegidos">
+      <div class="asientos-header-linea">
+        <span class="asientos-titulo-lbl">Butacas seleccionadas</span>
+        <span class="asientos-contador-tag">{{ asientosElegidos.length }}</span>
+      </div>
+
+      <div *ngIf="!asientosElegidos.length" class="sin-seleccion-aviso">
+        Elegí tus butacas en el mapa para continuar.
+      </div>
+
+      <div *ngIf="asientosElegidos.length > 0" class="asientos-elegidos-lista">
+        <div *ngFor="let a of asientosElegidos" class="asiento-elegido-item">
+          <div class="asiento-item-info">
+            <span class="asiento-id-txt">{{ a.id }}</span>
+            <span class="asiento-tipo-txt">{{ a.tipo }}</span>
+          </div>
+          <strong class="asiento-precio-txt">${{ precioAsiento(a) }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <hr class="sidebar-sep" />
+
+    <div class="sidebar-totales-area">
+      <div class="totales-linea">
+        <span>Total entradas</span>
+        <strong class="totales-valor">${{ totalCompra }}</strong>
+      </div>
+      <p class="retencion-timer" *ngIf="asientosElegidos.length > 0">
+        Butacas retenidas por 10 min.
+      </p>
+    </div>
+
+    <div class="compra-alerta exito" *ngIf="mensajeCompra()">{{ mensajeCompra() }}</div>
+    <div class="compra-alerta error" *ngIf="errorCompra()">{{ errorCompra() }}</div>
+
     <button
       type="button"
-      class="btn-comprar-grande"
+      class="btn-continuar-flujo"
       [disabled]="!asientosElegidos.length || !realtimeDisponible() || !!procesandoAsiento()"
-      (click)="comprarAsientos()"
+      (click)="continuarAlCandy()"
     >
-      {{ procesandoAsiento() === 'comprar' ? 'Reservando…' : 'Comprar' }}
+      Continuar al Candy →
     </button>
-  </footer>
+  </aside>
+
 </div>

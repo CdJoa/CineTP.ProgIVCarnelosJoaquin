@@ -99,7 +99,8 @@
   color: #333333;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 8px 10px;
   background: #ffffff;
@@ -110,12 +111,14 @@
   box-sizing: border-box;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #0056b3;
 }
 
-.form-group input.invalid {
+.form-group input.invalid,
+.form-group select.invalid {
   border-color: #dc3545;
 }
 

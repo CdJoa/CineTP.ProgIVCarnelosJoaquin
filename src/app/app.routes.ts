@@ -10,7 +10,9 @@ import { AdministrarCandy } from './componentes/admin/administrar-candy/administ
 import { AdministrarSalas } from './componentes/admin/administrar-salas/administrar-salas';
 import { AdministrarFunciones } from './componentes/admin/administrar-funciones/administrar-funciones';
 import { MapaSalaComponent } from './componentes/sala/mapa-sala/mapa-sala';
+import { SeleccionCandyComponent } from './componentes/candy/seleccion-candy/seleccion-candy';
 import { AdministrarCuponesComponent } from './componentes/admin/administrar-cupones/administrar-cupones';
+import { PerfilComponent } from './componentes/perfil/perfil';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 
@@ -20,7 +22,9 @@ export const routes: Routes = [
   { path: 'registro', component: Registro, canActivate: [authGuard] },
   { path: 'register', redirectTo: 'registro', pathMatch: 'full' },
   { path: 'home', component: Home },
+  { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },
   { path: 'sala', component: MapaSalaComponent },
+  { path: 'candy', component: SeleccionCandyComponent },
   {
     path: 'admin',
     component: Admin,

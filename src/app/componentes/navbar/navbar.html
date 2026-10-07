@@ -8,6 +8,8 @@
       <span class="user-greeting">Hola, {{ usuario.nombre }}</span>
       @if (usuario.rol === 'admin' || usuario.rol === 'empleado') {
         <a routerLink="/admin" class="nav-link nav-admin">Panel Admin</a>
+      } @else {
+        <a routerLink="/perfil" class="nav-link nav-perfil">Mi Perfil</a>
       }
       <button type="button" (click)="cerrarSesion()" class="nav-btn">Cerrar Sesión</button>
     } @else {

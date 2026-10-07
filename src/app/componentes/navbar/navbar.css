@@ -31,6 +31,21 @@
   text-decoration: underline;
 }
 
+.nav-admin,
+.nav-perfil {
+  background: rgba(255, 255, 255, 0.12);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.nav-admin:hover,
+.nav-perfil:hover {
+  background: rgba(255, 255, 255, 0.22);
+  text-decoration: none;
+}
+
 .user-greeting {
   color: #ffffff;
   font-size: 14px;

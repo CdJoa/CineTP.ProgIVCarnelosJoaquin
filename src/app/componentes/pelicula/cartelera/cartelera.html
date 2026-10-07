@@ -99,6 +99,7 @@
       <app-carta-pelicula
         [pelicula]="pelicula"
         [esPreventa]="esPeliculaPreventa(pelicula.id)"
+        [mostrarBoletosVendidos]="true"
         (seleccionar)="abrirDetalle($event)"
       ></app-carta-pelicula>
     </div>
@@ -118,6 +119,7 @@
         <app-carta-pelicula
           [pelicula]="pelicula"
           [esPreventa]="esPeliculaPreventa(pelicula.id)"
+          [mostrarBoletosVendidos]="true"
           (seleccionar)="abrirDetalle($event)"
         ></app-carta-pelicula>
       </div>
@@ -144,6 +146,7 @@
             <span>⏱️ {{ p.duracion }} min</span>
             <span>📅 Estreno: {{ p.fechaEstreno }}</span>
             <span class="badge-edad">+{{ p.restriccionEdad }}</span>
+            <span>🎟️ {{ p.boletosVendidos || 0 }} boletos vendidos</span>
           </div>
 
           <div class="detail-generos">

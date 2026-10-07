@@ -92,6 +92,75 @@
 
       <div class="form-row">
         <div class="form-group">
+          <label for="tipoSangre">Tipo de Sangre</label>
+          <select
+            id="tipoSangre"
+            formControlName="tipoSangre"
+            [class.invalid]="tipoSangre?.invalid && (tipoSangre?.dirty || tipoSangre?.touched)"
+          >
+            <option value="" disabled selected>Seleccione tipo</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+          @if (tipoSangre?.invalid && (tipoSangre?.dirty || tipoSangre?.touched)) {
+            <span class="error-text">
+              @if (tipoSangre?.errors?.['required']) { El tipo de sangre es requerido. }
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="colorOjos">Color de Ojos</label>
+          <select
+            id="colorOjos"
+            formControlName="colorOjos"
+            [class.invalid]="colorOjos?.invalid && (colorOjos?.dirty || colorOjos?.touched)"
+          >
+            <option value="" disabled selected>Seleccione color</option>
+            <option value="Marrón">Marrón</option>
+            <option value="Azul">Azul</option>
+            <option value="Verde">Verde</option>
+            <option value="Miel / Ámbar">Miel / Ámbar</option>
+            <option value="Negro">Negro</option>
+            <option value="Gris">Gris</option>
+            <option value="Otro">Otro</option>
+          </select>
+          @if (colorOjos?.invalid && (colorOjos?.dirty || colorOjos?.touched)) {
+            <span class="error-text">
+              @if (colorOjos?.errors?.['required']) { El color de ojos es requerido. }
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="diasVacaciones">Días de Vacaciones por Año</label>
+        <input
+          id="diasVacaciones"
+          type="number"
+          min="0"
+          max="365"
+          formControlName="diasVacaciones"
+          placeholder="Ej: 14"
+          [class.invalid]="diasVacaciones?.invalid && (diasVacaciones?.dirty || diasVacaciones?.touched)"
+        />
+        @if (diasVacaciones?.invalid && (diasVacaciones?.dirty || diasVacaciones?.touched)) {
+          <span class="error-text">
+            @if (diasVacaciones?.errors?.['required']) { La cantidad de días de vacaciones es requerida. }
+            @else if (diasVacaciones?.errors?.['min']) { No puede ser un valor negativo. }
+            @else if (diasVacaciones?.errors?.['pattern']) { Debe ser un número entero válido. }
+          </span>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
           <label for="password">Contraseña</label>
           <input
             id="password"

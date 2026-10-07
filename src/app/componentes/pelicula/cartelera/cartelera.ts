@@ -1,11 +1,13 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { Pelicula } from '../../../models/pelicula';
 import { Funcion } from '../../../models/funcion';
 import { PeliculasService } from '../../../servicios/peliculas';
 import { FuncionesService } from '../../../servicios/funciones';
+import { AsientosRealtimeService } from '../../../servicios/asientos-realtime';
 import { CartaPelicula } from '../carta-pelicula/carta-pelicula';
 
 @Component({
@@ -15,9 +17,10 @@ import { CartaPelicula } from '../carta-pelicula/carta-pelicula';
   templateUrl: './cartelera.html',
   styleUrl: './cartelera.css',
 })
-export class CarteleraComponent implements OnInit {
+export class CarteleraComponent implements OnInit, OnDestroy {
   private peliculasService = inject(PeliculasService);
   private funcionesService = inject(FuncionesService);
+  private asientosRealtimeService = inject(AsientosRealtimeService);
   private router = inject(Router);
 
   peliculas = signal<Pelicula[]>([]);
@@ -36,8 +39,91 @@ export class CarteleraComponent implements OnInit {
   filtroFuncionFormato = signal<string>('todos');
   filtroFuncionIdioma = signal<string>('todos');
 
+  private canalesRealtime: RealtimeChannel[] = [];
+  private canalLocal?: BroadcastChannel;
+
   async ngOnInit(): Promise<void> {
     await Promise.all([this.cargarPeliculas(), this.cargarFunciones()]);
+    this.iniciarSuscripcionesRealtime();
+  }
+
+  ngOnDestroy(): void {
+    for (const canal of this.canalesRealtime) {
+      canal.unsubscribe();
+    }
+    this.canalesRealtime = [];
+
+    if (this.canalLocal) {
+      this.canalLocal.close();
+    }
+  }
+
+  private iniciarSuscripcionesRealtime(): void {
+    // 0. Escuchar cambios locales de pestaña (cuando el admin edita películas en el mismo navegador)
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        this.canalLocal = new BroadcastChannel('cinetp-peliculas-local');
+        this.canalLocal.onmessage = (event) => {
+          const pAct = event.data?.pelicula as Pelicula | undefined;
+          if (pAct?.id) {
+            this.peliculas.update((lista) =>
+              lista.map((p) => (p.id === pAct.id ? { ...p, ...pAct } : p))
+            );
+            if (this.peliculaSeleccionada()?.id === pAct.id) {
+              this.peliculaSeleccionada.set({ ...this.peliculaSeleccionada()!, ...pAct });
+            }
+          }
+        };
+      } catch {}
+    }
+
+    // 1. Escuchar actualizaciones directas en la tabla peliculas (boletos_vendidos)
+    const canalPeliculas = this.peliculasService.suscribirCambios((peliculaActualizada) => {
+      this.peliculas.update((lista) =>
+        lista.map((p) =>
+          p.id === peliculaActualizada.id
+            ? { ...p, boletosVendidos: peliculaActualizada.boletosVendidos }
+            : p
+        )
+      );
+      if (this.peliculaSeleccionada()?.id === peliculaActualizada.id) {
+        this.peliculaSeleccionada.set({
+          ...this.peliculaSeleccionada()!,
+          boletosVendidos: peliculaActualizada.boletosVendidos,
+        });
+      }
+    });
+    this.canalesRealtime.push(canalPeliculas);
+
+    // 2. Escuchar ventas en asientos_funcion (activo por defecto en supabase_realtime)
+    const canalAsientos = this.asientosRealtimeService.suscribirBoletosVendidos((funcionId) => {
+      const funcion = this.funciones().find((f) => f.id === funcionId);
+      if (funcion?.peliculaId) {
+        this.peliculas.update((lista) =>
+          lista.map((p) =>
+            p.id === funcion.peliculaId
+              ? { ...p, boletosVendidos: (p.boletosVendidos || 0) + 1 }
+              : p
+          )
+        );
+        if (this.peliculaSeleccionada()?.id === funcion.peliculaId) {
+          this.peliculaSeleccionada.update((actual) =>
+            actual ? { ...actual, boletosVendidos: (actual.boletosVendidos || 0) + 1 } : null
+          );
+        }
+      }
+      this.recargarPeliculasSilencioso();
+    });
+    this.canalesRealtime.push(canalAsientos);
+  }
+
+  async recargarPeliculasSilencioso(): Promise<void> {
+    try {
+      const data = await this.peliculasService.obtenerPeliculas();
+      this.peliculas.set(data);
+    } catch {
+      // background sync silencioso
+    }
   }
 
   async cargarPeliculas(): Promise<void> {
@@ -80,9 +166,8 @@ export class CarteleraComponent implements OnInit {
   }
 
   get topTresVendidas(): Pelicula[] {
-    const hoyStr = this.obtenerFechaLocalKey(new Date());
     return [...this.peliculas()]
-      .filter((p) => p.activa !== false && p.enCartelera !== false && (!p.fechaEstreno || p.fechaEstreno <= hoyStr))
+      .filter((p) => p.activa !== false && p.enCartelera !== false)
       .sort((a, b) => (b.boletosVendidos || 0) - (a.boletosVendidos || 0))
       .slice(0, 3);
   }
@@ -95,7 +180,12 @@ export class CarteleraComponent implements OnInit {
   }
 
   esPeliculaPreventa(peliculaId: string): boolean {
-    return this.funciones().some((f) => f.peliculaId === peliculaId && f.esPreventa);
+    const tieneFuncionPreventa = this.funciones().some((f) => f.peliculaId === peliculaId && f.esPreventa);
+    if (tieneFuncionPreventa) return true;
+
+    const p = this.peliculas().find((x) => x.id === peliculaId);
+    const hoyStr = this.obtenerFechaLocalKey(new Date());
+    return !!(p?.fechaEstreno && p.fechaEstreno > hoyStr && (p.boletosVendidos || 0) > 0);
   }
 
   get peliculasFiltradas(): Pelicula[] {

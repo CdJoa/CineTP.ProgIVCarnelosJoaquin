@@ -1,0 +1,246 @@
+<div class="seleccion-candy-container">
+  <!-- Cabecera / Banner del flujo de compra -->
+  <header class="compra-header">
+    <button type="button" class="btn-volver" (click)="volverASala()">
+      ← Cambiar Asientos
+    </button>
+    <div class="pasos-indicador">
+      <span class="paso completado">1. Butacas</span>
+      <span class="paso-flecha">→</span>
+      <span class="paso activo">2. Candy Bar</span>
+      <span class="paso-flecha">→</span>
+      <span class="paso pendiente">3. Pago</span>
+    </div>
+  </header>
+
+  <div class="candy-layout">
+    <!-- Columna Izquierda: Combos y Productos -->
+    <div class="productos-col">
+      <div *ngIf="cargando()" class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando productos del Candy Bar...</p>
+      </div>
+
+      <!-- SECCIÓN DE COMBOS (ARRIBA DE TODO) -->
+      <section class="combos-seccion" *ngIf="!cargando() && combos().length > 0">
+        <div class="combos-header">
+          <h2 class="combos-titulo">Combos Especiales</h2>
+          <p class="combos-subtitulo">Aprovechá nuestros mejores combos con descuento</p>
+        </div>
+
+        <div class="combos-grid">
+          <div *ngFor="let combo of combos()" class="combo-card" [class.en-carrito]="obtenerCantidad(combo.id) > 0">
+            <div class="combo-img-box">
+              <img *ngIf="combo.imagen" [src]="combo.imagen" [alt]="combo.nombre" class="combo-img" />
+              <div *ngIf="!combo.imagen" class="combo-placeholder-img">
+                <span>🍿🥤</span>
+              </div>
+              <span class="badge-combo">COMBO</span>
+            </div>
+
+            <div class="combo-info">
+              <div class="combo-texto">
+                <h3 class="combo-nombre">{{ combo.nombre }}</h3>
+                <p class="combo-desc">{{ combo.descripcion }}</p>
+              </div>
+
+              <div class="combo-footer-row">
+                <div class="combo-precio-box">
+                  <strong class="combo-precio">${{ combo.precio }}</strong>
+                  <span *ngIf="combo.puntajeCompra > 0" class="puntos-tag">+{{ combo.puntajeCompra }} pts</span>
+                </div>
+
+                <div class="cantidad-controles">
+                  <button
+                    *ngIf="obtenerCantidad(combo.id) > 0"
+                    type="button"
+                    class="btn-cant btn-menos"
+                    (click)="quitarProducto(combo)"
+                    title="Quitar uno"
+                  >
+                    −
+                  </button>
+                  <span *ngIf="obtenerCantidad(combo.id) > 0" class="cant-num">
+                    {{ obtenerCantidad(combo.id) }}
+                  </span>
+                  <button
+                    type="button"
+                    class="btn-cant btn-mas"
+                    (click)="agregarProducto(combo)"
+                    title="Agregar"
+                  >
+                    {{ obtenerCantidad(combo.id) === 0 ? '+ Agregar' : '+' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN DE PRODUCTOS INDIVIDUALES -->
+      <div class="candy-seccion-header" *ngIf="!cargando()">
+        <div>
+          <h2 class="candy-titulo">Productos Individuales</h2>
+          <p class="candy-subtitulo">Pochoclos, bebidas y snacks para armar a tu gusto</p>
+        </div>
+
+        <!-- Filtros de categoría -->
+        <div class="categorias-tabs">
+          <button
+            *ngFor="let cat of categorias"
+            type="button"
+            class="cat-btn"
+            [class.active]="categoriaFiltro() === cat.id"
+            (click)="categoriaFiltro.set(cat.id)"
+          >
+            {{ cat.label }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="!cargando() && productosFiltrados.length === 0" class="empty-state">
+        <p>No hay productos disponibles en esta categoría.</p>
+      </div>
+
+      <div *ngIf="!cargando() && productosFiltrados.length > 0" class="productos-grid">
+        <div *ngFor="let p of productosFiltrados" class="producto-card" [class.en-carrito]="obtenerCantidad(p.id) > 0">
+          <div class="producto-img-box">
+            <img *ngIf="p.imagen" [src]="p.imagen" [alt]="p.nombre" class="producto-img" />
+            <div *ngIf="!p.imagen" class="placeholder-img">
+              <span>🍿</span>
+            </div>
+            <span class="badge-cat">{{ p.categoria | uppercase }}</span>
+          </div>
+
+          <div class="producto-info">
+            <h3 class="producto-nombre">{{ p.nombre }}</h3>
+            <p class="producto-desc">{{ p.descripcion }}</p>
+
+            <div class="producto-precio-row">
+              <div class="precio-box">
+                <strong class="precio-num">${{ p.precio }}</strong>
+                <span *ngIf="p.puntajeCompra > 0" class="puntos-tag">+{{ p.puntajeCompra }} pts</span>
+              </div>
+
+              <!-- Controles de Cantidad -->
+              <div class="cantidad-controles">
+                <button
+                  *ngIf="obtenerCantidad(p.id) > 0"
+                  type="button"
+                  class="btn-cant btn-menos"
+                  (click)="quitarProducto(p)"
+                  title="Quitar uno"
+                >
+                  −
+                </button>
+                <span *ngIf="obtenerCantidad(p.id) > 0" class="cant-num">
+                  {{ obtenerCantidad(p.id) }}
+                </span>
+                <button
+                  type="button"
+                  class="btn-cant btn-mas"
+                  (click)="agregarProducto(p)"
+                  title="Agregar"
+                >
+                  {{ obtenerCantidad(p.id) === 0 ? '+ Agregar' : '+' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Resumen del Pedido -->
+    <aside class="carrito-col">
+      <!-- Tarjeta Lateral de Reserva de Entradas Activa -->
+      <section class="resumen-entradas-card" *ngIf="compraContexto() as ctx">
+        <div class="resumen-info">
+          <span class="eyebrow">RESERVA DE ENTRADAS ACTIVA</span>
+          <h3 class="pelicula-titulo">{{ ctx.peliculaTitulo || funcion()?.peliculaTitulo || 'Película' }}</h3>
+          <p class="funcion-detalles">
+            {{ ctx.salaNombre || funcion()?.salaNombre }} · {{ formatearFecha(ctx.inicio || funcion()?.inicio) }} · {{ ctx.formato || funcion()?.formato || '2D' }} ({{ ctx.idioma || funcion()?.idioma || 'español' }})
+          </p>
+          <div class="asientos-tags">
+            <span class="asientos-lbl">Butacas:</span>
+            <div class="tags-row">
+              <span *ngFor="let asientoId of ctx.asientos" class="asiento-tag">{{ asientoId }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="resumen-precio">
+          <div class="precio-linea-lateral">
+            <span class="precio-label">Subtotal Entradas</span>
+            <strong class="precio-valor">${{ ctx.totalEntradas }}</strong>
+          </div>
+          <span class="tiempo-reserva">Butacas retenidas por 10 min</span>
+        </div>
+      </section>
+
+      <div class="carrito-card">
+        <h3 class="carrito-titulo">Resumen de tu Compra</h3>
+
+        <!-- Entradas -->
+        <div class="pedido-seccion">
+          <div class="pedido-linea">
+            <span>Entradas ({{ compraContexto()?.asientos?.length || 0 }})</span>
+            <strong>${{ totalEntradas() }}</strong>
+          </div>
+          <div class="pedido-sublinea" *ngIf="compraContexto() as ctx">
+            {{ ctx.asientos.join(', ') }}
+          </div>
+        </div>
+
+        <hr class="carrito-divider" />
+
+        <!-- Productos de Candy seleccionados -->
+        <div class="pedido-seccion">
+          <div class="pedido-linea">
+            <span>Candy Bar</span>
+            <strong>${{ totalCandy() }}</strong>
+          </div>
+
+          <div *ngIf="itemsSeleccionados().length === 0" class="candy-vacio-msg">
+            No has seleccionado productos del Candy.
+          </div>
+
+          <ul *ngIf="itemsSeleccionados().length > 0" class="candy-items-lista">
+            <li *ngFor="let item of itemsSeleccionados()" class="candy-item-fila">
+              <div class="item-nombre-cant">
+                <span class="item-cant">{{ item.cantidad }}x</span>
+                <span class="item-nombre">{{ item.producto.nombre }}</span>
+              </div>
+              <div class="item-precio-acciones">
+                <span>${{ item.producto.precio * item.cantidad }}</span>
+                <button type="button" class="btn-eliminar-item" (click)="quitarProducto(item.producto)">✕</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div *ngIf="puntosCandy() > 0" class="puntos-banner">
+          Sumás <strong>+{{ puntosCandy() }} puntos</strong> con tus productos de Candy
+        </div>
+
+        <hr class="carrito-divider" />
+
+        <!-- Total Final -->
+        <div class="total-row">
+          <span>Total a Pagar</span>
+          <strong class="total-monto">${{ totalFinal() }}</strong>
+        </div>
+
+        <!-- Acciones -->
+        <div class="carrito-acciones">
+          <button type="button" class="btn-continuar" (click)="guardarContexto()">
+            Continuar al Pago →
+          </button>
+          <button type="button" class="btn-omitir" (click)="volverASala()">
+            Modificar Asientos
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

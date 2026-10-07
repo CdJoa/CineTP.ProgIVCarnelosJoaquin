@@ -38,7 +38,68 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
     if (datos.enCartelera !== undefined) payload['enCartelera'] = Boolean(datos.enCartelera);
     if (datos.poster !== undefined) payload['poster'] = datos.poster || null;
 
-    return this.actualizarAuto(id, payload);
+    const res = await this.actualizarAuto(id, payload);
+    this.notificarCanalLocal(res);
+    return res;
+  }
+
+  async incrementarBoletosVendidos(peliculaId: string, cantidad: number): Promise<void> {
+    if (!peliculaId || cantidad <= 0) return;
+    try {
+      const { data } = await this.supabase
+        .from(this.nombreTabla)
+        .select('boletos_vendidos')
+        .eq('id', peliculaId)
+        .maybeSingle();
+
+      const actual = Number(data?.['boletos_vendidos'] || 0);
+      const { data: updated } = await this.supabase
+        .from(this.nombreTabla)
+        .update({ boletos_vendidos: actual + cantidad })
+        .eq('id', peliculaId)
+        .select()
+        .maybeSingle();
+
+      if (updated) {
+        this.notificarCanalLocal(this.mapear(updated));
+      }
+    } catch (err) {
+      console.warn('No se pudo incrementar boletos_vendidos en pelicula:', err);
+    }
+  }
+
+  private notificarCanalLocal(pelicula: Pelicula): void {
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel('cinetp-peliculas-local');
+        bc.postMessage({ pelicula });
+        bc.close();
+      } catch {}
+    }
+  }
+
+  suscribirCambios(alCambiar: (pelicula: Pelicula) => void): import('@supabase/supabase-js').RealtimeChannel {
+    return this.supabase
+      .channel('cartelera-peliculas-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: this.nombreTabla,
+        },
+        (payload) => {
+          const row = payload.new as Record<string, any> | undefined;
+          if (row?.['id']) {
+            alCambiar(this.mapear(row));
+          }
+        }
+      )
+      .subscribe();
+  }
+
+  async desuscribir(canal: import('@supabase/supabase-js').RealtimeChannel): Promise<void> {
+    await this.supabase.removeChannel(canal);
   }
 
   protected override mapear(data: Record<string, any>): Pelicula {

@@ -43,9 +43,23 @@ export interface ActualizarSalaDto {
   activa?: boolean;
 }
 
+export interface ConfiguracionPreciosButacas {
+  multiplicadorComun: number;
+  multiplicadorVip: number;
+  multiplicadorDiscapacitado: number;
+  precioBaseReferencia: number;
+}
+
+export const CONFIG_PRECIOS_DEFAULT: ConfiguracionPreciosButacas = {
+  multiplicadorComun: 1,
+  multiplicadorVip: 1.5,
+  multiplicadorDiscapacitado: 1,
+  precioBaseReferencia: 5000,
+};
+
 export const PRECIOS_ASIENTO: Record<TipoFila, number> = {
   comun: 5000,
-  discapacitado: 3500,
+  discapacitado: 5000,
   vip: 7500,
 };
 
@@ -54,3 +68,4 @@ export const NOMBRES_TIPO_FILA: Record<TipoFila, string> = {
   discapacitado: 'Discapacitado (2-10-2)',
   vip: 'VIP (4-20-4)',
 };
+

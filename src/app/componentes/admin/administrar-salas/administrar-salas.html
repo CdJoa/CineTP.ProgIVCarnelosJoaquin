@@ -10,6 +10,117 @@
     </button>
   </header>
 
+  <!-- Panel de Tarifas Generales de Butacas -->
+  <section class="tarifas-panel">
+    <div class="tarifas-header">
+      <div class="tarifas-titulo-box">
+        <span class="tarifas-badge-icon">🎟️</span>
+        <div>
+          <h2 class="tarifas-titulo">Tarifas Generales de Butacas</h2>
+          <p class="tarifas-subtitulo">
+            Multiplicadores calculados sobre el <strong>valor de la función</strong> (Normal x1, VIP x1.5, Discapacitados x1). El valor de la función se define al programar o generar funciones.
+          </p>
+        </div>
+      </div>
+      <div class="tarifas-header-btns">
+        <button type="button" class="btn-restablecer-tarifas" (click)="restablecerTarifasDefault()" title="Restablecer a Normal x1, VIP x1.5, Discapacitado x1">
+          ↺ Por Defecto
+        </button>
+        <button type="button" class="btn-guardar-tarifas" (click)="guardarTarifas()" [disabled]="guardandoTarifas()">
+          {{ guardandoTarifas() ? 'Guardando...' : '💾 Guardar Tarifas' }}
+        </button>
+      </div>
+    </div>
+
+    <form [formGroup]="formTarifas" class="tarifas-grid">
+      <!-- Butaca Normal -->
+      <div class="tarifa-card comun-card">
+        <div class="tarifa-card-top">
+          <div class="tarifa-tipo-indicator">
+            <span class="dot comun-dot"></span>
+            <span class="tarifa-tipo-nombre">Normal</span>
+          </div>
+          <span class="factor-badge comun-factor">x{{ formTarifas.get('multiplicadorComun')?.value }}</span>
+        </div>
+        <label class="tarifa-label">Multiplicador función</label>
+        <div class="input-prefix-box">
+          <span class="input-prefix">x</span>
+          <input type="number" step="0.1" min="0.1" formControlName="multiplicadorComun" class="tarifa-input" />
+        </div>
+        <div class="tarifa-calculo-box">
+          <span class="tarifa-ejemplo-lbl">Ejemplo c/ función ${{ formTarifas.get('precioBaseReferencia')?.value || 5000 }}:</span>
+          <strong class="tarifa-ejemplo-val comun-val">${{ calcularEjemplo('comun') }}</strong>
+        </div>
+      </div>
+
+      <!-- Butaca VIP -->
+      <div class="tarifa-card vip-card">
+        <div class="tarifa-card-top">
+          <div class="tarifa-tipo-indicator">
+            <span class="dot vip-dot"></span>
+            <span class="tarifa-tipo-nombre">VIP</span>
+          </div>
+          <span class="factor-badge vip-factor">x{{ formTarifas.get('multiplicadorVip')?.value }}</span>
+        </div>
+        <label class="tarifa-label">Multiplicador función</label>
+        <div class="input-prefix-box">
+          <span class="input-prefix">x</span>
+          <input type="number" step="0.1" min="0.1" formControlName="multiplicadorVip" class="tarifa-input" />
+        </div>
+        <div class="tarifa-calculo-box">
+          <span class="tarifa-ejemplo-lbl">Ejemplo c/ función ${{ formTarifas.get('precioBaseReferencia')?.value || 5000 }}:</span>
+          <strong class="tarifa-ejemplo-val vip-val">${{ calcularEjemplo('vip') }}</strong>
+        </div>
+      </div>
+
+      <!-- Butaca Discapacitado -->
+      <div class="tarifa-card disc-card">
+        <div class="tarifa-card-top">
+          <div class="tarifa-tipo-indicator">
+            <span class="dot disc-dot"></span>
+            <span class="tarifa-tipo-nombre">Discapacitados ♿</span>
+          </div>
+          <span class="factor-badge disc-factor">x{{ formTarifas.get('multiplicadorDiscapacitado')?.value }}</span>
+        </div>
+        <label class="tarifa-label">Multiplicador función</label>
+        <div class="input-prefix-box">
+          <span class="input-prefix">x</span>
+          <input type="number" step="0.1" min="0.1" formControlName="multiplicadorDiscapacitado" class="tarifa-input" />
+        </div>
+        <div class="tarifa-calculo-box">
+          <span class="tarifa-ejemplo-lbl">Ejemplo c/ función ${{ formTarifas.get('precioBaseReferencia')?.value || 5000 }}:</span>
+          <strong class="tarifa-ejemplo-val disc-val">${{ calcularEjemplo('discapacitado') }}</strong>
+        </div>
+      </div>
+
+      <!-- Referencia (Simulador) -->
+      <div class="tarifa-card base-card">
+        <div class="tarifa-card-top">
+          <div class="tarifa-tipo-indicator">
+            <span class="dot base-dot"></span>
+            <span class="tarifa-tipo-nombre">Referencia (Simulador)</span>
+          </div>
+          <span class="factor-badge base-factor">Ejemplo</span>
+        </div>
+        <label class="tarifa-label">Valor función de prueba</label>
+        <div class="input-prefix-box">
+          <span class="input-prefix">$</span>
+          <input type="number" step="100" min="500" formControlName="precioBaseReferencia" class="tarifa-input" />
+        </div>
+        <div class="tarifa-calculo-box">
+          <span class="tarifa-ejemplo-lbl">Simula el cálculo aquí. El precio real se fija al crear las funciones.</span>
+        </div>
+      </div>
+    </form>
+
+    <div *ngIf="mensajeExitoTarifas()" class="alert-tarifas-exito">
+      ✓ {{ mensajeExitoTarifas() }}
+    </div>
+    <div *ngIf="mensajeErrorTarifas()" class="alert-tarifas-error">
+      ⚠ {{ mensajeErrorTarifas() }}
+    </div>
+  </section>
+
   <!-- Filtros -->
   <div class="filtros-bar">
     <div class="buscador-box">

@@ -16,6 +16,7 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
       precio: Number(datos.precio),
       imagen: datos.imagen || null,
       puntaje_compra: Number(datos.puntajeCompra),
+      cantidad_vendida: Number(datos.cantidadVendida || 0),
       activo: true,
     });
   }
@@ -29,8 +30,21 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
     if (datos.precio !== undefined) payload['precio'] = Number(datos.precio);
     if (datos.puntajeCompra !== undefined) payload['puntajeCompra'] = Number(datos.puntajeCompra);
     if (datos.imagen !== undefined) payload['imagen'] = datos.imagen || null;
+    if (datos.cantidadVendida !== undefined) payload['cantidad_vendida'] = Number(datos.cantidadVendida);
 
     return this.actualizarAuto(id, payload);
+  }
+
+  async incrementarCantidadVendida(id: string, cantidad: number = 1): Promise<void> {
+    try {
+      const prod = await this.obtenerPorId(id);
+      if (prod) {
+        const actual = Number(prod.cantidadVendida || 0);
+        await this.actualizarAuto(id, { cantidad_vendida: actual + cantidad });
+      }
+    } catch (err) {
+      console.error('Error al incrementar cantidad vendida de candy:', err);
+    }
   }
 
   protected override mapear(data: Record<string, any>): ProductoCandy {
@@ -42,6 +56,7 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
       precio: data['precio'],
       imagen: data['imagen'],
       puntajeCompra: data['puntaje_compra'] ?? 0,
+      cantidadVendida: Number(data['cantidad_vendida'] ?? data['cantidadVendida'] ?? 0),
       activo: data['activo'] ?? true,
       creadoEn: data['creado_en'],
     };

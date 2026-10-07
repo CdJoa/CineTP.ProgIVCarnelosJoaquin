@@ -99,6 +99,13 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
     turnoMañana: [true],
     turnoTarde: [true],
     turnoNoche: [true],
+    diaLunes: [true],
+    diaMartes: [true],
+    diaMiercoles: [true],
+    diaJueves: [true],
+    diaViernes: [true],
+    diaSabado: [true],
+    diaDomingo: [true],
     prioridad: ['alta' as 'alta' | 'media' | 'baja'],
     precio: [5000],
     esPreventa: [false],
@@ -514,6 +521,42 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
     this.modoAutoGeneracion.set(false);
   }
 
+  seleccionarTodosDias(seleccionado: boolean): void {
+    this.autoForm.patchValue({
+      diaLunes: seleccionado,
+      diaMartes: seleccionado,
+      diaMiercoles: seleccionado,
+      diaJueves: seleccionado,
+      diaViernes: seleccionado,
+      diaSabado: seleccionado,
+      diaDomingo: seleccionado,
+    });
+  }
+
+  seleccionarDiasHabiles(): void {
+    this.autoForm.patchValue({
+      diaLunes: true,
+      diaMartes: true,
+      diaMiercoles: true,
+      diaJueves: true,
+      diaViernes: true,
+      diaSabado: false,
+      diaDomingo: false,
+    });
+  }
+
+  seleccionarFinde(): void {
+    this.autoForm.patchValue({
+      diaLunes: false,
+      diaMartes: false,
+      diaMiercoles: false,
+      diaJueves: false,
+      diaViernes: false,
+      diaSabado: true,
+      diaDomingo: true,
+    });
+  }
+
   async ejecutarAutoGeneracion(): Promise<void> {
     const val = this.autoForm.value;
     if (!val.peliculaId) {
@@ -535,6 +578,20 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
       return;
     }
 
+    const diasSeleccionados: number[] = [];
+    if (val.diaDomingo) diasSeleccionados.push(0);
+    if (val.diaLunes) diasSeleccionados.push(1);
+    if (val.diaMartes) diasSeleccionados.push(2);
+    if (val.diaMiercoles) diasSeleccionados.push(3);
+    if (val.diaJueves) diasSeleccionados.push(4);
+    if (val.diaViernes) diasSeleccionados.push(5);
+    if (val.diaSabado) diasSeleccionados.push(6);
+
+    if (diasSeleccionados.length === 0) {
+      this.mensajeError.set('Debes seleccionar al menos un día de la semana.');
+      return;
+    }
+
     this.guardando.set(true);
     this.mensajeError.set(null);
     this.mensajeExito.set(null);
@@ -545,6 +602,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
         fechaInicio: val.fechaInicio,
         fechaFin: val.fechaFin,
         turnos: turnosSeleccionados,
+        diasSemana: diasSeleccionados,
         prioridad: val.prioridad,
         precio: Number(val.precio || 5000),
         esPreventa: Boolean(val.esPreventa),
