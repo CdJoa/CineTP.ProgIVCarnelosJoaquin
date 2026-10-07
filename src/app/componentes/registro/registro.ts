@@ -69,6 +69,84 @@ export class Registro {
     return this.registroForm.get('confirmPassword');
   }
 
+  diaNacimiento = '';
+  mesNacimiento = '';
+  anioNacimiento = '';
+
+  constructor() {
+    this.registroForm.get('fechaNacimiento')?.valueChanges.subscribe((val) => {
+      if (val && typeof val === 'string' && val.includes('-')) {
+        const partes = val.split('-');
+        if (partes.length === 3) {
+          this.anioNacimiento = partes[0];
+          this.mesNacimiento = partes[1];
+          this.diaNacimiento = partes[2];
+        }
+      } else if (!val) {
+        this.diaNacimiento = '';
+        this.mesNacimiento = '';
+        this.anioNacimiento = '';
+      }
+    });
+  }
+
+  onDiaChange(event: Event, nextInput: HTMLInputElement): void {
+    const input = event.target as HTMLInputElement;
+    this.diaNacimiento = input.value.replace(/\D/g, '').slice(0, 2);
+    input.value = this.diaNacimiento;
+    if (this.diaNacimiento.length === 2) {
+      nextInput.focus();
+    }
+    this.sincronizarFechaNacimiento();
+  }
+
+  onMesChange(event: Event, nextInput: HTMLInputElement): void {
+    const input = event.target as HTMLInputElement;
+    this.mesNacimiento = input.value.replace(/\D/g, '').slice(0, 2);
+    input.value = this.mesNacimiento;
+    if (this.mesNacimiento.length === 2) {
+      nextInput.focus();
+    }
+    this.sincronizarFechaNacimiento();
+  }
+
+  onBackspaceMes(prevInput: HTMLInputElement): void {
+    if (!this.mesNacimiento) {
+      prevInput.focus();
+    }
+  }
+
+  onAnioChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.anioNacimiento = input.value.replace(/\D/g, '').slice(0, 4);
+    input.value = this.anioNacimiento;
+    this.sincronizarFechaNacimiento();
+  }
+
+  onBackspaceAnio(prevInput: HTMLInputElement): void {
+    if (!this.anioNacimiento) {
+      prevInput.focus();
+    }
+  }
+
+  onFechaBlur(): void {
+    this.fechaNacimiento?.markAsTouched();
+  }
+
+  private sincronizarFechaNacimiento(): void {
+    if (!this.diaNacimiento && !this.mesNacimiento && !this.anioNacimiento) {
+      this.fechaNacimiento?.setValue('');
+    } else if (this.diaNacimiento && this.mesNacimiento && this.anioNacimiento && this.anioNacimiento.length === 4) {
+      const d = this.diaNacimiento.padStart(2, '0');
+      const m = this.mesNacimiento.padStart(2, '0');
+      const y = this.anioNacimiento;
+      this.fechaNacimiento?.setValue(`${y}-${m}-${d}`);
+    } else {
+      this.fechaNacimiento?.setValue('invalida');
+    }
+    this.fechaNacimiento?.markAsDirty();
+  }
+
   cargando = signal<boolean>(false);
   mensajeError = signal<string | null>(null);
   mensajeExito = signal<string | null>(null);

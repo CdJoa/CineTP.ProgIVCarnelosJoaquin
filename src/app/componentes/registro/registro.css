@@ -122,6 +122,33 @@
   border-color: #dc3545;
 }
 
+.fecha-tres-cajas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.caja-fecha {
+  text-align: center;
+  font-size: 15px;
+}
+
+.caja-dia,
+.caja-mes {
+  width: 72px !important;
+}
+
+.caja-anio {
+  width: 105px !important;
+}
+
+.separador-fecha {
+  color: #777777;
+  font-size: 16px;
+  font-weight: bold;
+  user-select: none;
+}
+
 .error-text {
   color: #dc3545;
   font-size: 12px;

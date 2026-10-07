@@ -74,17 +74,60 @@
       </div>
 
       <div class="form-group">
-        <label for="fechaNacimiento">Fecha de Nacimiento</label>
-        <input
-          id="fechaNacimiento"
-          type="date"
-          formControlName="fechaNacimiento"
-          [class.invalid]="fechaNacimiento?.invalid && (fechaNacimiento?.dirty || fechaNacimiento?.touched)"
-        />
+        <label>Fecha de Nacimiento</label>
+        <div class="fecha-tres-cajas">
+          <input
+            #diaInput
+            id="fechaNacimiento-dia"
+            type="text"
+            inputmode="numeric"
+            maxlength="2"
+            placeholder="DD"
+            [value]="diaNacimiento"
+            (input)="onDiaChange($event, mesInput)"
+            (blur)="onFechaBlur()"
+            class="caja-fecha caja-dia"
+            [class.invalid]="fechaNacimiento?.invalid && (fechaNacimiento?.dirty || fechaNacimiento?.touched)"
+            aria-label="Día de nacimiento"
+          />
+          <span class="separador-fecha" aria-hidden="true">/</span>
+          <input
+            #mesInput
+            id="fechaNacimiento-mes"
+            type="text"
+            inputmode="numeric"
+            maxlength="2"
+            placeholder="MM"
+            [value]="mesNacimiento"
+            (input)="onMesChange($event, anioInput)"
+            (keydown.backspace)="onBackspaceMes(diaInput)"
+            (blur)="onFechaBlur()"
+            class="caja-fecha caja-mes"
+            [class.invalid]="fechaNacimiento?.invalid && (fechaNacimiento?.dirty || fechaNacimiento?.touched)"
+            aria-label="Mes de nacimiento"
+          />
+          <span class="separador-fecha" aria-hidden="true">/</span>
+          <input
+            #anioInput
+            id="fechaNacimiento-anio"
+            type="text"
+            inputmode="numeric"
+            maxlength="4"
+            placeholder="AAAA"
+            [value]="anioNacimiento"
+            (input)="onAnioChange($event)"
+            (keydown.backspace)="onBackspaceAnio(mesInput)"
+            (blur)="onFechaBlur()"
+            class="caja-fecha caja-anio"
+            [class.invalid]="fechaNacimiento?.invalid && (fechaNacimiento?.dirty || fechaNacimiento?.touched)"
+            aria-label="Año de nacimiento"
+          />
+        </div>
         @if (fechaNacimiento?.invalid && (fechaNacimiento?.dirty || fechaNacimiento?.touched)) {
           <span class="error-text">
             @if (fechaNacimiento?.errors?.['required']) { La fecha de nacimiento es requerida. }
-            @else if (fechaNacimiento?.errors?.['fechaFutura']) { La fecha no puede ser futura. }
+            @else if (fechaNacimiento?.errors?.['fechaMinima']) { El año de nacimiento debe ser a partir de 1900. }
+            @else if (fechaNacimiento?.errors?.['fechaFutura']) { La fecha no puede ser posterior a la actual. }
             @else if (fechaNacimiento?.errors?.['fechaInvalida']) { Fecha no válida. }
           </span>
         }

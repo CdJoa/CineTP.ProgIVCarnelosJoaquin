@@ -64,4 +64,14 @@ describe('Registro', () => {
 
     expect(component.registroForm.valid).toBe(true);
   });
+
+  it('debe invalidar fechas de nacimiento anteriores a 1900 con fechaMinima', () => {
+    component.registroForm.get('fechaNacimiento')?.setValue('1899-12-31');
+    expect(component.fechaNacimiento?.errors?.['fechaMinima']).toBe(true);
+  });
+
+  it('debe invalidar fechas de nacimiento futuras con fechaFutura', () => {
+    component.registroForm.get('fechaNacimiento')?.setValue('2099-01-01');
+    expect(component.fechaNacimiento?.errors?.['fechaFutura']).toBe(true);
+  });
 });
