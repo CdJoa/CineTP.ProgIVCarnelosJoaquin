@@ -1,16 +1,23 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AuditoriaService } from '../../../servicios/auditoria';
 import { AccionAuditoria, RegistroAuditoria } from '../../../models/auditoria';
 
-const NOMBRES_ACCION: Record<AccionAuditoria, string> = {
+const NOMBRES_ACCION: Record<string, string> = {
+  pelicula_creada: 'Película creada',
+  pelicula_editada: 'Película editada',
   funcion_creada: 'Función creada',
+  funcion_editada: 'Función editada',
+  compra_realizada: 'Compra de función',
+  lectura_qr: 'Escaneo de QR',
+  compra_cancelada: 'Cancelación de compra',
   precio_modificado: 'Precio modificado',
-  lectura_qr: 'Validación de QR',
 };
 
 @Component({
   selector: 'app-auditoria',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './auditoria.html',
   styleUrl: './auditoria.css',
 })

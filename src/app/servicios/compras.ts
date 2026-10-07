@@ -7,6 +7,7 @@ import { PeliculasService } from './peliculas';
 import { FuncionesService } from './funciones';
 import { AsientosRealtimeService } from './asientos-realtime';
 import { CuponesService } from './cupones';
+import { AuditoriaService } from './auditoria';
 
 const HORAS_LIMITE_CANCELACION = 2;
 
@@ -26,6 +27,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
   private funcionesService = inject(FuncionesService);
   private asientosRealtime = inject(AsientosRealtimeService);
   private cuponesService = inject(CuponesService);
+  private auditoriaService = inject(AuditoriaService);
 
   protected mapear(data: Record<string, any>): Compra {
     return {
@@ -185,6 +187,13 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       }
     }
 
+    // 5. Registrar evento en auditoría
+    const detalleCompra = `Entradas para "${dto.peliculaTitulo || 'Película'}" en ${dto.salaNombre || 'Sala'} (${dto.asientos.join(', ')}). Total: $${dto.totalFinal}`;
+    void this.auditoriaService.registrar('compra_realizada', detalleCompra, {
+      id: dto.usuarioId,
+      email: dto.usuarioEmail,
+    });
+
     return (await this.enriquecerCompras([compraCreada]))[0];
   }
 
@@ -337,6 +346,17 @@ export class ComprasService extends BaseSupabaseService<Compra> {
 
     this.auth.establecerSaldo(Number(data?.['puntos'] || 0), Number(data?.['credito'] || 0));
 
-    return Number(data?.['credito_acreditado'] || 0);
+    const creditoAcreditado = Number(data?.['credito_acreditado'] || 0);
+
+    void this.auditoriaService.registrar(
+      'compra_cancelada',
+      `Cancelación de entrada #${compra.codigo || compra.id.slice(0, 8)}: "${compra.peliculaTitulo || 'Película'}" (${compra.asientos.join(', ')}). Crédito acreditado: $${creditoAcreditado}`,
+      {
+        id: compra.usuarioId,
+        email: compra.usuarioEmail,
+      }
+    );
+
+    return creditoAcreditado;
   }
 }

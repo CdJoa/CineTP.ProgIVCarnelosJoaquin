@@ -1,15 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CrearPeliculaDto, Pelicula } from '../models/pelicula';
 import { BaseSupabaseService } from './base-supabase';
+import { AuditoriaService } from './auditoria';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PeliculasService extends BaseSupabaseService<Pelicula> {
   protected readonly nombreTabla = 'peliculas';
+  private auditoriaService = inject(AuditoriaService);
 
   async crearPelicula(datos: CrearPeliculaDto): Promise<Pelicula> {
-    return this.insertar({
+    const pelicula = await this.insertar({
       titulo: datos.titulo,
       sinopsis: datos.sinopsis,
       duracion: Number(datos.duracion),
@@ -22,6 +24,13 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       boletos_vendidos: Number(datos.boletosVendidos || 0),
       activa: true,
     });
+
+    void this.auditoriaService.registrar(
+      'pelicula_creada',
+      `Película: "${pelicula.titulo}" (${pelicula.duracion} min, +${pelicula.restriccionEdad})`
+    );
+
+    return pelicula;
   }
 
   async obtenerPeliculas(): Promise<Pelicula[]> {
@@ -40,6 +49,12 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
 
     const res = await this.actualizarAuto(id, payload);
     this.notificarCanalLocal(res);
+
+    void this.auditoriaService.registrar(
+      'pelicula_editada',
+      `Película: "${res.titulo}"`
+    );
+
     return res;
   }
 

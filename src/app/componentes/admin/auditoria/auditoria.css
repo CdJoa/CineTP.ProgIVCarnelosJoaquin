@@ -79,4 +79,95 @@ th {
 
 .celda-fecha {
   white-space: nowrap;
+  color: #555;
+  font-size: 12px;
 }
+
+.celda-nombre {
+  white-space: nowrap;
+}
+
+.celda-email {
+  color: #555;
+  font-size: 12px;
+}
+
+.celda-detalle {
+  max-width: 380px;
+  word-break: break-word;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-rol {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.badge-rol.badge-admin {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.badge-rol.badge-empleado {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-rol.badge-cliente {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.badge-accion {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  text-transform: none;
+  font-size: 12px;
+}
+
+.badge-accion-pelicula_creada,
+.badge-accion-funcion_creada {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.badge-accion-pelicula_editada,
+.badge-accion-funcion_editada,
+.badge-accion-precio_modificado {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.badge-accion-compra_realizada {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #86efac;
+}
+
+.badge-accion-lectura_qr {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.badge-accion-compra_cancelada {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+

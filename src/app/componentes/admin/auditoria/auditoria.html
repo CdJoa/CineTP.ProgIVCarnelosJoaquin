@@ -1,14 +1,14 @@
 <div class="auditoria-container">
   <div class="header-bar">
     <div>
-      <h2>Auditoría</h2>
-      <p>Log de actividad: funciones creadas, precios modificados y QR validados, con fecha y hora.</p>
+      <h2>Auditoría del Sistema</h2>
+      <p>Log de actividad de administradores, empleados y clientes: creación y edición de películas y funciones, compras, validación de QR y cancelaciones.</p>
     </div>
     <button class="btn-primary" [disabled]="cargando()" (click)="cargar()">Actualizar</button>
   </div>
 
   @if (cargando()) {
-    <p class="estado-box">Cargando registros...</p>
+    <p class="estado-box">Cargando registros de auditoría...</p>
   } @else if (error()) {
     <p class="estado-box estado-error">{{ error() }}</p>
   } @else if (registros().length === 0) {
@@ -19,7 +19,9 @@
         <thead>
           <tr>
             <th>Fecha y hora</th>
-            <th>Usuario</th>
+            <th>Nombre</th>
+            <th>Mail</th>
+            <th>Rol</th>
             <th>Acción</th>
             <th>Detalle</th>
           </tr>
@@ -28,9 +30,21 @@
           @for (r of registros(); track r.id) {
             <tr>
               <td class="celda-fecha">{{ formatearFechaHora(r.creadoEn) }}</td>
-              <td>{{ r.usuarioEmail || '-' }}</td>
-              <td>{{ nombreAccion(r.accion) }}</td>
-              <td>{{ r.detalle }}</td>
+              <td class="celda-nombre">
+                <strong>{{ r.usuarioNombre || 'Anónimo' }}</strong>
+              </td>
+              <td class="celda-email">{{ r.usuarioEmail || '-' }}</td>
+              <td>
+                <span class="badge badge-rol badge-{{ r.usuarioRol || 'desconocido' }}">
+                  {{ r.usuarioRol || '-' }}
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-accion badge-accion-{{ r.accion }}">
+                  {{ nombreAccion(r.accion) }}
+                </span>
+              </td>
+              <td class="celda-detalle">{{ r.detalle }}</td>
             </tr>
           }
         </tbody>
@@ -38,3 +52,4 @@
     </div>
   }
 </div>
+

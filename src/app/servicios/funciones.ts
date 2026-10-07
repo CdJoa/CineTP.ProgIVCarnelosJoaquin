@@ -219,6 +219,10 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     const precioAnterior = dto.precio !== undefined ? (await this.obtenerPorId(id))?.precio : undefined;
 
     const actualizada = await this.enriquecerFuncion(await this.actualizar(id, payload), duracionPelicula);
+    void this.auditoriaService.registrar(
+      'funcion_editada',
+      `Función de ${this.describirFuncion(actualizada)} (${actualizada.formato}, ${actualizada.idioma})${precioAnterior !== undefined && precioAnterior !== actualizada.precio ? ` - Precio: $${precioAnterior} → $${actualizada.precio}` : ''}`
+    );
     if (precioAnterior !== undefined && precioAnterior !== actualizada.precio) {
       void this.auditoriaService.registrar(
         'precio_modificado',
