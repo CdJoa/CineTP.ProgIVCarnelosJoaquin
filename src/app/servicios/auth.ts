@@ -158,6 +158,18 @@ export class Auth {
     return this.crearUsuarioBase(datos, 'empleado', true);
   }
 
+  private calcularEdad(fechaNacimiento: string): number {
+    const [anio, mes, dia] = fechaNacimiento.split('-').map(Number);
+    if (!anio || !mes || !dia) return 0;
+
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - anio;
+    if (hoy.getMonth() + 1 < mes || (hoy.getMonth() + 1 === mes && hoy.getDate() < dia)) {
+      edad--;
+    }
+    return Math.max(0, edad);
+  }
+
   private async crearUsuarioBase(
     datos: RegistroUsuarioDto,
     rol: 'cliente' | 'empleado' | 'admin',
@@ -252,6 +264,10 @@ export class Auth {
         // Asignar cupón de registro si es cliente
         if (rol === 'cliente') {
           await this.cuponesService.asignarCuponRegistro(nuevoUsuario.id);
+          await this.cuponesService.asignarCuponesPorEdad(
+            nuevoUsuario.id,
+            this.calcularEdad(nuevoUsuario.fechaNacimiento)
+          );
         }
       } catch (dbError) {
         console.warn('Aviso: perfil guardado en Auth, tabla usuarios pendiente:', dbError);

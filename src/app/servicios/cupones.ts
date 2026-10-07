@@ -53,18 +53,58 @@ export class CuponesService extends BaseSupabaseService<Cupon> {
       }
 
       // Asignar en tabla cupones_usuario
-      await this.supabase.from('cupones_usuario').insert([{
-        usuario_id: usuarioId,
-        cupon_id: cuponRegistro.id,
-        usado: false,
-        asignado_en: new Date().toISOString(),
-      }]);
-
-      return true;
+      return await this.asignarCuponAUsuario(usuarioId, cuponRegistro.id);
     } catch (err) {
       console.warn('Aviso: no se pudo asignar cupón automático de bienvenida:', err);
       return false;
     }
+  }
+
+  /** Asigna los cupones activos para los que el usuario cumple la edad mínima. */
+  async asignarCuponesPorEdad(
+    usuarioId: string,
+    edadUsuario: number,
+    esPrimeraCompra = true
+  ): Promise<boolean> {
+    try {
+      const cuponesPorEdad = (await this.obtenerCuponesActivos()).filter(
+        (cupon) => cupon.edadMinimaRequerida !== undefined &&
+          edadUsuario >= cupon.edadMinimaRequerida &&
+          (!cupon.esPrimeraCompra || esPrimeraCompra)
+      );
+
+      for (const cupon of cuponesPorEdad) {
+        const asignado = await this.asignarCuponAUsuario(usuarioId, cupon.id);
+        if (!asignado) return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.warn('Aviso: no se pudieron asignar cupones por edad:', err);
+      return false;
+    }
+  }
+
+  private async asignarCuponAUsuario(usuarioId: string, cuponId: string): Promise<boolean> {
+    const { data: asignacionExistente, error: errorConsulta } = await this.supabase
+      .from('cupones_usuario')
+      .select('cupon_id')
+      .eq('usuario_id', usuarioId)
+      .eq('cupon_id', cuponId)
+      .maybeSingle();
+
+    if (errorConsulta) throw errorConsulta;
+    if (asignacionExistente) return true;
+
+    const { error } = await this.supabase.from('cupones_usuario').insert([{
+      usuario_id: usuarioId,
+      cupon_id: cuponId,
+      usado: false,
+      asignado_en: new Date().toISOString(),
+    }]);
+
+    if (error) throw error;
+    return true;
   }
 
   /**
@@ -73,6 +113,9 @@ export class CuponesService extends BaseSupabaseService<Cupon> {
    */
   async obtenerCuponesDisponiblesUsuario(usuarioId: string, edadUsuario: number, esPrimeraCompra: boolean): Promise<Cupon[]> {
     try {
+      // También cubre usuarios creados antes de que existiera la asignación automática por edad.
+      await this.asignarCuponesPorEdad(usuarioId, edadUsuario, esPrimeraCompra);
+
       // 1. Consultar directamente en cupones_usuario por usuario_id no usados
       const { data: asignaciones, error: errorAsignaciones } = await this.supabase
         .from('cupones_usuario')
@@ -122,7 +165,7 @@ export class CuponesService extends BaseSupabaseService<Cupon> {
         const cupon = this.mapear(item);
 
         // Validar filtro por edad si requiere edad mínima (ej: 50 años)
-        if (cupon.edadMinimaRequerida && edadUsuario < cupon.edadMinimaRequerida) {
+        if (cupon.edadMinimaRequerida !== undefined && edadUsuario < cupon.edadMinimaRequerida) {
           continue;
         }
 
@@ -160,15 +203,17 @@ export class CuponesService extends BaseSupabaseService<Cupon> {
   }
 
   protected override mapear(data: Record<string, any>): Cupon {
+    const edadMinima = data['edad_minima_requerida'] ?? data['edadMinimaRequerida'];
+
     return {
       id: data['id'],
       codigo: data['codigo'] || '',
       nombre: data['nombre'] || '',
       descripcion: data['descripcion'] || '',
       porcentajeDescuento: Number(data['porcentaje_descuento'] || data['porcentajeDescuento'] || 0),
-      edadMinimaRequerida: data['edad_minima_requerida'] !== undefined
-        ? Number(data['edad_minima_requerida'])
-        : (data['edadMinimaRequerida'] ? Number(data['edadMinimaRequerida']) : undefined),
+      edadMinimaRequerida: edadMinima === null || edadMinima === undefined || edadMinima === ''
+        ? undefined
+        : Number(edadMinima),
       esPrimeraCompra: !!(data['es_primera_compra'] ?? data['esPrimeraCompra']),
       activo: !!(data['activo'] ?? true),
       creadoEn: data['creado_en'] || data['creadoEn'],
