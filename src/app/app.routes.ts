@@ -15,7 +15,6 @@ import { AdministrarCuponesComponent } from './componentes/admin/administrar-cup
 import { PerfilComponent } from './componentes/perfil/perfil';
 import { PagoComponent } from './componentes/pago/pago';
 import { Auditoria } from './componentes/admin/auditoria/auditoria';
-import { ValidarEntrada } from './componentes/empleado/validar-entrada/validar-entrada';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 
@@ -31,7 +30,9 @@ export const routes: Routes = [
   { path: 'pago', component: PagoComponent },
   {
     path: 'empleado/validar',
-    component: ValidarEntrada,
+    // Carga diferida: el lector de QR solo se descarga para el personal
+    loadComponent: () =>
+      import('./componentes/empleado/validar-entrada/validar-entrada').then((m) => m.ValidarEntrada),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['empleado', 'admin'] },
   },
