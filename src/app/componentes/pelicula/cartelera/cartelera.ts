@@ -41,6 +41,14 @@ export class CarteleraComponent implements OnInit, OnDestroy {
     return this.authService.usuarioActual();
   }
 
+  irAProponerPelicula(): void {
+    if (!this.authService.usuarioActual()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/propuestas' } });
+    } else {
+      this.router.navigate(['/propuestas']);
+    }
+  }
+
   resumenesRating = signal<Record<string, ResumenPuntuacion>>({});
   resenasPeliculaActual = signal<Resena[]>([]);
   cargandoResenas = signal<boolean>(false);

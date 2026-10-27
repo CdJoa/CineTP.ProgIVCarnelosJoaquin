@@ -28,32 +28,42 @@
       <p>Descubrí las películas disponibles en nuestras salas</p>
     </div>
 
-    <!-- Pestañas de Filtro -->
-    <div class="filtro-tabs">
+    <div class="cartelera-header-acciones">
       <button
         type="button"
-        class="tab-btn"
-        [class.active]="filtroTipo() === 'cartelera'"
-        (click)="filtroTipo.set('cartelera')"
+        class="btn-proponer-pelicula"
+        (click)="irAProponerPelicula()"
       >
-        🎬 En Cartelera
+        💡 Proponer Película
       </button>
-      <button
-        type="button"
-        class="tab-btn preventa-tab"
-        [class.active]="filtroTipo() === 'preventa'"
-        (click)="filtroTipo.set('preventa')"
-      >
-        ⭐ Preventas
-      </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="filtroTipo() === 'todas'"
-        (click)="filtroTipo.set('todas')"
-      >
-        Todas
-      </button>
+
+      <!-- Pestañas de Filtro -->
+      <div class="filtro-tabs">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="filtroTipo() === 'cartelera'"
+          (click)="filtroTipo.set('cartelera')"
+        >
+          🎬 En Cartelera
+        </button>
+        <button
+          type="button"
+          class="tab-btn preventa-tab"
+          [class.active]="filtroTipo() === 'preventa'"
+          (click)="filtroTipo.set('preventa')"
+        >
+          ⭐ Preventas
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="filtroTipo() === 'todas'"
+          (click)="filtroTipo.set('todas')"
+        >
+          Todas
+        </button>
+      </div>
     </div>
   </div>
 

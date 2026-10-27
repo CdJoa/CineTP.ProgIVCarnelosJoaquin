@@ -27,6 +27,16 @@ export const routes: Routes = [
   { path: 'home', component: Home },
   { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },
   { path: 'mis-peliculas', component: PerfilComponent, canActivate: [authGuard] },
+  {
+    path: 'propuestas',
+    loadComponent: () =>
+      import('./componentes/propuestas/propuestas').then(
+        (m) => m.PropuestasComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['cliente'] },
+  },
+  { path: 'proponer-pelicula', redirectTo: 'propuestas', pathMatch: 'full' },
   { path: 'sala', component: MapaSalaComponent },
   { path: 'candy', component: SeleccionCandyComponent },
   { path: 'pago', component: PagoComponent },
@@ -47,6 +57,13 @@ export const routes: Routes = [
       { path: '', redirectTo: 'peliculas', pathMatch: 'full' },
       { path: 'peliculas', component: AdministrarPeliculas },
       { path: 'peliculas/nueva', redirectTo: 'peliculas', pathMatch: 'full' },
+      {
+        path: 'propuestas',
+        loadComponent: () =>
+          import('./componentes/admin/administrar-propuestas/administrar-propuestas').then(
+            (m) => m.AdministrarPropuestasComponent
+          ),
+      },
       { path: 'funciones', component: AdministrarFunciones },
       { path: 'funciones/nueva', redirectTo: 'funciones', pathMatch: 'full' },
       { path: 'candy', component: AdministrarCandy },

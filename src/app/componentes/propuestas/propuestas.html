@@ -1,0 +1,195 @@
+<div class="form-container">
+  <div class="form-card">
+    <div class="form-header">
+      <h2 class="form-title">Proponer Película</h2>
+      <p class="form-subtitle">
+        ¡Tu opinión nos importa! Cuéntanos qué película te gustaría ver en cartelera.
+      </p>
+    </div>
+
+    @if (mensajeError()) {
+      <div class="alert-error">
+        <span>{{ mensajeError() }}</span>
+      </div>
+    }
+
+    @if (mensajeExito()) {
+      <div class="alert-success">
+        <span>{{ mensajeExito() }}</span>
+      </div>
+    }
+
+    @if (cargando()) {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>Verificando tu estado de propuestas...</p>
+      </div>
+    } @else {
+      <!-- Caso 1: El cliente ya tiene una propuesta activa (pendiente) -->
+      @if (propuestaActiva() && propuestaActiva()?.estado === 'pendiente' && !mostrarFormularioNueva()) {
+        <div class="propuesta-activa-card">
+          <div class="propuesta-header">
+            <span class="badge-estado badge-pendiente">🟡 Pendiente de Revisión</span>
+            <span class="propuesta-fecha">{{ propuestaActiva()?.createdAt | date:'mediumDate' }}</span>
+          </div>
+
+          <div class="propuesta-info">
+            <div class="info-item">
+              <span class="info-label">Título Propuesto:</span>
+              <h3 class="info-titulo">{{ propuestaActiva()?.titulo }}</h3>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">Descripción / Sinopsis:</span>
+              <p class="info-texto">{{ propuestaActiva()?.descripcion }}</p>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">¿Por qué quieres esta película en el cine?:</span>
+              <p class="info-texto explicacion">{{ propuestaActiva()?.explicacion }}</p>
+            </div>
+          </div>
+
+          <div class="aviso-unica-propuesta">
+            <p>
+              ℹ️ <strong>Cada cliente puede tener una propuesta activa a la vez.</strong> Nuestro equipo de programación está evaluando tu pedido. Si necesitas cambiarla, puedes cancelarla para redactar una nueva.
+            </p>
+          </div>
+
+          <div class="propuesta-actions">
+            <button
+              type="button"
+              class="btn-cancelar-propuesta"
+              (click)="cancelarPropuestaActual()"
+              [disabled]="cancelando()"
+            >
+              @if (cancelando()) {
+                <span class="spinner-small"></span> Cancelando...
+              } @else {
+                🗑️ Cancelar esta propuesta y redactar otra
+              }
+            </button>
+            <a routerLink="/home" class="btn-secondary">Volver al Inicio</a>
+          </div>
+        </div>
+      }
+
+      <!-- Caso 2: El cliente tuvo una propuesta previa que ya fue resuelta (aceptada o rechazada) -->
+      @else if (propuestaActiva() && propuestaActiva()?.estado !== 'pendiente' && !mostrarFormularioNueva()) {
+        <div class="propuesta-resuelta-card">
+          <div class="propuesta-header">
+            @if (propuestaActiva()?.estado === 'aceptada') {
+              <span class="badge-estado badge-aceptada">🟢 ¡Propuesta Aceptada!</span>
+            } @else {
+              <span class="badge-estado badge-rechazada">🔴 Propuesta No Aceptada</span>
+            }
+            <span class="propuesta-fecha">{{ propuestaActiva()?.createdAt | date:'mediumDate' }}</span>
+          </div>
+
+          <div class="resultado-mensaje">
+            @if (propuestaActiva()?.estado === 'aceptada') {
+              <p>
+                🎉 ¡Excelente noticia! Tu propuesta para <strong>"{{ propuestaActiva()?.titulo }}"</strong> fue aceptada por la administración y se encuentra en proceso de incorporación a nuestra cartelera.
+              </p>
+            } @else {
+              <p>
+                Gracias por tu propuesta de <strong>"{{ propuestaActiva()?.titulo }}"</strong>. Lamentablemente en este momento no es posible incluirla en la programación de salas.
+              </p>
+            }
+          </div>
+
+          <div class="propuesta-actions">
+            <button type="button" class="btn-primary" (click)="habilitarNuevaPropuesta()">
+              💡 Enviar una nueva propuesta
+            </button>
+            <a routerLink="/home" class="btn-secondary">Volver al Inicio</a>
+          </div>
+        </div>
+      }
+
+      <!-- Caso 3: Formulario para enviar propuesta -->
+      @else {
+        <form [formGroup]="propuestaForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+          <div class="info-box">
+            <p>
+              💡 Puedes sugerir películas que actualmente no estén en cartelera. <strong>Solo una propuesta activa a la vez</strong>. Nuestro equipo revisará tu solicitud.
+            </p>
+          </div>
+
+          <!-- Título -->
+          <div class="form-group">
+            <label for="titulo">Título de la Película *</label>
+            <input
+              id="titulo"
+              type="text"
+              formControlName="titulo"
+              placeholder="Ej: Inception, El Secreto de sus Ojos, etc."
+              [class.invalid]="titulo?.invalid && (titulo?.dirty || titulo?.touched)"
+            />
+            @if (titulo?.invalid && (titulo?.dirty || titulo?.touched)) {
+              <span class="error-text">
+                @if (titulo?.errors?.['required']) { El título es requerido. }
+                @else if (titulo?.errors?.['minlength']) { Mínimo 2 caracteres. }
+                @else if (titulo?.errors?.['maxlength']) { Máximo 100 caracteres. }
+              </span>
+            }
+          </div>
+
+          <!-- Descripción -->
+          <div class="form-group">
+            <label for="descripcion">Descripción / De qué trata la película *</label>
+            <textarea
+              id="descripcion"
+              rows="3"
+              formControlName="descripcion"
+              placeholder="Describe brevemente la trama o de qué trata la película..."
+              [class.invalid]="descripcion?.invalid && (descripcion?.dirty || descripcion?.touched)"
+            ></textarea>
+            @if (descripcion?.invalid && (descripcion?.dirty || descripcion?.touched)) {
+              <span class="error-text">
+                @if (descripcion?.errors?.['required']) { La descripción es requerida. }
+                @else if (descripcion?.errors?.['minlength']) { Mínimo 10 caracteres. }
+                @else if (descripcion?.errors?.['maxlength']) { Máximo 600 caracteres. }
+              </span>
+            }
+          </div>
+
+          <!-- Explicación -->
+          <div class="form-group">
+            <label for="explicacion">¿Por qué quieres esta película en el cine? *</label>
+            <textarea
+              id="explicacion"
+              rows="3"
+              formControlName="explicacion"
+              placeholder="Cuéntanos por qué consideras que el público del cine disfrutaría esta película en pantalla grande..."
+              [class.invalid]="explicacion?.invalid && (explicacion?.dirty || explicacion?.touched)"
+            ></textarea>
+            @if (explicacion?.invalid && (explicacion?.dirty || explicacion?.touched)) {
+              <span class="error-text">
+                @if (explicacion?.errors?.['required']) { La explicación es requerida. }
+                @else if (explicacion?.errors?.['minlength']) { Mínimo 10 caracteres. }
+                @else if (explicacion?.errors?.['maxlength']) { Máximo 600 caracteres. }
+              </span>
+            }
+          </div>
+
+          <div class="form-actions">
+            <a routerLink="/home" class="btn-secondary">Cancelar</a>
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="propuestaForm.invalid || enviando()"
+            >
+              @if (enviando()) {
+                <span class="spinner"></span>
+                <span>Enviando propuesta...</span>
+              } @else {
+                <span>Enviar Propuesta</span>
+              }
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </div>
+</div>

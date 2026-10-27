@@ -1,0 +1,161 @@
+<div class="admin-propuestas-container">
+  <div class="header-bar">
+    <div>
+      <h2>💡 Propuestas de Películas de Clientes</h2>
+      <p>Revisa las sugerencias de los clientes para sumar nuevas películas a la cartelera</p>
+    </div>
+    @if (cantidadPendientes() > 0) {
+      <span class="badge-pendientes-total">
+        {{ cantidadPendientes() }} pendiente{{ cantidadPendientes() === 1 ? '' : 's' }}
+      </span>
+    }
+  </div>
+
+  @if (mensajeError()) {
+    <div class="alert-error">
+      <span>{{ mensajeError() }}</span>
+    </div>
+  }
+
+  @if (mensajeExito()) {
+    <div class="alert-success">
+      <span>{{ mensajeExito() }}</span>
+    </div>
+  }
+
+  <!-- Filtros de estado -->
+  <div class="filtros-bar">
+    <button
+      type="button"
+      class="filtro-btn"
+      [class.active]="filtroEstado() === 'todas'"
+      (click)="cambiarFiltro('todas')"
+    >
+      Todas ({{ propuestas().length }})
+    </button>
+    <button
+      type="button"
+      class="filtro-btn"
+      [class.active]="filtroEstado() === 'pendiente'"
+      (click)="cambiarFiltro('pendiente')"
+    >
+      🟡 Pendientes ({{ cantidadPendientes() }})
+    </button>
+    <button
+      type="button"
+      class="filtro-btn"
+      [class.active]="filtroEstado() === 'aceptada'"
+      (click)="cambiarFiltro('aceptada')"
+    >
+      🟢 Aceptadas
+    </button>
+    <button
+      type="button"
+      class="filtro-btn"
+      [class.active]="filtroEstado() === 'rechazada'"
+      (click)="cambiarFiltro('rechazada')"
+    >
+      🔴 Rechazadas
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="loading-box">
+      <span class="spinner"></span>
+      <p>Cargando propuestas de clientes...</p>
+    </div>
+  } @else {
+    @if (propuestasFiltradas().length === 0) {
+      <div class="empty-state">
+        <p>No se encontraron propuestas con el filtro seleccionado.</p>
+      </div>
+    } @else {
+      <div class="propuestas-grid">
+        @for (prop of propuestasFiltradas(); track prop.id) {
+          <div class="propuesta-card" [class.card-pendiente]="prop.estado === 'pendiente'">
+            <div class="card-header">
+              <div class="cliente-meta">
+                <span class="cliente-nombre">👤 {{ prop.usuarioNombre }}</span>
+                <span class="cliente-email">&lt;{{ prop.usuarioEmail }}&gt;</span>
+                <span class="prop-fecha">{{ prop.createdAt | date:'short' }}</span>
+              </div>
+              <span
+                class="badge-estado"
+                [class.badge-pendiente]="prop.estado === 'pendiente'"
+                [class.badge-aceptada]="prop.estado === 'aceptada'"
+                [class.badge-rechazada]="prop.estado === 'rechazada'"
+              >
+                {{ prop.estado === 'pendiente' ? '🟡 Pendiente' : (prop.estado === 'aceptada' ? '🟢 Aceptada' : '🔴 Rechazada') }}
+              </span>
+            </div>
+
+            <div class="card-body">
+              <h3 class="pelicula-titulo">🎬 {{ prop.titulo }}</h3>
+
+              <div class="seccion-info">
+                <label>Descripción / Sinopsis:</label>
+                <p class="texto-sinopsis">{{ prop.descripcion }}</p>
+              </div>
+
+              <div class="seccion-info">
+                <label>¿Por qué la quieren en el cine?:</label>
+                <p class="texto-explicacion">{{ prop.explicacion }}</p>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              @if (prop.estado === 'pendiente') {
+                <div class="acciones-propuesta">
+                  <button
+                    type="button"
+                    class="btn-rechazar"
+                    [disabled]="procesandoId() === prop.id"
+                    (click)="rechazarPropuesta(prop)"
+                  >
+                    @if (procesandoId() === prop.id) {
+                      <span class="spinner-small"></span>
+                    } @else {
+                      ✖ Rechazar
+                    }
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-aceptar"
+                    [disabled]="procesandoId() === prop.id"
+                    (click)="aceptarPropuesta(prop)"
+                  >
+                    @if (procesandoId() === prop.id) {
+                      <span class="spinner-small"></span> Cargando...
+                    } @else {
+                      ✔ Aceptar y Crear Película
+                    }
+                  </button>
+                </div>
+              } @else {
+                <div class="estado-resuelto-info">
+                  @if (prop.estado === 'aceptada') {
+                    <span class="resuelto-texto texto-verde">
+                      ✔ Aceptada. Puedes darla de alta en cualquier momento:
+                    </span>
+                    <button
+                      type="button"
+                      class="btn-crear-nuevo"
+                      (click)="aceptarPropuesta(prop)"
+                    >
+                      Cargar en Cartelera
+                    </button>
+                  } @else {
+                    <span class="resuelto-texto texto-rojo">
+                      ✖ Propuesta rechazada
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

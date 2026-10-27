@@ -36,6 +36,18 @@
         <p class="metrica-desc">Saldo disponible para canjear en tus próximas entradas</p>
       </div>
     </div>
+
+    <!-- Métrica de Propuesta -->
+    <div class="metrica-card propuesta" *ngIf="propuestaUsuario() as prop" (click)="cambiarTab('propuesta')" style="cursor: pointer;">
+      <div class="metrica-icon">💡</div>
+      <div class="metrica-content">
+        <span class="metrica-lbl">Mi Propuesta</span>
+        <strong class="metrica-valor" [class.texto-pendiente]="prop.estado === 'pendiente'" [class.texto-aceptada]="prop.estado === 'aceptada'" [class.texto-rechazada]="prop.estado === 'rechazada'">
+          {{ prop.estado === 'pendiente' ? '🟡 Pendiente' : (prop.estado === 'aceptada' ? '🟢 Aceptada' : '🔴 Rechazada') }}
+        </strong>
+        <p class="metrica-desc">"{{ prop.titulo }}" (Ver detalles)</p>
+      </div>
+    </div>
   </section>
 
   <!-- Navegación de Pestañas del Perfil -->
@@ -59,6 +71,23 @@
     >
       🎟️ Mis Tickets y Entradas
       <span class="tab-badge" *ngIf="compras().length > 0">{{ compras().length }}</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="tabActiva() === 'propuesta'"
+      (click)="cambiarTab('propuesta')"
+    >
+      💡 Mi Propuesta
+      <span
+        class="tab-badge badge-estado-tab"
+        [class.badge-tab-pendiente]="propuestaUsuario()?.estado === 'pendiente'"
+        [class.badge-tab-aceptada]="propuestaUsuario()?.estado === 'aceptada'"
+        [class.badge-tab-rechazada]="propuestaUsuario()?.estado === 'rechazada'"
+        *ngIf="propuestaUsuario()"
+      >
+        {{ propuestaUsuario()?.estado === 'pendiente' ? 'Pendiente' : (propuestaUsuario()?.estado === 'aceptada' ? 'Aceptada' : 'Rechazada') }}
+      </span>
     </button>
     <button
       type="button"
@@ -434,6 +463,85 @@
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- SECCIÓN: MI PROPUESTA DE PELÍCULA                       -->
+  <!-- ======================================================== -->
+  <section class="perfil-seccion mi-propuesta-seccion" *ngIf="tabActiva() === 'propuesta'">
+    <div class="seccion-header-row">
+      <div>
+        <h2 class="seccion-titulo">💡 Mi Propuesta de Película</h2>
+        <p class="seccion-subtitulo">
+          Consultá el estado y seguimiento de la película que propusiste para sumar a cartelera.
+        </p>
+      </div>
+      <a routerLink="/propuestas" class="link-explorar">
+        {{ propuestaUsuario() && propuestaUsuario()?.estado === 'pendiente' ? 'Gestionar Propuesta →' : '+ Proponer Película →' }}
+      </a>
+    </div>
+
+    <div *ngIf="cargandoPropuesta()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando información de tu propuesta...</p>
+    </div>
+
+    <div *ngIf="!cargandoPropuesta()">
+      <div *ngIf="propuestaUsuario() as prop" class="propuesta-perfil-card" [class.estado-pendiente]="prop.estado === 'pendiente'" [class.estado-aceptada]="prop.estado === 'aceptada'" [class.estado-rechazada]="prop.estado === 'rechazada'">
+        <div class="propuesta-card-top">
+          <div class="estado-badge-row">
+            <span *ngIf="prop.estado === 'pendiente'" class="badge-estado-perfil badge-pendiente">🟡 En Revisión por el Cine</span>
+            <span *ngIf="prop.estado === 'aceptada'" class="badge-estado-perfil badge-aceptada">🟢 ¡Propuesta Aceptada!</span>
+            <span *ngIf="prop.estado === 'rechazada'" class="badge-estado-perfil badge-rechazada">🔴 Propuesta No Seleccionada</span>
+            <span class="propuesta-fecha-perfil">Enviada el {{ prop.createdAt | date:'mediumDate' }}</span>
+          </div>
+
+          <h3 class="propuesta-titulo-perfil">🎬 {{ prop.titulo }}</h3>
+        </div>
+
+        <div class="propuesta-card-body">
+          <div class="propuesta-campo">
+            <span class="campo-label">Sinopsis / Descripción:</span>
+            <p class="campo-valor">{{ prop.descripcion }}</p>
+          </div>
+
+          <div class="propuesta-campo">
+            <span class="campo-label">¿Por qué quieres esta película en el cine?:</span>
+            <p class="campo-valor campo-explicacion">{{ prop.explicacion }}</p>
+          </div>
+
+          <div class="propuesta-mensaje-estado">
+            <div *ngIf="prop.estado === 'pendiente'" class="mensaje-alerta alerta-info">
+              ℹ️ <strong>Tu propuesta está siendo revisada:</strong> Nuestro equipo de programación está evaluando sumar "{{ prop.titulo }}" a las salas. Recuerda que se permite una propuesta activa por cliente a la vez.
+            </div>
+            <div *ngIf="prop.estado === 'aceptada'" class="mensaje-alerta alerta-exito">
+              🎉 <strong>¡Tu propuesta fue aceptada!</strong> La administración aprobó "{{ prop.titulo }}" para ser incorporada a la cartelera. Ya puedes proponer otro título si lo deseas.
+            </div>
+            <div *ngIf="prop.estado === 'rechazada'" class="mensaje-alerta alerta-neutra">
+              Agradecemos mucho tu propuesta de "{{ prop.titulo }}". En este momento no fue posible incorporarla a la cartelera, pero puedes proponer una nueva película cuando gustes.
+            </div>
+          </div>
+        </div>
+
+        <div class="propuesta-card-footer">
+          <a *ngIf="prop.estado === 'pendiente'" routerLink="/propuestas" class="btn-ir-propuesta">
+            Ver o Cancelar Propuesta
+          </a>
+          <a *ngIf="prop.estado !== 'pendiente'" routerLink="/propuestas" class="btn-ir-propuesta btn-nueva">
+            💡 Enviar una Nueva Propuesta
+          </a>
+        </div>
+      </div>
+
+      <div *ngIf="!propuestaUsuario()" class="empty-propuesta-box">
+        <div class="empty-icon">💡</div>
+        <h3>No tienes ninguna propuesta activa</h3>
+        <p>¿Hay alguna película que te gustaría ver en nuestras salas? Cuéntanos tu sugerencia.</p>
+        <a routerLink="/propuestas" class="btn-crear-propuesta">
+          Proponer una Película
+        </a>
       </div>
     </div>
   </section>

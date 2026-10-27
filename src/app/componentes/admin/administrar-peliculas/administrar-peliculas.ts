@@ -1,6 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Pelicula, GenerosPelicula } from '../../../models/pelicula';
 import { PeliculasService } from '../../../servicios/peliculas';
 import { CartaPelicula } from '../../pelicula/carta-pelicula/carta-pelicula';
@@ -14,8 +15,9 @@ import { AdministrarBase } from '../administrar-base';
   templateUrl: './administrar-peliculas.html',
   styleUrl: './administrar-peliculas.css',
 })
-export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
+export class AdministrarPeliculas extends AdministrarBase<Pelicula> implements OnInit {
   private peliculasService = inject(PeliculasService);
+  private route = inject(ActivatedRoute);
 
   readonly generosList = GENEROS_PELICULA;
 
@@ -43,6 +45,23 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> {
   get peliculaEditandoPreview(): Pelicula | null {
     if (!this.modoModal()) return null;
     return generarPreviewPelicula(this.editForm.value, this.generosSeleccionados(), this.peliculaEditando() || undefined);
+  }
+
+  override async ngOnInit(): Promise<void> {
+    await super.ngOnInit();
+
+    // Si viene derivado desde una propuesta aceptada
+    const queryParams = this.route.snapshot.queryParams;
+    if (queryParams['titulo']) {
+      this.abrirCreacion();
+      this.editForm.patchValue({
+        titulo: queryParams['titulo'] || '',
+        sinopsis: queryParams['sinopsis'] || '',
+      });
+      this.mensajeExito.set(
+        `¡Propuesta aceptada! Datos de "${queryParams['titulo']}" precargados. Completa la duración, géneros y poster para publicarla.`
+      );
+    }
   }
 
   protected override cargarData(): Promise<Pelicula[]> {

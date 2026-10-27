@@ -9,7 +9,6 @@
       <a *appEmpleado routerLink="/empleado/validar" class="nav-link nav-admin">Validar Entradas</a>
       <a *appAdmin routerLink="/admin" class="nav-link nav-admin">Panel Admin</a>
       @if (usuario.rol === 'cliente') {
-        <a routerLink="/mis-peliculas" class="nav-link nav-mis-peliculas">🎬 Mis Películas</a>
         <a routerLink="/perfil" class="nav-link nav-perfil">Mi Perfil</a>
       }
       <button type="button" (click)="cerrarSesion()" class="nav-btn">Cerrar Sesión</button>

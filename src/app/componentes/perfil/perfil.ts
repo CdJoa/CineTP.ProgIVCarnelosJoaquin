@@ -5,12 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { Auth } from '../../servicios/auth';
 import { ComprasService } from '../../servicios/compras';
 import { ResenasService } from '../../servicios/resenas';
+import { PropuestasService } from '../../servicios/propuestas';
 import { Compra } from '../../models/compra';
 import { Resena } from '../../models/resena';
+import { PropuestaPelicula } from '../../models/propuesta';
 import { RatingEstrellas } from '../pelicula/rating-estrellas/rating-estrellas';
 import { HoverZoomDirective } from '../../directivas/hover-zoom.directive';
 
-export type TabPerfil = 'peliculas' | 'entradas' | 'datos';
+export type TabPerfil = 'peliculas' | 'entradas' | 'propuesta' | 'datos';
 export type FiltroCalificacion = 'todas' | 'calificadas' | 'sin_calificar';
 export type OrdenHistorial = 'fecha_desc' | 'fecha_asc' | 'calif_desc';
 
@@ -25,11 +27,16 @@ export class PerfilComponent implements OnInit {
   authService = inject(Auth);
   private comprasService = inject(ComprasService);
   private resenasService = inject(ResenasService);
+  private propuestasService = inject(PropuestasService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   // Pestaña activa
   tabActiva = signal<TabPerfil>('peliculas');
+
+  // Propuesta del usuario
+  propuestaUsuario = signal<PropuestaPelicula | null>(null);
+  cargandoPropuesta = signal<boolean>(true);
 
   // Compras y reseñas
   compras = signal<Compra[]>([]);
@@ -164,16 +171,37 @@ export class PerfilComponent implements OnInit {
         this.tabActiva.set('peliculas');
       } else if (params['tab'] === 'entradas' || params['seccion'] === 'entradas') {
         this.tabActiva.set('entradas');
+      } else if (params['tab'] === 'propuesta' || params['seccion'] === 'propuesta') {
+        this.tabActiva.set('propuesta');
       } else if (params['tab'] === 'datos' || params['seccion'] === 'datos') {
         this.tabActiva.set('datos');
       }
     });
 
-    await Promise.all([this.cargarCompras(), this.cargarResenas()]);
+    await Promise.all([this.cargarCompras(), this.cargarResenas(), this.cargarPropuesta()]);
   }
 
   cambiarTab(tab: TabPerfil): void {
     this.tabActiva.set(tab);
+  }
+
+  async cargarPropuesta(): Promise<void> {
+    this.cargandoPropuesta.set(true);
+    const u = this.usuario;
+    if (u) {
+      try {
+        const activa = await this.propuestasService.obtenerPropuestaActiva(u.id);
+        if (activa) {
+          this.propuestaUsuario.set(activa);
+        } else {
+          const ultima = await this.propuestasService.obtenerUltimaPropuestaUsuario(u.id);
+          this.propuestaUsuario.set(ultima);
+        }
+      } catch (err) {
+        console.warn('Error al cargar propuesta en perfil:', err);
+      }
+    }
+    this.cargandoPropuesta.set(false);
   }
 
   async cargarCompras(): Promise<void> {
