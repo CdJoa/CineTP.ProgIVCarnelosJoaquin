@@ -1,0 +1,500 @@
+.graficos-container {
+  padding: 1.75rem 2rem 4rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #0f172a;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+/* ENCABEZADO */
+.graficos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.header-titular {
+  flex: 1;
+  min-width: 280px;
+}
+
+.header-tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.header-titulo {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0 0 0.4rem;
+}
+
+.header-subtitulo {
+  font-size: 0.92rem;
+  color: #64748b;
+  margin: 0;
+  max-width: 700px;
+  line-height: 1.45;
+}
+
+/* BARRA DE PERÍODO */
+.periodo-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.periodo-titular {
+  display: flex;
+  flex-direction: column;
+}
+
+.periodo-lbl {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.periodo-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.periodo-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.periodo-chip {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.periodo-chip:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.periodo-chip.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+}
+
+/* CARDS DE LÍDERES "HALL OF FAME" */
+.destacados-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.lider-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.lider-card.pelicula-lider {
+  border-top: 4px solid #3b82f6;
+}
+
+.lider-card.candy-lider {
+  border-top: 4px solid #f59e0b;
+}
+
+.lider-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #1d4ed8;
+  background: #dbeafe;
+  padding: 4px 10px;
+  border-radius: 6px;
+  align-self: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.lider-badge.candy {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.lider-contenido {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.lider-poster {
+  width: 75px;
+  height: 110px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.lider-poster-placeholder {
+  width: 75px;
+  height: 110px;
+  border-radius: 8px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.candy-lider-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #fef3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.75rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.lider-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.lider-sub-tag {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.lider-nombre {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0.2rem 0 0.5rem;
+  line-height: 1.25;
+}
+
+.lider-stat-destacado {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.lider-stat-num {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.lider-stat-lbl {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.lider-recaudacion {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.lider-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  padding: 1.5rem 0;
+}
+
+/* ======================================================== */
+/* GRÁFICOS VISUALES COMPARATIVOS DE BARRAS                */
+/* ======================================================== */
+.graficos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 1.75rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 600px) {
+  .graficos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grafico-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.grafico-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.grafico-titulo {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.grafico-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.grafico-badge.candy {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.grafico-subtitulo {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.grafico-total-badge {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.grafico-total-badge.candy {
+  background: #fefce8;
+  border-color: #fef08a;
+}
+
+.grafico-total-badge strong {
+  color: #0f172a;
+}
+
+/* LISTA DE BARRAS */
+.barras-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.barra-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.barra-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.barra-titulo-col {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.ranking-medalla {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.barra-nombre {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barra-valores-col {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.valor-primario {
+  font-size: 0.88rem;
+  color: #0f172a;
+}
+
+.valor-primario strong {
+  font-size: 1rem;
+}
+
+.valor-secundario {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* TRACK Y FILL DE LA BARRA */
+.barra-track {
+  width: 100%;
+  height: 22px;
+  background: #f1f5f9;
+  border-radius: 7px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.barra-fill {
+  height: 100%;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 24px;
+}
+
+.pelicula-fill {
+  background: linear-gradient(90deg, #38bdf8, #2563eb);
+}
+
+.candy-fill {
+  background: linear-gradient(90deg, #fbbf24, #d97706);
+}
+
+.barra-item.top-1 .pelicula-fill {
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.barra-item.top-1 .candy-fill {
+  background: linear-gradient(90deg, #f59e0b, #b45309);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+}
+
+.barra-fill-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.grafico-vacio {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.btn-cambiar-periodo {
+  margin-top: 0.75rem;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* CARGA Y ERRORES */
+.cargando-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3.5rem;
+  color: #64748b;
+  gap: 0.75rem;
+}
+
+.spinner-mini {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.alerta-error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}

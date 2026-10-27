@@ -46,6 +46,22 @@
   text-decoration: none;
 }
 
+.nav-mis-peliculas {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.nav-mis-peliculas:hover {
+  background: #f59e0b;
+  color: #000000;
+  text-decoration: none;
+}
+
 .user-greeting {
   color: #ffffff;
   font-size: 14px;

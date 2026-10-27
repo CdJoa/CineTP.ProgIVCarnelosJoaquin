@@ -18,7 +18,18 @@
   </div>
 
   <div class="pelicula-info">
-    <h3 class="pelicula-titulo">{{ pelicula().titulo }}</h3>
+    <div class="pelicula-header-card">
+      <h3 class="pelicula-titulo">{{ pelicula().titulo }}</h3>
+      @if (rating(); as r) {
+        <div class="rating-badge-card" [title]="r.total > 0 ? (r.promedio + ' estrellas (' + r.total + ' opiniones)') : 'Sin opiniones todavía'">
+          <span class="star-icon">⭐</span>
+          <span class="rating-num">{{ r.promedio > 0 ? (r.promedio | number:'1.1-1') : 'Nuevo' }}</span>
+          @if (r.total > 0) {
+            <span class="rating-cant">({{ r.total }})</span>
+          }
+        </div>
+      }
+    </div>
     
     <div class="pelicula-metadatos">
       <span>{{ pelicula().duracion }} min</span>

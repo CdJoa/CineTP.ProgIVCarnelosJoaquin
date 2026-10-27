@@ -15,6 +15,7 @@ import { AdministrarCuponesComponent } from './componentes/admin/administrar-cup
 import { PerfilComponent } from './componentes/perfil/perfil';
 import { PagoComponent } from './componentes/pago/pago';
 import { Auditoria } from './componentes/admin/auditoria/auditoria';
+import { GraficosVentasComponent } from './componentes/admin/graficos-ventas/graficos-ventas';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 
@@ -25,6 +26,7 @@ export const routes: Routes = [
   { path: 'register', redirectTo: 'registro', pathMatch: 'full' },
   { path: 'home', component: Home },
   { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },
+  { path: 'mis-peliculas', component: PerfilComponent, canActivate: [authGuard] },
   { path: 'sala', component: MapaSalaComponent },
   { path: 'candy', component: SeleccionCandyComponent },
   { path: 'pago', component: PagoComponent },
@@ -55,6 +57,15 @@ export const routes: Routes = [
       { path: 'cupones/nuevo', redirectTo: 'cupones', pathMatch: 'full' },
       { path: 'empleados/nuevo', component: RegistrarEmpleado },
       { path: 'auditoria', component: Auditoria },
+      {
+        path: 'facturacion',
+        //lazy loading):jsPDF y XLSX
+        loadComponent: () =>
+          import('./componentes/admin/reporte-facturacion/reporte-facturacion').then(
+            (m) => m.ReporteFacturacionComponent
+          ),
+      },
+      { path: 'graficos', component: GraficosVentasComponent },
     ],
   },
   { path: '**', redirectTo: 'login' },

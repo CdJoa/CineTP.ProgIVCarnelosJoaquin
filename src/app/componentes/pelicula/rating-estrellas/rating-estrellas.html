@@ -1,0 +1,59 @@
+<div
+  class="rating-container"
+  [class.readonly]="soloLectura"
+  [class.tamano-sm]="tamano === 'sm'"
+  [class.tamano-md]="tamano === 'md'"
+  [class.tamano-lg]="tamano === 'lg'"
+  (mouseleave)="onMouseLeave()"
+>
+  <div class="estrellas-row">
+    @for (i of estrellasIndices; track i) {
+      <div class="star-item">
+        <!-- Estrella de fondo vacía -->
+        <svg viewBox="0 0 24 24" class="star-svg star-empty" aria-hidden="true">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+        </svg>
+
+        <!-- Capa de relleno dorado (ancho en porcentaje: 0%, 50% o 100%) -->
+        <div class="star-fill-clip" [style.width.%]="obtenerPorcentajeEstrella(i)">
+          <svg viewBox="0 0 24 24" class="star-svg star-filled" aria-hidden="true">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+        </div>
+
+        <!-- Zonas interactivas para mitad izquierda (0.5) y derecha (1.0) -->
+        @if (!soloLectura) {
+          <div
+            class="star-hitbox left"
+            [title]="(i - 0.5) + ' estrellas'"
+            (mouseenter)="onHover(i - 0.5)"
+            (click)="onSeleccionar(i - 0.5)"
+          ></div>
+          <div
+            class="star-hitbox right"
+            [title]="i + ' estrellas'"
+            (mouseenter)="onHover(i)"
+            (click)="onSeleccionar(i)"
+          ></div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (mostrarNumero) {
+    <div class="puntuacion-texto">
+      @if (valorVisible > 0) {
+        <span class="valor-numero">{{ valorVisible | number:'1.1-1' }}</span>
+        @if (!soloLectura) {
+          <span class="valor-max">/ 5</span>
+        }
+      } @else {
+        <span class="sin-calificar">{{ soloLectura ? 'Sin opiniones' : 'Sin calificar' }}</span>
+      }
+
+      @if (totalResenas !== undefined && totalResenas > 0) {
+        <span class="total-resenas">({{ totalResenas }})</span>
+      }
+    </div>
+  }
+</div>

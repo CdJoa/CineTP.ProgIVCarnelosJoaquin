@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Pelicula } from '../../../models/pelicula';
+import { ResumenPuntuacion } from '../../../models/resena';
 import { HoverZoomDirective } from '../../../directivas/hover-zoom.directive';
 
 @Component({
@@ -12,6 +13,7 @@ import { HoverZoomDirective } from '../../../directivas/hover-zoom.directive';
 })
 export class CartaPelicula {
   pelicula = input.required<Pelicula>();
+  rating = input<ResumenPuntuacion | null>(null);
   seleccionada = input<boolean>(false);
   esPreventa = input<boolean>(false);
   mostrarBotonEditar = input<boolean>(false);

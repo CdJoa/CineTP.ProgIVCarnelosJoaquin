@@ -1,0 +1,436 @@
+<div class="facturacion-container">
+  <!-- ENCABEZADO Y BOTONES DE EXPORTACIÓN (EXCLUSIVO FACTURACIÓN Y CONTABILIDAD) -->
+  <header class="facturacion-header">
+    <div class="header-titular">
+      <div class="header-tag">ADMINISTRACIÓN CONTABLE</div>
+      <h1 class="header-titulo">📊 Reporte Contable y Facturación</h1>
+      <p class="header-subtitulo">
+        Planilla general de facturación, comprobantes de pago, métricas de recaudación y exportación de balance contable a PDF y Excel.
+      </p>
+    </div>
+
+    <div class="header-acciones-exportar">
+      <button
+        type="button"
+        class="btn-exportar btn-pdf"
+        (click)="exportarPDF()"
+        [disabled]="cargando() || compras().length === 0"
+        title="Descargar libro contable en PDF con balance general y detalle de comprobantes"
+      >
+        <span class="btn-icon">📄</span>
+        <div class="btn-txt-col">
+          <strong>Exportar PDF</strong>
+          <small>Libro contable y comprobantes</small>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="btn-exportar btn-excel"
+        (click)="exportarExcel()"
+        [disabled]="cargando() || compras().length === 0"
+        title="Descargar planilla contable en Excel (.xlsx) con comprobantes y balance"
+      >
+        <span class="btn-icon">📊</span>
+        <div class="btn-txt-col">
+          <strong>Exportar Excel</strong>
+          <small>Planilla con 2 hojas contables</small>
+        </div>
+      </button>
+    </div>
+  </header>
+
+  <!-- SPINNER GLOBAL SI CARGA -->
+  <div *ngIf="cargando()" class="cargando-box">
+    <div class="spinner-mini"></div>
+    <p>Cargando registros contables y facturación del cine...</p>
+  </div>
+
+  <div *ngIf="error()" class="alerta-error">
+    ⚠ {{ error() }}
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- SECCIÓN CONTABLE: KPIS, FILTROS Y TABLA DE FACTURACIÓN   -->
+  <!-- ======================================================== -->
+  <section class="seccion-tabla-contable" *ngIf="!cargando()">
+    <!-- CARDS DE MÉTRICAS FINANCIERAS -->
+    <div class="kpi-grid">
+      <div class="kpi-card neto">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Facturación Neta</span>
+          <strong class="kpi-valor">{{ formatearMoneda(metricas().totalNeto) }}</strong>
+          <span class="kpi-desc">{{ metricas().ordenesValidas }} compras confirmadas / usadas</span>
+        </div>
+      </div>
+
+      <div class="kpi-card entradas">
+        <div class="kpi-icon">🎟️</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Ventas Entradas</span>
+          <strong class="kpi-valor">{{ formatearMoneda(metricas().totalEntradas) }}</strong>
+          <span class="kpi-desc">{{ metricas().cantidadEntradas }} butacas vendidas</span>
+        </div>
+      </div>
+
+      <div class="kpi-card candy">
+        <div class="kpi-icon">🍿</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Ventas Candy Bar</span>
+          <strong class="kpi-valor">{{ formatearMoneda(metricas().totalCandy) }}</strong>
+          <span class="kpi-desc">Combos y snacks facturados</span>
+        </div>
+      </div>
+
+      <div class="kpi-card descuentos">
+        <div class="kpi-icon">🏷️</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Descuentos Aplicados</span>
+          <strong class="kpi-valor">{{ formatearMoneda(metricas().totalDescuentos) }}</strong>
+          <span class="kpi-desc">Por cupones y promociones</span>
+        </div>
+      </div>
+
+      <div class="kpi-card cancelaciones">
+        <div class="kpi-icon">↩️</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Cancelaciones</span>
+          <strong class="kpi-valor">{{ formatearMoneda(metricas().totalCancelado) }}</strong>
+          <span class="kpi-desc">{{ metricas().ordenesCanceladas }} compras pasadas a crédito</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL DE FILTROS -->
+    <div class="filtros-panel">
+      <div class="filtros-top-row">
+        <!-- Presets de Fecha -->
+        <div class="presets-row">
+          <span class="filtros-seccion-lbl">Período:</span>
+          <div class="presets-buttons">
+            <button
+              type="button"
+              class="preset-btn"
+              [class.active]="presetFecha() === 'todo'"
+              (click)="seleccionarPreset('todo')"
+            >
+              Todo el historial
+            </button>
+            <button
+              type="button"
+              class="preset-btn"
+              [class.active]="presetFecha() === 'hoy'"
+              (click)="seleccionarPreset('hoy')"
+            >
+              Hoy
+            </button>
+            <button
+              type="button"
+              class="preset-btn"
+              [class.active]="presetFecha() === 'semana'"
+              (click)="seleccionarPreset('semana')"
+            >
+              Últimos 7 días
+            </button>
+            <button
+              type="button"
+              class="preset-btn"
+              [class.active]="presetFecha() === 'mes'"
+              (click)="seleccionarPreset('mes')"
+            >
+              Este mes
+            </button>
+            <button
+              type="button"
+              class="preset-btn"
+              [class.active]="presetFecha() === 'personalizado'"
+              (click)="seleccionarPreset('personalizado')"
+            >
+              Personalizado
+            </button>
+          </div>
+        </div>
+
+        <!-- Buscador -->
+        <div class="buscador-box">
+          <span class="buscador-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Buscar por código, cliente, película..."
+            [ngModel]="busqueda()"
+            (ngModelChange)="busqueda.set($event)"
+            class="buscador-input"
+          />
+          <button
+            *ngIf="busqueda()"
+            type="button"
+            class="btn-clear-busqueda"
+            (click)="busqueda.set('')"
+            title="Limpiar"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Rango personalizado y filtros adicionales -->
+      <div class="filtros-bottom-row">
+        <div class="fechas-custom-row" *ngIf="presetFecha() === 'personalizado'">
+          <div class="campo-fecha">
+            <label for="fecha-desde-input">Desde:</label>
+            <input
+              id="fecha-desde-input"
+              type="date"
+              [ngModel]="fechaDesde()"
+              (ngModelChange)="fechaDesde.set($event)"
+              class="input-fecha"
+            />
+          </div>
+          <div class="campo-fecha">
+            <label for="fecha-hasta-input">Hasta:</label>
+            <input
+              id="fecha-hasta-input"
+              type="date"
+              [ngModel]="fechaHasta()"
+              (ngModelChange)="fechaHasta.set($event)"
+              class="input-fecha"
+            />
+          </div>
+        </div>
+
+        <!-- Filtro por Estado -->
+        <div class="filtro-select-group">
+          <label for="estado-select">Estado:</label>
+          <select
+            id="estado-select"
+            class="filtro-select"
+            [ngModel]="filtroEstado()"
+            (ngModelChange)="filtroEstado.set($event)"
+          >
+            <option value="todos">Todos los estados</option>
+            <option value="validas">Solo válidas (Confirmadas y Usadas)</option>
+            <option value="confirmada">Solo Confirmadas</option>
+            <option value="usado">Solo Usadas</option>
+            <option value="cancelada">Solo Canceladas</option>
+          </select>
+        </div>
+
+        <!-- Filtro por Película -->
+        <div class="filtro-select-group">
+          <label for="peli-select">Película:</label>
+          <select
+            id="peli-select"
+            class="filtro-select"
+            [ngModel]="peliculaFiltro()"
+            (ngModelChange)="peliculaFiltro.set($event)"
+          >
+            <option value="todas">Todas las películas</option>
+            <option *ngFor="let p of peliculasDisponibles()" [value]="p">
+              {{ p }}
+            </option>
+          </select>
+        </div>
+
+        <div class="registros-contador">
+          Mostrando <strong>{{ comprasFiltradas().length }}</strong> de
+          <strong>{{ compras().length }}</strong> operaciones
+        </div>
+      </div>
+    </div>
+
+    <!-- ESTADO VACÍO EN TABLA -->
+    <div *ngIf="comprasFiltradas().length === 0" class="vacio-box">
+      <div class="vacio-icon">📉</div>
+      <h3>No se encontraron registros de facturación</h3>
+      <p>Probá cambiando el rango de fechas o limpiando los filtros seleccionados.</p>
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="presetFecha.set('todo'); filtroEstado.set('todos'); peliculaFiltro.set('todas'); busqueda.set('')"
+      >
+        Restablecer filtros
+      </button>
+    </div>
+
+    <!-- TABLA DE FACTURACIÓN -->
+    <div *ngIf="comprasFiltradas().length > 0" class="tabla-wrapper">
+      <table class="facturacion-tabla">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Fecha / Hora</th>
+            <th>Cliente</th>
+            <th>Película</th>
+            <th>Sala / Butacas</th>
+            <th class="th-num">Entradas</th>
+            <th class="th-num">Candy</th>
+            <th class="th-num">Descuento</th>
+            <th class="th-num">Total Final</th>
+            <th class="th-center">Estado</th>
+            <th class="th-center">Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let c of comprasFiltradas()"
+            [class.fila-cancelada]="c.estado === 'cancelada'"
+          >
+            <td class="td-codigo">
+              <strong>{{ c.codigo }}</strong>
+            </td>
+            <td class="td-fecha">
+              {{ formatearFechaHora(c.creadoEn) }}
+            </td>
+            <td class="td-cliente" [title]="c.usuarioEmail || 'Invitado'">
+              {{ c.usuarioEmail || 'Invitado' }}
+            </td>
+            <td class="td-pelicula" [title]="c.peliculaTitulo">
+              <strong>{{ c.peliculaTitulo }}</strong>
+              <span class="td-formato">({{ c.formato || '2D' }} - {{ c.idioma || 'esp' }})</span>
+            </td>
+            <td class="td-sala">
+              {{ c.salaNombre }} ({{ c.asientos.length }} butacas)
+            </td>
+            <td class="td-num">
+              ${{ (c.totalEntradas || 0).toLocaleString('es-AR') }}
+            </td>
+            <td class="td-num">
+              ${{ (c.totalCandy || 0).toLocaleString('es-AR') }}
+            </td>
+            <td class="td-num td-descuento">
+              {{ c.descuento ? '-$' + c.descuento.toLocaleString('es-AR') : '-' }}
+            </td>
+            <td class="td-num td-total">
+              ${{ c.totalFinal.toLocaleString('es-AR') }}
+            </td>
+            <td class="td-center">
+              <span
+                class="badge-estado"
+                [class.confirmada]="c.estado === 'confirmada'"
+                [class.usada]="c.estado === 'usado'"
+                [class.cancelada]="c.estado === 'cancelada'"
+              >
+                {{ c.estado | uppercase }}
+              </span>
+            </td>
+            <td class="td-center">
+              <button
+                type="button"
+                class="btn-ver-detalle"
+                (click)="abrirDetalle(c)"
+                title="Ver desglose completo de la orden"
+              >
+                👁️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="fila-totales">
+            <td colspan="5">
+              <strong>TOTALES NETOS DEL REPORTE ({{ metricas().ordenesValidas }} órdenes válidas)</strong>
+            </td>
+            <td class="td-num">
+              <strong>${{ metricas().totalEntradas.toLocaleString('es-AR') }}</strong>
+            </td>
+            <td class="td-num">
+              <strong>${{ metricas().totalCandy.toLocaleString('es-AR') }}</strong>
+            </td>
+            <td class="td-num td-descuento">
+              <strong>-${{ metricas().totalDescuentos.toLocaleString('es-AR') }}</strong>
+            </td>
+            <td class="td-num td-gran-total">
+              <strong>${{ metricas().totalNeto.toLocaleString('es-AR') }}</strong>
+            </td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- MODAL: DETALLE COMPLETO DE COMPRA -->
+  <div *ngIf="compraDetalle() as cd" class="modal-overlay" (click)="cerrarDetalle()">
+    <div
+      class="modal-detalle-box"
+      role="dialog"
+      aria-modal="true"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="modal-header">
+        <div class="modal-header-titular">
+          <span class="modal-sub">Detalle de Operación</span>
+          <h3>Código: {{ cd.codigo }}</h3>
+        </div>
+        <button type="button" class="btn-cerrar" (click)="cerrarDetalle()">✕</button>
+      </header>
+
+      <div class="modal-body">
+        <div class="detalle-grid">
+          <div class="detalle-item">
+            <span class="lbl">Película:</span>
+            <strong>{{ cd.peliculaTitulo }}</strong>
+          </div>
+          <div class="detalle-item">
+            <span class="lbl">Sala / Formato:</span>
+            <strong>{{ cd.salaNombre }} ({{ cd.formato || '2D' }} - {{ cd.idioma || 'esp' }})</strong>
+          </div>
+          <div class="detalle-item">
+            <span class="lbl">Horario de Función:</span>
+            <strong>{{ formatearFechaHora(cd.funcionInicio) }}</strong>
+          </div>
+          <div class="detalle-item">
+            <span class="lbl">Cliente:</span>
+            <strong>{{ cd.usuarioEmail || 'No registrado' }}</strong>
+          </div>
+          <div class="detalle-item">
+            <span class="lbl">Butacas:</span>
+            <strong>{{ cd.asientos.join(', ') }}</strong>
+          </div>
+          <div class="detalle-item">
+            <span class="lbl">Estado:</span>
+            <span class="badge-estado" [ngClass]="cd.estado">{{ cd.estado | uppercase }}</span>
+          </div>
+        </div>
+
+        <!-- Desglose de Candy si compró -->
+        <div *ngIf="cd.itemsCandy && cd.itemsCandy.length > 0" class="candy-desglose-seccion">
+          <h4>Items de Candy Bar incluidos</h4>
+          <ul class="candy-lista">
+            <li *ngFor="let item of cd.itemsCandy">
+              <span>{{ item.nombre }} (x{{ item.cantidad }})</span>
+              <strong>${{ item.subtotal }}</strong>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Totales -->
+        <div class="detalle-totales-box">
+          <div class="total-row">
+            <span>Subtotal Entradas:</span>
+            <span>${{ cd.totalEntradas }}</span>
+          </div>
+          <div class="total-row" *ngIf="cd.totalCandy > 0">
+            <span>Subtotal Candy Bar:</span>
+            <span>${{ cd.totalCandy }}</span>
+          </div>
+          <div class="total-row descuento" *ngIf="cd.descuento > 0">
+            <span>Descuento (Cupón {{ cd.cuponCodigo || '' }}):</span>
+            <span>-${{ cd.descuento }}</span>
+          </div>
+          <div class="total-row final">
+            <strong>Total Facturado:</strong>
+            <strong>${{ cd.totalFinal }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-cerrar-modal" (click)="cerrarDetalle()">
+          Cerrar
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>

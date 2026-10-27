@@ -9,6 +9,7 @@
     "deploy": "npm run build -- --configuration production && firebase deploy --only hosting",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "simular:ventas": "node simular_ventas_auth.mjs",
     "serve:ssr:cineTP": "node dist/cineTP/server/server.mjs"
   },
   "private": true,
@@ -26,10 +27,13 @@
     "@supabase/supabase-js": "^2.116.0",
     "@types/qrcode": "^1.5.6",
     "express": "^5.1.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "jsqr": "^1.4.0",
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@angular/build": "^22.1.7",

@@ -179,10 +179,11 @@
 .modal-content-pelicula {
   background: #ffffff;
   width: 100%;
-  max-width: 650px;
+  max-width: 740px;
+  max-height: 90vh;
+  overflow-y: auto;
   border-radius: 14px;
   position: relative;
-  overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
   animation: fadeIn 0.25s ease-out;
 }
@@ -209,7 +210,7 @@
 
 .modal-grid-detail {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 240px 1fr;
   gap: 1.25rem;
   padding: 1.25rem;
 }
@@ -634,4 +635,356 @@
 
 .fn-bloqueada .btn-comprar-fn {
   cursor: not-allowed;
+}
+
+/* ==============================================================================
+   SECCIÓN: Calificación de estrellas abajo del póster & Directiva de Comentario
+   ============================================================================== */
+.poster-rating-box {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.calificar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.calificar-titulo {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.badge-tu-resena {
+  font-size: 0.7rem;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.calificar-stars-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  background: #ffffff;
+  padding: 0.4rem;
+  border-radius: 8px;
+  border: 1px solid #edf2f7;
+}
+
+/* Directiva para insertar comentario */
+.comentario-directiva-container {
+  /* Controlado dinámicamente por la directiva [appInsertarComentario] */
+  margin-top: 0.25rem;
+}
+
+.comentario-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.comentario-lbl {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.comentario-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  resize: none;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.comentario-textarea:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.comentario-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.char-count {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.btn-group-resena {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.btn-guardar-resena {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.btn-guardar-resena:hover:not(:disabled) {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+.btn-guardar-resena:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-eliminar-resena {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-eliminar-resena:hover:not(:disabled) {
+  background: #fecaca;
+}
+
+.resena-alerta {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.resena-alerta.exito {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.resena-alerta.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Prompt para iniciar sesión */
+.login-prompt-rating {
+  text-align: center;
+  padding: 0.6rem 0.4rem;
+}
+
+.login-prompt-icon {
+  font-size: 1.5rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.login-prompt-text {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.btn-login-prompt {
+  display: inline-block;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btn-login-prompt:hover {
+  background: #1e293b;
+}
+
+/* ==============================================================================
+   SECCIÓN: Reseñas de la comunidad y promedio en el detalle
+   ============================================================================== */
+.detail-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.promedio-destacado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+}
+
+.promedio-lbl {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.detail-divider {
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  margin: 0.5rem 0;
+}
+
+.resenas-comunidad-seccion {
+  margin-top: 0.5rem;
+}
+
+.resenas-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.resenas-titulo {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.resenas-count-pill {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.resenas-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #64748b;
+  padding: 0.75rem 0;
+}
+
+.empty-resenas {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px dashed #e2e8f0;
+  color: #64748b;
+}
+
+.empty-resenas-icon {
+  font-size: 1.4rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.empty-resenas p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.resenas-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.resena-card-mini {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.resena-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resena-user {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.resena-user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resena-user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.resena-user-nombre {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.1;
+}
+
+.resena-fecha {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+.resena-comentario-txt {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #334155;
+  font-style: italic;
+  line-height: 1.35;
+  background: #ffffff;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border-left: 3px solid #f59e0b;
 }

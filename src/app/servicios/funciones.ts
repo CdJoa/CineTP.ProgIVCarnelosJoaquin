@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { BaseSupabaseService } from './base-supabase';
 import { CrearFuncionDto, EstadoFuncion, Formato, Idioma, Funcion } from '../models/funcion';
+import { Pelicula } from '../models/pelicula';
+import { Sala } from '../models/sala';
 import { PeliculasService } from './peliculas';
 import { SalaService } from './sala';
 import { AuditoriaService } from './auditoria';
@@ -159,8 +161,8 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
       this.salaService.obtenerSalas().catch(() => []),
     ]);
 
-    const mapPeliculas = new Map(peliculas.map((p) => [p.id, p]));
-    const mapSalas = new Map(salas.map((s) => [s.id, s]));
+    const mapPeliculas = new Map<string, Pelicula>(peliculas.map((p): [string, Pelicula] => [p.id, p]));
+    const mapSalas = new Map<string, Sala>(salas.map((s): [string, Sala] => [s.id, s]));
 
     return funciones.map((funcion) => this.mapearConRelaciones(
       funcion,

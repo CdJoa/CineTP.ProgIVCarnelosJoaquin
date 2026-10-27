@@ -38,9 +38,411 @@
     </div>
   </section>
 
-  <!-- Datos de la Cuenta -->
-  <section class="perfil-seccion">
-    <h2 class="seccion-titulo">Datos de tu Cuenta</h2>
+  <!-- Navegación de Pestañas del Perfil -->
+  <nav class="perfil-tabs-nav" aria-label="Secciones del perfil">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="tabActiva() === 'peliculas'"
+      (click)="cambiarTab('peliculas')"
+    >
+      🎬 Mis Películas
+      <span class="tab-badge" *ngIf="estadisticasCine().totalVistas > 0">
+        {{ estadisticasCine().totalVistas }}
+      </span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="tabActiva() === 'entradas'"
+      (click)="cambiarTab('entradas')"
+    >
+      🎟️ Mis Tickets y Entradas
+      <span class="tab-badge" *ngIf="compras().length > 0">{{ compras().length }}</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="tabActiva() === 'datos'"
+      (click)="cambiarTab('datos')"
+    >
+      👤 Datos de mi Cuenta
+    </button>
+  </nav>
+
+  <!-- ======================================================== -->
+  <!-- SECCIÓN 1: MIS PELÍCULAS (HISTORIAL VISUAL Y CALIFICACIÓN) -->
+  <!-- ======================================================== -->
+  <section class="perfil-seccion mis-peliculas-seccion" *ngIf="tabActiva() === 'peliculas'">
+    <div class="seccion-header-row">
+      <div>
+        <h2 class="seccion-titulo">🎬 Mis Películas</h2>
+        <p class="seccion-subtitulo">
+          Tu historial visual de películas vistas en el cine con tus calificaciones y opiniones personales.
+        </p>
+      </div>
+      <a routerLink="/home" class="link-explorar">Ver Cartelera →</a>
+    </div>
+
+    <!-- Barra de Estadísticas Cinematográficas -->
+    <div class="stats-cine-bar" *ngIf="compras().length > 0">
+      <div class="stat-cine-item">
+        <span class="stat-cine-num">{{ estadisticasCine().totalVistas }}</span>
+        <span class="stat-cine-label">Películas vistas</span>
+      </div>
+      <div class="stat-cine-separador"></div>
+      <div class="stat-cine-item">
+        <span class="stat-cine-num">{{ estadisticasCine().cantCalificadas }}</span>
+        <span class="stat-cine-label">Calificadas por vos</span>
+      </div>
+      <div class="stat-cine-separador"></div>
+      <div class="stat-cine-item">
+        <span class="stat-cine-num">
+          {{ estadisticasCine().promedio > 0 ? (estadisticasCine().promedio + ' ⭐') : '-' }}
+        </span>
+        <span class="stat-cine-label">Tu promedio</span>
+      </div>
+      <div class="stat-cine-separador"></div>
+      <div class="stat-cine-item">
+        <span class="stat-cine-num">{{ estadisticasCine().pendientes }}</span>
+        <span class="stat-cine-label">Por calificar</span>
+      </div>
+    </div>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="filtros-historial-bar" *ngIf="compras().length > 0">
+      <!-- Buscador -->
+      <div class="historial-search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          placeholder="Buscar por título de película o sala..."
+          [ngModel]="busquedaPelicula()"
+          (ngModelChange)="busquedaPelicula.set($event)"
+          class="historial-search-input"
+        />
+        <button
+          *ngIf="busquedaPelicula()"
+          type="button"
+          class="btn-clear-search"
+          (click)="busquedaPelicula.set('')"
+          title="Limpiar búsqueda"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Chips de Filtro -->
+      <div class="filtro-chips-row">
+        <button
+          type="button"
+          class="chip-btn"
+          [class.active]="filtroCalificacion() === 'todas'"
+          (click)="filtroCalificacion.set('todas')"
+        >
+          Todas
+        </button>
+        <button
+          type="button"
+          class="chip-btn"
+          [class.active]="filtroCalificacion() === 'calificadas'"
+          (click)="filtroCalificacion.set('calificadas')"
+        >
+          ⭐ Calificadas ({{ estadisticasCine().cantCalificadas }})
+        </button>
+        <button
+          type="button"
+          class="chip-btn"
+          [class.active]="filtroCalificacion() === 'sin_calificar'"
+          (click)="filtroCalificacion.set('sin_calificar')"
+        >
+          ⏳ Sin calificar ({{ estadisticasCine().pendientes }})
+        </button>
+      </div>
+
+      <!-- Selector de Orden -->
+      <div class="orden-select-wrapper">
+        <label for="orden-historial-select" class="orden-lbl">Ordenar:</label>
+        <select
+          id="orden-historial-select"
+          class="orden-select"
+          [ngModel]="ordenHistorial()"
+          (ngModelChange)="ordenHistorial.set($event)"
+        >
+          <option value="fecha_desc">Más recientes primero</option>
+          <option value="fecha_asc">Más antiguas primero</option>
+          <option value="calif_desc">Mejor calificada primero</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Spinner cargando -->
+    <div *ngIf="cargandoCompras() || cargandoResenas()" class="cargando-compras-box">
+      <div class="spinner-mini"></div>
+      <p>Cargando tu historial de películas y calificaciones...</p>
+    </div>
+
+    <!-- Estado vacío: Sin compras aún -->
+    <div
+      *ngIf="!cargandoCompras() && !cargandoResenas() && compras().length === 0"
+      class="historial-vacio-card"
+    >
+      <div class="icono-vacio">🎬</div>
+      <h3>Todavía no viste ninguna película</h3>
+      <p>
+        Cuando compres tus entradas y disfrutes de una función, acá vas a tener tu colección
+        personal con pósters, fechas y la posibilidad de dejar tu propia calificación y reseña.
+      </p>
+      <a routerLink="/home" class="btn-comprar-entradas">Explorar Cartelera de Películas</a>
+    </div>
+
+    <!-- Estado vacío: Filtro sin resultados -->
+    <div
+      *ngIf="!cargandoCompras() && !cargandoResenas() && compras().length > 0 && peliculasHistorialFiltradas().length === 0"
+      class="filtro-vacio-card"
+    >
+      <p class="filtro-vacio-texto">No se encontraron películas con los filtros seleccionados.</p>
+      <button
+        type="button"
+        class="btn-reset-filtros"
+        (click)="busquedaPelicula.set(''); filtroCalificacion.set('todas')"
+      >
+        Mostrar todas mis películas
+      </button>
+    </div>
+
+    <!-- GRILLA VISUAL DE MIS PELÍCULAS -->
+    <div
+      *ngIf="!cargandoCompras() && !cargandoResenas() && peliculasHistorialFiltradas().length > 0"
+      class="peliculas-historial-grid"
+    >
+      <article
+        *ngFor="let c of peliculasHistorialFiltradas()"
+        class="pelicula-visual-card"
+        [class.card-cancelada]="c.estado === 'cancelada'"
+      >
+        <!-- PÓSTER CINEMATOGRÁFICO -->
+        <div class="peli-poster-container" [appHoverZoom]="1.04">
+          <img
+            *ngIf="c.peliculaPoster"
+            [src]="c.peliculaPoster"
+            [alt]="c.peliculaTitulo"
+            class="peli-poster-img"
+            loading="lazy"
+          />
+          <div *ngIf="!c.peliculaPoster" class="peli-poster-placeholder">
+            <span class="placeholder-icon">🎬</span>
+            <span class="placeholder-titulo">{{ c.peliculaTitulo }}</span>
+          </div>
+
+          <!-- Badges sobre el póster -->
+          <div class="poster-overlay-top">
+            <span class="formato-pill">{{ c.formato || '2D' }}</span>
+            <span *ngIf="c.estado === 'cancelada'" class="badge-estado-overlay cancelada">
+              CANCELADA
+            </span>
+            <span *ngIf="c.estado === 'usado'" class="badge-estado-overlay usada">
+              ✓ VISTA
+            </span>
+          </div>
+
+          <!-- Fecha destacada sobre el póster -->
+          <div class="poster-overlay-bottom">
+            <span class="fecha-vista-badge">
+              📅 {{ formatearFechaCorta(c.funcionInicio || c.creadoEn) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- CONTENIDO Y METADATOS -->
+        <div class="peli-card-info">
+          <h3 class="peli-titulo" [title]="c.peliculaTitulo">{{ c.peliculaTitulo }}</h3>
+
+          <div class="peli-metadatos">
+            <span class="peli-fecha-hora">
+              🕒 {{ formatearFechaHora(c.funcionInicio) }}
+            </span>
+            <span class="peli-sala-butacas">
+              🏛️ {{ c.salaNombre }} · {{ c.asientos.length }} butaca(s) ({{ c.asientos.join(', ') }})
+            </span>
+          </div>
+
+          <!-- BLOQUE DE CALIFICACIÓN PERSONAL -->
+          <div class="seccion-calificacion-usuario">
+            @if (obtenerResena(c); as miResena) {
+              <!-- YA CALIFICADA -->
+              <div class="calificacion-presente-box">
+                <div class="calif-header-row">
+                  <span class="calif-lbl-mi">Tu calificación:</span>
+                  <button
+                    type="button"
+                    class="btn-editar-calif-link"
+                    (click)="abrirModalCalificar(c)"
+                    title="Modificar tu calificación"
+                  >
+                    ✏️ Editar
+                  </button>
+                </div>
+
+                <div class="calif-stars-display">
+                  <app-rating-estrellas
+                    [valor]="miResena.puntos"
+                    [soloLectura]="true"
+                    tamano="md"
+                    [mostrarNumero]="true"
+                  ></app-rating-estrellas>
+                </div>
+
+                <p *ngIf="miResena.comentario" class="mi-comentario-cita">
+                  “{{ miResena.comentario }}”
+                </p>
+                <p *ngIf="!miResena.comentario" class="mi-comentario-vacio">
+                  Sin comentario escrito.
+                </p>
+              </div>
+            } @else {
+              <!-- PENDIENTE DE CALIFICAR -->
+              <div class="calificacion-pendiente-box">
+                <span class="badge-sin-calificar">⭐ Sin calificar</span>
+                <p class="pendiente-ayuda">¿Qué te pareció la película?</p>
+                <button
+                  type="button"
+                  class="btn-calificar-ahora"
+                  (click)="abrirModalCalificar(c)"
+                >
+                  ⭐ Calificar ahora
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- PIE DE TARJETA: ACCIONES -->
+          <div class="peli-card-actions">
+            <button
+              type="button"
+              class="btn-ver-ticket-mini"
+              (click)="verTicketCompleto(c)"
+            >
+              🎟️ Ver Ticket / QR
+            </button>
+            <button
+              *ngIf="puedeCancelar(c) && c.estado !== 'cancelada'"
+              type="button"
+              class="btn-cancelar-mini"
+              (click)="pedirCancelacion(c)"
+            >
+              Cancelar función
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- SECCIÓN 2: MIS TICKETS Y ENTRADAS (HISTORIAL DE COMPRA) -->
+  <!-- ======================================================== -->
+  <section class="perfil-seccion" *ngIf="tabActiva() === 'entradas'">
+    <div class="seccion-header-row">
+      <h2 class="seccion-titulo">🎟️ Mis Entradas y Comprobantes</h2>
+      <a routerLink="/home" class="link-explorar">Comprar Entradas →</a>
+    </div>
+
+    <!-- Spinner si está cargando -->
+    <div *ngIf="cargandoCompras()" class="cargando-compras-box">
+      <div class="spinner-mini"></div>
+      <p>Cargando tus entradas...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!cargandoCompras() && compras().length === 0" class="historial-vacio-card">
+      <div class="icono-vacio">🎟️</div>
+      <h3>Todavía no tenés entradas compradas</h3>
+      <p>
+        Cuando compres entradas para tus películas favoritas, vas a poder ver acá tus funciones,
+        asientos reservados y código QR de acceso.
+      </p>
+      <a routerLink="/home" class="btn-comprar-entradas">Ver Cartelera de Películas</a>
+    </div>
+
+    <!-- Mensaje de cancelación -->
+    <p *ngIf="mensajeCancelacion()" class="aviso-cancelacion">✓ {{ mensajeCancelacion() }}</p>
+
+    <!-- Grilla de Tickets de Compras -->
+    <div *ngIf="!cargandoCompras() && compras().length > 0" class="compras-grid">
+      <div
+        *ngFor="let c of compras()"
+        class="compra-card"
+        [class.compra-cancelada]="c.estado === 'cancelada'"
+      >
+        <div class="compra-card-header">
+          <span class="compra-sala">🏛️ {{ c.salaNombre }}</span>
+          <span *ngIf="c.estado === 'cancelada'" class="badge-cancelada">CANCELADA</span>
+          <span *ngIf="c.estado === 'usado'" class="badge-usada">USADA</span>
+          <span class="compra-codigo">Cod: <strong>{{ c.codigo }}</strong></span>
+        </div>
+
+        <div class="compra-card-body">
+          <div class="compra-poster-box" *ngIf="c.peliculaPoster">
+            <img [src]="c.peliculaPoster" [alt]="c.peliculaTitulo" class="compra-poster-img" />
+          </div>
+          <div class="compra-detalles-col">
+            <h3 class="compra-pelicula-titulo">{{ c.peliculaTitulo }}</h3>
+            <p class="compra-fecha-hora">📅 {{ formatearFechaHora(c.funcionInicio) }}</p>
+            <p class="compra-formato">
+              Formato: {{ c.formato || '2D' }} ({{ c.idioma || 'español' }})
+            </p>
+
+            <div class="compra-asientos-row">
+              <span class="compra-asientos-lbl">Butacas:</span>
+              <div class="compra-asientos-tags">
+                <span *ngFor="let a of c.asientos" class="asiento-badge">{{ a }}</span>
+              </div>
+            </div>
+
+            <div *ngIf="c.itemsCandy && c.itemsCandy.length > 0" class="compra-candy-mini">
+              🍿 Candy: {{ c.itemsCandy.length }} producto(s) incluido(s)
+            </div>
+          </div>
+        </div>
+
+        <div class="compra-card-footer">
+          <div class="compra-monto-puntos">
+            <strong class="compra-total">${{ c.totalFinal }}</strong>
+            <span
+              *ngIf="c.puntosGanados > 0 && c.estado !== 'cancelada'"
+              class="compra-puntos"
+            >
+              +{{ c.puntosGanados }} pts
+            </span>
+            <span *ngIf="c.estado === 'cancelada'" class="compra-credito">
+              ${{ c.puntosGanados }} a crédito
+            </span>
+          </div>
+
+          <div class="compra-acciones" *ngIf="c.estado !== 'cancelada'">
+            <button
+              *ngIf="puedeCancelar(c)"
+              type="button"
+              class="btn-cancelar-compra"
+              (click)="pedirCancelacion(c)"
+            >
+              Cancelar
+            </button>
+            <button type="button" class="btn-ver-qr" (click)="verTicketCompleto(c)">
+              🎟️ Ver Ticket / QR
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- SECCIÓN 3: DATOS DE LA CUENTA                           -->
+  <!-- ======================================================== -->
+  <section class="perfil-seccion" *ngIf="tabActiva() === 'datos'">
+    <h2 class="seccion-titulo">👤 Datos de tu Cuenta</h2>
     <div class="datos-grid">
       <div class="dato-item">
         <span class="dato-lbl">Nombre</span>
@@ -79,99 +481,159 @@
     </div>
   </section>
 
-  <!-- Historial de Películas / Compras -->
-  <section class="perfil-seccion">
-    <div class="seccion-header-row">
-      <h2 class="seccion-titulo">Mis Películas y Entradas</h2>
-      <a routerLink="/home" class="link-explorar">Explorar Funciones →</a>
-    </div>
-
-    <!-- Spinner si está cargando -->
-    <div *ngIf="cargandoCompras()" class="cargando-compras-box">
-      <div class="spinner-mini"></div>
-      <p>Cargando tus entradas...</p>
-    </div>
-
-    <!-- Empty State -->
-    <div *ngIf="!cargandoCompras() && compras().length === 0" class="historial-vacio-card">
-      <div class="icono-vacio">🎟️</div>
-      <h3>Todavía no tenés entradas compradas</h3>
-      <p>Cuando compres entradas para tus películas favoritas, vas a poder ver acá tus funciones, asientos reservados y código QR de acceso.</p>
-      <a routerLink="/home" class="btn-comprar-entradas">Ver Cartelera de Películas</a>
-    </div>
-
-    <!-- Grilla de Compras Realizadas -->
-    <p *ngIf="mensajeCancelacion()" class="aviso-cancelacion">✓ {{ mensajeCancelacion() }}</p>
-
-    <div *ngIf="!cargandoCompras() && compras().length > 0" class="compras-grid">
-      <div *ngFor="let c of compras()" class="compra-card" [class.compra-cancelada]="c.estado === 'cancelada'">
-        <div class="compra-card-header">
-          <span class="compra-sala">🏛️ {{ c.salaNombre }}</span>
-          <span *ngIf="c.estado === 'cancelada'" class="badge-cancelada">CANCELADA</span>
-          <span *ngIf="c.estado === 'usado'" class="badge-usada">USADA</span>
-          <span class="compra-codigo">Cod: <strong>{{ c.codigo }}</strong></span>
-        </div>
-
-        <div class="compra-card-body">
-          <div class="compra-poster-box" *ngIf="c.peliculaPoster">
-            <img [src]="c.peliculaPoster" [alt]="c.peliculaTitulo" class="compra-poster-img" />
-          </div>
-          <div class="compra-detalles-col">
-            <h3 class="compra-pelicula-titulo">{{ c.peliculaTitulo }}</h3>
-            <p class="compra-fecha-hora">📅 {{ formatearFechaHora(c.funcionInicio) }}</p>
-            <p class="compra-formato">Format: {{ c.formato || '2D' }} ({{ c.idioma || 'español' }})</p>
-
-            <div class="compra-asientos-row">
-              <span class="compra-asientos-lbl">Butacas:</span>
-              <div class="compra-asientos-tags">
-                <span *ngFor="let a of c.asientos" class="asiento-badge">{{ a }}</span>
-              </div>
-            </div>
-
-            <div *ngIf="c.itemsCandy && c.itemsCandy.length > 0" class="compra-candy-mini">
-              🍿 Candy: {{ c.itemsCandy.length }} producto(s) incluido(s)
-            </div>
+  <!-- ======================================================== -->
+  <!-- MODAL: CALIFICAR / MODIFICAR CALIFICACIÓN               -->
+  <!-- ======================================================== -->
+  <div
+    *ngIf="peliculaParaCalificar() as peliModal"
+    class="modal-overlay"
+    (click)="cerrarModalCalificar()"
+  >
+    <div
+      class="modal-calificar-box"
+      role="dialog"
+      aria-modal="true"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="modal-calificar-header">
+        <div class="modal-peli-info">
+          <img
+            *ngIf="peliModal.peliculaPoster"
+            [src]="peliModal.peliculaPoster"
+            [alt]="peliModal.peliculaTitulo"
+            class="modal-peli-poster"
+          />
+          <div class="modal-peli-textos">
+            <span class="modal-pre-titulo">Tu Calificación</span>
+            <h3 class="modal-peli-titulo">{{ peliModal.peliculaTitulo }}</h3>
+            <p class="modal-peli-sub">Compartí tu opinión sobre esta película</p>
           </div>
         </div>
+        <button
+          type="button"
+          class="btn-cerrar-modal"
+          (click)="cerrarModalCalificar()"
+          aria-label="Cerrar modal"
+        >
+          ✕
+        </button>
+      </header>
 
-        <div class="compra-card-footer">
-          <div class="compra-monto-puntos">
-            <strong class="compra-total">${{ c.totalFinal }}</strong>
-            <span *ngIf="c.puntosGanados > 0 && c.estado !== 'cancelada'" class="compra-puntos">+{{ c.puntosGanados }} pts</span>
-            <span *ngIf="c.estado === 'cancelada'" class="compra-credito">${{ c.puntosGanados }} a crédito</span>
-          </div>
+      <div class="modal-calificar-body">
+        <!-- Selector interactivo de estrellas -->
+        <div class="selector-estrellas-centrado">
+          <span class="estrellas-lbl">Puntaje:</span>
+          <app-rating-estrellas
+            [valor]="puntajeModal()"
+            [soloLectura]="false"
+            tamano="lg"
+            [mostrarNumero]="true"
+            (valorChange)="onPuntajeChange($event)"
+          ></app-rating-estrellas>
+          <span class="texto-puntaje-feedback">
+            {{ obtenerTextoFeedback(puntajeModal()) }}
+          </span>
+        </div>
 
-          <div class="compra-acciones" *ngIf="c.estado !== 'cancelada'">
-            <button *ngIf="puedeCancelar(c)" type="button" class="btn-cancelar-compra" (click)="pedirCancelacion(c)">
-              Cancelar
-            </button>
-            <button type="button" class="btn-ver-qr" (click)="verTicketCompleto(c)">
-              🎟️ Ver Ticket / QR
-            </button>
-          </div>
+        <!-- Textarea de comentario -->
+        <div class="comentario-campo">
+          <label for="comentario-modal-input" class="comentario-label">
+            Tu opinión o reseña corta:
+          </label>
+          <textarea
+            id="comentario-modal-input"
+            rows="3"
+            maxlength="250"
+            [(ngModel)]="comentarioModal"
+            placeholder="¿Qué te pareció la trama, la actuación, los efectos? (opcional)"
+            class="modal-textarea"
+          ></textarea>
+          <span class="char-count-modal">{{ comentarioModal.length }}/250</span>
+        </div>
+
+        <div *ngIf="mensajeExitoCalificacion()" class="alerta-calif exito">
+          {{ mensajeExitoCalificacion() }}
+        </div>
+        <div *ngIf="errorCalificacion()" class="alerta-calif error">
+          ⚠ {{ errorCalificacion() }}
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Confirmación de cancelación -->
+      <footer class="modal-calificar-footer">
+        <button
+          *ngIf="peliModal.resenaExistente"
+          type="button"
+          class="btn-eliminar-calif"
+          [disabled]="guardandoCalificacion()"
+          (click)="eliminarCalificacion(peliModal.resenaExistente.id, peliModal.peliculaId)"
+          title="Borrar mi calificación"
+        >
+          🗑️ Eliminar calificación
+        </button>
+        <div class="modal-footer-derecha">
+          <button
+            type="button"
+            class="btn-cancelar-modal"
+            [disabled]="guardandoCalificacion()"
+            (click)="cerrarModalCalificar()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn-guardar-calif"
+            [disabled]="guardandoCalificacion() || puntajeModal() < 0.5"
+            (click)="confirmarGuardarCalificacion()"
+          >
+            {{
+              guardandoCalificacion()
+                ? 'Guardando...'
+                : peliModal.resenaExistente
+                ? 'Actualizar Calificación'
+                : 'Guardar Calificación'
+            }}
+          </button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CONFIRMACIÓN DE CANCELACIÓN                      -->
+  <!-- ======================================================== -->
   <div *ngIf="compraACancelar() as cc" class="modal-overlay" (click)="cerrarCancelacion()">
-    <div class="modal-cancelacion" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div
+      class="modal-cancelacion"
+      role="dialog"
+      aria-modal="true"
+      (click)="$event.stopPropagation()"
+    >
       <h3>¿Cancelar esta compra?</h3>
       <p>
         <strong>{{ cc.peliculaTitulo }}</strong> · {{ formatearFechaHora(cc.funcionInicio) }} ·
         Butacas {{ cc.asientos.join(', ') }}
       </p>
       <p>
-        No se devuelve dinero: los <strong>{{ cc.puntosGanados }} puntos</strong> de esta compra pasan a ser
-        <strong>${{ cc.puntosGanados }} de crédito a favor</strong> y tus butacas quedan liberadas.
+        No se devuelve dinero: los <strong>{{ cc.puntosGanados }} puntos</strong> de esta compra
+        pasan a ser <strong>${{ cc.puntosGanados }} de crédito a favor</strong> y tus butacas quedan
+        liberadas.
       </p>
       <p *ngIf="errorCancelacion()" class="modal-error">{{ errorCancelacion() }}</p>
       <div class="modal-acciones">
-        <button type="button" class="btn-cartelera" [disabled]="cancelando()" (click)="cerrarCancelacion()">
+        <button
+          type="button"
+          class="btn-cartelera"
+          [disabled]="cancelando()"
+          (click)="cerrarCancelacion()"
+        >
           Volver
         </button>
-        <button type="button" class="btn-confirmar-cancelacion" [disabled]="cancelando()" (click)="confirmarCancelacion()">
+        <button
+          type="button"
+          class="btn-confirmar-cancelacion"
+          [disabled]="cancelando()"
+          (click)="confirmarCancelacion()"
+        >
           {{ cancelando() ? 'Cancelando...' : 'Sí, cancelar compra' }}
         </button>
       </div>

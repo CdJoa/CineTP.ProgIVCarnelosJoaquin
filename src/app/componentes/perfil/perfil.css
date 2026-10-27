@@ -1,5 +1,5 @@
 .perfil-container {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 2rem auto 4rem;
   padding: 0 1rem;
   font-family: system-ui, -apple-system, sans-serif;
@@ -15,8 +15,8 @@
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 1.75rem 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
@@ -24,7 +24,7 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #0f172a;
+  background: linear-gradient(135deg, #0f172a, #334155);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -32,6 +32,7 @@
   font-size: 1.75rem;
   font-weight: 800;
   flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
 }
 
 .perfil-titular {
@@ -114,7 +115,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.25rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
 .metrica-card {
@@ -162,97 +163,666 @@
   line-height: 1.35;
 }
 
-/* Secciones */
+/* ======================================================== */
+/* PESTAÑAS DE NAVEGACIÓN DEL PERFIL                        */
+/* ======================================================== */
+.perfil-tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  padding: 0.35rem;
+  border-radius: 12px;
+  margin-bottom: 1.75rem;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  padding: 0.7rem 1.25rem;
+  border-radius: 9px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.tab-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tab-badge {
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.tab-btn.active .tab-badge {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+/* ======================================================== */
+/* SECCIONES COMUNES                                        */
+/* ======================================================== */
 .perfil-seccion {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 1.5rem 1.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
   margin-bottom: 2rem;
 }
 
 .seccion-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .seccion-titulo {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 1.25rem;
-}
-
-.seccion-header-row .seccion-titulo {
   margin: 0;
 }
 
+.seccion-subtitulo {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0.35rem 0 0;
+}
+
 .link-explorar {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #2563eb;
   text-decoration: none;
+  transition: all 0.15s ease;
 }
 
 .link-explorar:hover {
   text-decoration: underline;
+  color: #1d4ed8;
 }
 
-/* Datos Grid */
-.datos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1.25rem;
+/* ======================================================== */
+/* SECCIÓN MIS PELÍCULAS: ESTADÍSTICAS CINEMATOGRÁFICAS    */
+/* ======================================================== */
+.stats-cine-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.dato-item {
+.stat-cine-item {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-cine-num {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fbbf24;
+  line-height: 1.1;
+}
+
+.stat-cine-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.2rem;
+}
+
+.stat-cine-separador {
+  width: 1px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 640px) {
+  .stat-cine-separador {
+    display: none;
+  }
+}
+
+/* Barra de Filtros y Búsqueda */
+.filtros-historial-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
   background: #f8fafc;
   padding: 0.85rem 1rem;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
 }
 
-.dato-lbl {
-  font-size: 0.75rem;
+.historial-search-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  flex: 1;
+  min-width: 220px;
+  gap: 0.5rem;
+}
+
+.search-icon {
+  font-size: 0.95rem;
+  opacity: 0.6;
+}
+
+.historial-search-input {
+  border: none;
+  outline: none;
+  font-size: 0.85rem;
+  color: #0f172a;
+  width: 100%;
+}
+
+.btn-clear-search {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0 0.2rem;
+}
+
+.btn-clear-search:hover {
+  color: #0f172a;
+}
+
+.filtro-chips-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.chip-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.chip-btn.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.orden-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.orden-lbl {
+  font-size: 0.8rem;
+  font-weight: 700;
   color: #64748b;
-  margin-bottom: 0.25rem;
+}
+
+.orden-select {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.82rem;
+  color: #0f172a;
+  cursor: pointer;
+  outline: none;
+}
+
+/* ======================================================== */
+/* GRILLA VISUAL DE MIS PELÍCULAS                          */
+/* ======================================================== */
+.peliculas-historial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.pelicula-visual-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pelicula-visual-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+}
+
+.pelicula-visual-card.card-cancelada {
+  opacity: 0.7;
+  border-color: #fecaca;
+}
+
+/* Póster cinematográfico con badges */
+.peli-poster-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 220px;
+  background: #0f172a;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.peli-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+}
+
+.peli-poster-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 2.5rem;
+}
+
+.placeholder-titulo {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.poster-overlay-top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.formato-pill {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  color: #38bdf8;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  text-transform: uppercase;
+}
+
+.badge-estado-overlay {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+
+.badge-estado-overlay.usada {
+  background: rgba(16, 185, 129, 0.9);
+  color: #ffffff;
+}
+
+.badge-estado-overlay.cancelada {
+  background: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+}
+
+.poster-overlay-bottom {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  pointer-events: none;
+}
+
+.fecha-vista-badge {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Info de la Película */
+.peli-card-info {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.peli-titulo {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.4rem;
+  line-height: 1.3;
+}
+
+.peli-metadatos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+}
+
+.peli-fecha-hora {
+  font-size: 0.82rem;
+  color: #64748b;
   font-weight: 600;
 }
 
-.dato-val {
-  font-size: 0.95rem;
-  color: #0f172a;
-  font-weight: 700;
+.peli-sala-butacas {
+  font-size: 0.78rem;
+  color: #475569;
+  font-weight: 500;
 }
 
-/* Historial vacío */
+/* ======================================================== */
+/* BLOQUE DE CALIFICACIÓN PERSONAL DEL USUARIO              */
+/* ======================================================== */
+.seccion-calificacion-usuario {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Si ya está calificada */
+.calificacion-presente-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.calif-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calif-lbl-mi {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.btn-editar-calif-link {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.btn-editar-calif-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.calif-stars-display {
+  display: flex;
+  align-items: center;
+}
+
+.mi-comentario-cita {
+  font-size: 0.82rem;
+  color: #334155;
+  font-style: italic;
+  margin: 0.25rem 0 0;
+  background: #ffffff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border-left: 3px solid #fbbf24;
+  line-height: 1.35;
+}
+
+.mi-comentario-vacio {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Si está pendiente de calificar */
+.calificacion-pendiente-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.badge-sin-calificar {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.pendiente-ayuda {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-calificar-ahora {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.25rem;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
+}
+
+.btn-calificar-ahora:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+}
+
+/* Pie de tarjeta con acciones secundarias */
+.peli-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btn-ver-ticket-mini {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 0.45rem 0.8rem;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-ver-ticket-mini:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.btn-cancelar-mini {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cancelar-mini:hover {
+  text-decoration: underline;
+}
+
+/* Estado de filtro vacío */
+.filtro-vacio-card {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.filtro-vacio-texto {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0 0 1rem;
+}
+
+.btn-reset-filtros {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-reset-filtros:hover {
+  background: #1e293b;
+}
+
+/* ======================================================== */
+/* HISTORIAL DE TICKETS Y ENTRADAS (TAB 2)                  */
+/* ======================================================== */
+.cargando-compras-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem;
+  color: #64748b;
+  gap: 0.75rem;
+}
+
+.spinner-mini {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #f59e0b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .historial-vacio-card {
   text-align: center;
-  padding: 2.5rem 1.5rem;
+  padding: 3rem 1.5rem;
   background: #f8fafc;
   border: 1px dashed #cbd5e1;
   border-radius: 12px;
 }
 
 .icono-vacio {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   margin-bottom: 0.75rem;
 }
 
 .historial-vacio-card h3 {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: #0f172a;
   margin: 0 0 0.5rem;
 }
 
 .historial-vacio-card p {
-  font-size: 0.875rem;
+  font-size: 0.88rem;
   color: #64748b;
   max-width: 500px;
   margin: 0 auto 1.25rem;
@@ -274,25 +844,6 @@
 .btn-comprar-entradas:hover {
   background: #1e293b;
   transform: translateY(-1px);
-}
-
-/* --- Grilla de Compras Realizadas --- */
-.cargando-compras-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2.5rem;
-  color: #64748b;
-  gap: 0.75rem;
-}
-
-.spinner-mini {
-  width: 32px;
-  height: 32px;
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-top-color: #f59e0b;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
 }
 
 .compras-grid {
@@ -469,8 +1020,6 @@
   transform: translateY(-1px);
 }
 
-
-/* --- Cancelación de compras --- */
 .aviso-cancelacion {
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
@@ -489,6 +1038,16 @@
 .badge-cancelada {
   background: #fee2e2;
   color: #b91c1c;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+}
+
+.badge-usada {
+  background: #e2e8f0;
+  color: #475569;
   font-size: 0.68rem;
   font-weight: 800;
   padding: 0.2rem 0.55rem;
@@ -524,10 +1083,45 @@
   background: #fee2e2;
 }
 
+/* ======================================================== */
+/* DATOS DE LA CUENTA (TAB 3)                               */
+/* ======================================================== */
+.datos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.dato-item {
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.dato-lbl {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.dato-val {
+  font-size: 0.95rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* ======================================================== */
+/* MODAL: CALIFICAR PELÍCULA INTERACTIVO                   */
+/* ======================================================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -535,6 +1129,263 @@
   z-index: 1000;
 }
 
+.modal-calificar-box {
+  background: #ffffff;
+  border-radius: 18px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: modalEnter 0.25s ease-out;
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-calificar-header {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #ffffff;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.modal-peli-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.modal-peli-poster {
+  width: 52px;
+  height: 75px;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.modal-peli-textos {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-pre-titulo {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fbbf24;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-peli-titulo {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0.15rem 0;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.modal-peli-sub {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.btn-cerrar-modal {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-cerrar-modal:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.modal-calificar-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.selector-estrellas-centrado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 12px;
+  padding: 1.25rem 1rem;
+}
+
+.estrellas-lbl {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #854d0e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.texto-puntaje-feedback {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #713f12;
+}
+
+.comentario-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.comentario-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.modal-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.88rem;
+  color: #0f172a;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 75px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.modal-textarea:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.char-count-modal {
+  align-self: flex-end;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.alerta-calif {
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.alerta-calif.exito {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.alerta-calif.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.modal-calificar-footer {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-eliminar-calif {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.4rem;
+  transition: opacity 0.15s ease;
+}
+
+.btn-eliminar-calif:hover {
+  text-decoration: underline;
+}
+
+.modal-footer-derecha {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.btn-cancelar-modal {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-cancelar-modal:hover {
+  background: #f1f5f9;
+}
+
+.btn-guardar-calif {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border: none;
+  color: #ffffff;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
+}
+
+.btn-guardar-calif:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.btn-guardar-calif:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ======================================================== */
+/* MODAL DE CANCELACIÓN DE COMPRA                           */
+/* ======================================================== */
 .modal-cancelacion {
   background: #ffffff;
   border-radius: 14px;
@@ -587,14 +1438,4 @@
 .btn-confirmar-cancelacion:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.badge-usada {
-  background: #e2e8f0;
-  color: #475569;
-  font-size: 0.68rem;
-  font-weight: 800;
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
-  letter-spacing: 0.06em;
 }

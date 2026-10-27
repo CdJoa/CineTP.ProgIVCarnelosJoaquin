@@ -1,0 +1,245 @@
+<div class="graficos-container">
+  <!-- ENCABEZADO -->
+  <header class="graficos-header">
+    <div class="header-titular">
+      <div class="header-tag">ADMINISTRACIÓN Y ANALÍTICA</div>
+      <h1 class="header-titulo">📈 Gráficos de Ventas y Audiencia</h1>
+      <p class="header-subtitulo">
+        Estadísticas visuales de las películas más vistas por semana y por mes, y los productos más vendidos del Candy Bar.
+      </p>
+    </div>
+  </header>
+
+  <!-- SPINNER GLOBAL SI CARGA -->
+  <div *ngIf="cargando()" class="cargando-box">
+    <div class="spinner-mini"></div>
+    <p>Cargando estadísticas de taquilla y Candy Bar...</p>
+  </div>
+
+  <div *ngIf="error()" class="alerta-error">
+    ⚠ {{ error() }}
+  </div>
+
+  <div *ngIf="!cargando()">
+    <!-- SELECTOR DE PERÍODO (SEMANA / MES / HISTÓRICO) -->
+    <div class="periodo-bar">
+      <div class="periodo-titular">
+        <span class="periodo-lbl">Período de análisis:</span>
+        <span class="periodo-sub">Seleccioná el intervalo de tiempo para comparar las métricas</span>
+      </div>
+
+      <div class="periodo-chips">
+        <button
+          type="button"
+          class="periodo-chip"
+          [class.active]="periodo() === 'semana'"
+          (click)="cambiarPeriodo('semana')"
+        >
+          📅 Por Semana (Últimos 7 días)
+        </button>
+        <button
+          type="button"
+          class="periodo-chip"
+          [class.active]="periodo() === 'mes'"
+          (click)="cambiarPeriodo('mes')"
+        >
+          📆 Por Mes (Últimos 30 días)
+        </button>
+        <button
+          type="button"
+          class="periodo-chip"
+          [class.active]="periodo() === 'historico'"
+          (click)="cambiarPeriodo('historico')"
+        >
+          🌐 Todo el Historial
+        </button>
+      </div>
+    </div>
+
+    <!-- TARJETAS DESTACADAS DE LÍDERES (HALL OF FAME) -->
+    <div class="destacados-grid">
+      <!-- 🎬 PELÍCULA MÁS VISTA -->
+      <div class="lider-card pelicula-lider">
+        <div class="lider-badge">
+          🥇 PELÍCULA MÁS VISTA {{ periodo() === 'semana' ? 'DE LA SEMANA' : (periodo() === 'mes' ? 'DEL MES' : 'HISTÓRICA') }}
+        </div>
+
+        <div class="lider-contenido" *ngIf="peliculaMasVista() as peliLider">
+          <img *ngIf="peliLider.poster" [src]="peliLider.poster" [alt]="peliLider.titulo" class="lider-poster" />
+          <div *ngIf="!peliLider.poster" class="lider-poster-placeholder">🎬</div>
+
+          <div class="lider-info">
+            <h3 class="lider-nombre">{{ peliLider.titulo }}</h3>
+            <div class="lider-stat-destacado">
+              <span class="lider-stat-num">{{ peliLider.boletos }}</span>
+              <span class="lider-stat-lbl">Entradas vendidas</span>
+            </div>
+            <p class="lider-recaudacion">
+              Recaudación generada: <strong>{{ formatearMoneda(peliLider.recaudacion) }}</strong>
+              ({{ peliLider.porcentajeTotal }}% de la audiencia total)
+            </p>
+          </div>
+        </div>
+
+        <div class="lider-empty" *ngIf="!peliculaMasVista()">
+          <span class="empty-icon">🎟️</span>
+          <p>No se registraron ventas de entradas en este período.</p>
+        </div>
+      </div>
+
+      <!-- 👑 PRODUCTO DEL CANDY BAR MÁS VENDIDO -->
+      <div class="lider-card candy-lider">
+        <div class="lider-badge candy">👑 PRODUCTO MÁS VENDIDO DEL CANDY BAR</div>
+
+        <div class="lider-contenido" *ngIf="productoMasVendidoCandy() as candyLider">
+          <div class="candy-lider-icon">🍿</div>
+
+          <div class="lider-info">
+            <span class="lider-sub-tag">Líder indiscutido en ventas de snacks</span>
+            <h3 class="lider-nombre">{{ candyLider.nombre }}</h3>
+            <div class="lider-stat-destacado">
+              <span class="lider-stat-num">{{ candyLider.unidades }}</span>
+              <span class="lider-stat-lbl">Unidades despachadas</span>
+            </div>
+            <p class="lider-recaudacion">
+              Facturación generada: <strong>{{ formatearMoneda(candyLider.recaudacion) }}</strong>
+              ({{ candyLider.porcentajeTotal }}% de todos los productos de Candy)
+            </p>
+          </div>
+        </div>
+
+        <div class="lider-empty" *ngIf="!productoMasVendidoCandy()">
+          <span class="empty-icon">🍿</span>
+          <p>No se registraron ventas de Candy Bar en este período.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICOS VISUALES COMPARATIVOS DE BARRAS -->
+    <div class="graficos-grid">
+      <!-- ============================================== -->
+      <!-- GRÁFICO 1: PELÍCULAS MÁS VISTAS               -->
+      <!-- ============================================== -->
+      <div class="grafico-card">
+        <div class="grafico-card-header">
+          <div>
+            <h3 class="grafico-titulo">
+              🎬 Ranking: Películas Más Vistas
+              <span class="grafico-badge">
+                {{ periodo() === 'semana' ? 'Esta Semana' : (periodo() === 'mes' ? 'Este Mes' : 'Histórico') }}
+              </span>
+            </h3>
+            <p class="grafico-subtitulo">
+              Comparativa de volumen de espectadores y recaudación por película.
+            </p>
+          </div>
+          <div class="grafico-total-badge">
+            Total entradas: <strong>{{ totalesPeriodo().totalBoletos }}</strong>
+          </div>
+        </div>
+
+        <div class="grafico-cuerpo" *ngIf="rankingPeliculas().length > 0">
+          <div class="barras-lista">
+            <div
+              *ngFor="let p of rankingPeliculas(); let i = index"
+              class="barra-item"
+              [class.top-1]="i === 0"
+              [class.top-2]="i === 1"
+              [class.top-3]="i === 2"
+            >
+              <div class="barra-info-row">
+                <div class="barra-titulo-col">
+                  <span class="ranking-medalla">{{ i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : '#' + (i + 1))) }}</span>
+                  <span class="barra-nombre" [title]="p.titulo">{{ p.titulo }}</span>
+                </div>
+                <div class="barra-valores-col">
+                  <span class="valor-primario"><strong>{{ p.boletos }}</strong> boletos</span>
+                  <span class="valor-secundario">{{ formatearMoneda(p.recaudacion) }} ({{ p.porcentajeTotal }}%)</span>
+                </div>
+              </div>
+
+              <!-- Barra de progreso visual proporcional -->
+              <div class="barra-track">
+                <div
+                  class="barra-fill pelicula-fill"
+                  [style.width.%]="p.porcentajeRelativo"
+                >
+                  <span class="barra-fill-label">{{ p.boletos }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grafico-vacio" *ngIf="rankingPeliculas().length === 0">
+          <p>No hay datos de funciones vistas para el período seleccionado.</p>
+          <button type="button" class="btn-cambiar-periodo" (click)="cambiarPeriodo('historico')">
+            Ver período histórico
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- GRÁFICO 2: PRODUCTOS DEL CANDY BAR MÁS VENDIDOS -->
+      <!-- ============================================== -->
+      <div class="grafico-card">
+        <div class="grafico-card-header">
+          <div>
+            <h3 class="grafico-titulo">
+              🍿 Ranking: Productos de Candy Bar Más Vendidos
+              <span class="grafico-badge candy">
+                {{ periodo() === 'semana' ? 'Esta Semana' : (periodo() === 'mes' ? 'Este Mes' : 'Histórico') }}
+              </span>
+            </h3>
+            <p class="grafico-subtitulo">
+              Volumen de unidades consumidas y facturación por producto del menú.
+            </p>
+          </div>
+          <div class="grafico-total-badge candy">
+            Total unidades: <strong>{{ totalesPeriodo().totalUnidadesCandy }}</strong>
+          </div>
+        </div>
+
+        <div class="grafico-cuerpo" *ngIf="rankingCandy().length > 0">
+          <div class="barras-lista">
+            <div
+              *ngFor="let c of rankingCandy(); let i = index"
+              class="barra-item"
+              [class.top-1]="i === 0"
+              [class.top-2]="i === 1"
+              [class.top-3]="i === 2"
+            >
+              <div class="barra-info-row">
+                <div class="barra-titulo-col">
+                  <span class="ranking-medalla">{{ i === 0 ? '👑' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : '#' + (i + 1))) }}</span>
+                  <span class="barra-nombre" [title]="c.nombre">{{ c.nombre }}</span>
+                </div>
+                <div class="barra-valores-col">
+                  <span class="valor-primario"><strong>{{ c.unidades }}</strong> u.</span>
+                  <span class="valor-secundario">{{ formatearMoneda(c.recaudacion) }} ({{ c.porcentajeTotal }}%)</span>
+                </div>
+              </div>
+
+              <!-- Barra de progreso visual proporcional -->
+              <div class="barra-track">
+                <div
+                  class="barra-fill candy-fill"
+                  [style.width.%]="c.porcentajeRelativo"
+                >
+                  <span class="barra-fill-label">{{ c.unidades }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grafico-vacio" *ngIf="rankingCandy().length === 0">
+          <p>No se encontraron compras con items de Candy Bar en este período.</p>
+          <button type="button" class="btn-cambiar-periodo" (click)="cambiarPeriodo('historico')">
+            Ver período histórico
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

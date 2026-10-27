@@ -1,20 +1,31 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { Pelicula } from '../../../models/pelicula';
 import { Funcion } from '../../../models/funcion';
+import { Resena, ResumenPuntuacion } from '../../../models/resena';
 import { PeliculasService } from '../../../servicios/peliculas';
 import { FuncionesService } from '../../../servicios/funciones';
 import { AsientosRealtimeService } from '../../../servicios/asientos-realtime';
+import { ResenasService } from '../../../servicios/resenas';
 import { Auth } from '../../../servicios/auth';
 import { CartaPelicula } from '../carta-pelicula/carta-pelicula';
+import { RatingEstrellas } from '../rating-estrellas/rating-estrellas';
+import { InsertarComentarioDirective } from '../../../directivas/insertar-comentario.directive';
 
 @Component({
   selector: 'app-cartelera',
   standalone: true,
-  imports: [CommonModule, FormsModule, CartaPelicula],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    CartaPelicula,
+    RatingEstrellas,
+    InsertarComentarioDirective,
+  ],
   templateUrl: './cartelera.html',
   styleUrl: './cartelera.css',
 })
@@ -22,8 +33,23 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   private peliculasService = inject(PeliculasService);
   private funcionesService = inject(FuncionesService);
   private asientosRealtimeService = inject(AsientosRealtimeService);
+  private resenasService = inject(ResenasService);
   private router = inject(Router);
   private authService = inject(Auth);
+
+  get usuarioActual() {
+    return this.authService.usuarioActual();
+  }
+
+  resumenesRating = signal<Record<string, ResumenPuntuacion>>({});
+  resenasPeliculaActual = signal<Resena[]>([]);
+  cargandoResenas = signal<boolean>(false);
+  miResenaPelicula = signal<Resena | null>(null);
+  miPuntaje = signal<number>(0);
+  miComentario = signal<string>('');
+  guardandoResena = signal<boolean>(false);
+  mensajeResena = signal<string | null>(null);
+  errorResena = signal<string | null>(null);
 
   peliculas = signal<Pelicula[]>([]);
   funciones = signal<Funcion[]>([]);
@@ -45,7 +71,11 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   private canalLocal?: BroadcastChannel;
 
   async ngOnInit(): Promise<void> {
-    await Promise.all([this.cargarPeliculas(), this.cargarFunciones()]);
+    await Promise.all([
+      this.cargarPeliculas(),
+      this.cargarFunciones(),
+      this.cargarResumenesRating(),
+    ]);
     this.iniciarSuscripcionesRealtime();
   }
 
@@ -117,6 +147,16 @@ export class CarteleraComponent implements OnInit, OnDestroy {
       this.recargarPeliculasSilencioso();
     });
     this.canalesRealtime.push(canalAsientos);
+
+    // 3. Escuchar cambios en reseñas y valoraciones
+    const canalResenas = this.resenasService.suscribirCambios(() => {
+      this.cargarResumenesRating();
+      const p = this.peliculaSeleccionada();
+      if (p) {
+        this.cargarResenasPelicula(p.id);
+      }
+    });
+    this.canalesRealtime.push(canalResenas);
   }
 
   async recargarPeliculasSilencioso(): Promise<void> {
@@ -288,7 +328,10 @@ export class CarteleraComponent implements OnInit, OnDestroy {
     this.filtroFuncionDia.set('todos');
     this.filtroFuncionFormato.set('todos');
     this.filtroFuncionIdioma.set('todos');
+    this.mensajeResena.set(null);
+    this.errorResena.set(null);
     this.cargarFunciones();
+    this.cargarResenasPelicula(pelicula.id);
   }
 
   cerrarDetalle(): void {
@@ -328,5 +371,111 @@ export class CarteleraComponent implements OnInit, OnDestroy {
       dia: this.formatearFechaCorta(d),
       hora: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' hs',
     };
+  }
+
+  // ==========================================
+  // Métodos del Sistema de Reseñas y Estrellas
+  // ==========================================
+  async cargarResumenesRating(): Promise<void> {
+    try {
+      const mapa = await this.resenasService.obtenerMapaResumenes();
+      this.resumenesRating.set(mapa);
+    } catch (err) {
+      console.warn('Error al cargar resúmenes de rating:', err);
+    }
+  }
+
+  async cargarResenasPelicula(peliculaId: string): Promise<void> {
+    this.cargandoResenas.set(true);
+    try {
+      const lista = await this.resenasService.obtenerResenasPorPelicula(peliculaId);
+      this.resenasPeliculaActual.set(lista);
+
+      const u = this.usuarioActual;
+      if (u) {
+        const miRes = await this.resenasService.obtenerMiResena(peliculaId, u.id);
+        this.miResenaPelicula.set(miRes);
+        if (miRes) {
+          this.miPuntaje.set(miRes.puntos);
+          this.miComentario.set(miRes.comentario);
+        } else {
+          this.miPuntaje.set(0);
+          this.miComentario.set('');
+        }
+      } else {
+        this.miResenaPelicula.set(null);
+        this.miPuntaje.set(0);
+        this.miComentario.set('');
+      }
+    } catch (err) {
+      console.error('Error al cargar reseñas de la película:', err);
+    } finally {
+      this.cargandoResenas.set(false);
+    }
+  }
+
+  onPuntajeChange(nuevoPuntaje: number): void {
+    this.miPuntaje.set(nuevoPuntaje);
+    this.mensajeResena.set(null);
+    this.errorResena.set(null);
+  }
+
+  async guardarMiResena(): Promise<void> {
+    const p = this.peliculaSeleccionada();
+    const u = this.usuarioActual;
+    if (!p || !u) return;
+
+    if (this.miPuntaje() < 0.5) {
+      this.errorResena.set('Por favor seleccioná al menos 0.5 estrellas para calificar.');
+      return;
+    }
+
+    this.guardandoResena.set(true);
+    this.mensajeResena.set(null);
+    this.errorResena.set(null);
+
+    try {
+      const guardada = await this.resenasService.guardarResena({
+        peliculaId: p.id,
+        usuarioId: u.id,
+        usuarioNombre: `${u.nombre || ''} ${u.apellido || ''}`.trim() || u.email || 'Usuario',
+        usuarioEmail: u.email,
+        puntos: this.miPuntaje(),
+        comentario: this.miComentario(),
+      });
+
+      this.miResenaPelicula.set(guardada);
+      this.mensajeResena.set('¡Tu reseña ha sido guardada correctamente! ⭐');
+      await Promise.all([this.cargarResenasPelicula(p.id), this.cargarResumenesRating()]);
+    } catch (err: any) {
+      this.errorResena.set(err?.message || 'No se pudo guardar la reseña.');
+    } finally {
+      this.guardandoResena.set(false);
+    }
+  }
+
+  async eliminarMiResena(): Promise<void> {
+    const resena = this.miResenaPelicula();
+    const p = this.peliculaSeleccionada();
+    const u = this.usuarioActual;
+    if (!resena || !p || !u) return;
+
+    this.guardandoResena.set(true);
+    try {
+      await this.resenasService.eliminarMiResena(resena.id, p.id, u.id);
+      this.miResenaPelicula.set(null);
+      this.miPuntaje.set(0);
+      this.miComentario.set('');
+      this.mensajeResena.set('Tu reseña ha sido eliminada.');
+      await Promise.all([this.cargarResenasPelicula(p.id), this.cargarResumenesRating()]);
+    } catch (err: any) {
+      this.errorResena.set(err?.message || 'No se pudo eliminar la reseña.');
+    } finally {
+      this.guardandoResena.set(false);
+    }
+  }
+
+  obtenerResumenActual(peliculaId: string): ResumenPuntuacion {
+    return this.resumenesRating()[peliculaId] || { promedio: 0, total: 0 };
   }
 }

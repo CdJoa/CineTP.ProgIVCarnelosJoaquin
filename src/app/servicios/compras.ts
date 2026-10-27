@@ -198,6 +198,23 @@ export class ComprasService extends BaseSupabaseService<Compra> {
   }
 
   /**
+   * Obtiene todas las compras registradas en el sistema (para facturación y reportes de administración)
+   */
+  async obtenerTodasLasCompras(): Promise<Compra[]> {
+    const { data, error } = await this.supabase
+      .from(this.nombreTabla)
+      .select('*')
+      .order('creado_en', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const compras = (data || []).map((d) => this.mapear(d));
+    return await this.enriquecerCompras(compras);
+  }
+
+  /**
    * Obtiene compras de un usuario específico
    */
   async obtenerComprasUsuario(usuarioId: string): Promise<Compra[]> {
@@ -232,22 +249,15 @@ export class ComprasService extends BaseSupabaseService<Compra> {
         this.funcionesService.obtenerFuncionesCompleta().catch(() => []),
       ]);
 
-      const mapPelis = new Map<string, any>(todasPeliculas.map((p) => [String(p.id), p]));
-      const mapFuncs = new Map<string, any>(todasFunciones.map((f) => [String(f.id), f]));
+      const mapPelis = new Map<string, any>(todasPeliculas.map((p): [string, any] => [String(p.id), p]));
+      const mapFuncs = new Map<string, any>(todasFunciones.map((f): [string, any] => [String(f.id), f]));
 
       for (const c of lista) {
-        if (c.peliculaId && mapPelis.has(String(c.peliculaId))) {
-          const p = mapPelis.get(String(c.peliculaId))!;
-          c.restriccionEdad = Number(p.restriccionEdad || 0);
-          if (!c.peliculaTitulo || c.peliculaTitulo === 'Película') {
-            c.peliculaTitulo = p.titulo;
-          }
-          if (!c.peliculaPoster) {
-            c.peliculaPoster = p.poster;
-          }
-        }
         if (c.funcionId && mapFuncs.has(String(c.funcionId))) {
           const f = mapFuncs.get(String(c.funcionId))!;
+          if (!c.peliculaId && f.peliculaId) {
+            c.peliculaId = f.peliculaId;
+          }
           if (!c.salaNombre || c.salaNombre === 'Sala') {
             c.salaNombre = f.salaNombre || 'Sala';
           }
@@ -262,6 +272,26 @@ export class ComprasService extends BaseSupabaseService<Compra> {
           }
           if (!c.peliculaTitulo || c.peliculaTitulo === 'Película') {
             c.peliculaTitulo = f.peliculaTitulo || c.peliculaTitulo;
+          }
+        }
+
+        if (!c.peliculaId && c.peliculaTitulo) {
+          const found = todasPeliculas.find(
+            (p) => p.titulo.toLowerCase().trim() === c.peliculaTitulo.toLowerCase().trim()
+          );
+          if (found) {
+            c.peliculaId = found.id;
+          }
+        }
+
+        if (c.peliculaId && mapPelis.has(String(c.peliculaId))) {
+          const p = mapPelis.get(String(c.peliculaId))!;
+          c.restriccionEdad = Number(p.restriccionEdad || 0);
+          if (!c.peliculaTitulo || c.peliculaTitulo === 'Película') {
+            c.peliculaTitulo = p.titulo;
+          }
+          if (!c.peliculaPoster) {
+            c.peliculaPoster = p.poster;
           }
         }
       }

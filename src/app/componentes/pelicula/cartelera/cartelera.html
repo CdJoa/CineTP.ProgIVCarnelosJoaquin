@@ -10,6 +10,7 @@
       <div *ngFor="let pelicula of topTresVendidas" class="grid-item">
         <app-carta-pelicula
           [pelicula]="pelicula"
+          [rating]="resumenesRating()[pelicula.id]"
           [esPreventa]="esPeliculaPreventa(pelicula.id)"
           [mostrarBoletosVendidos]="true"
           (seleccionar)="abrirDetalle($event)"
@@ -98,6 +99,7 @@
     >
       <app-carta-pelicula
         [pelicula]="pelicula"
+        [rating]="resumenesRating()[pelicula.id]"
         [esPreventa]="esPeliculaPreventa(pelicula.id)"
         [mostrarBoletosVendidos]="true"
         (seleccionar)="abrirDetalle($event)"
@@ -118,6 +120,7 @@
       <div *ngFor="let pelicula of peliculasProximamente" class="grid-item">
         <app-carta-pelicula
           [pelicula]="pelicula"
+          [rating]="resumenesRating()[pelicula.id]"
           [esPreventa]="esPeliculaPreventa(pelicula.id)"
           [mostrarBoletosVendidos]="true"
           (seleccionar)="abrirDetalle($event)"
@@ -136,10 +139,108 @@
         <div class="detail-poster-col">
           <img *ngIf="p.poster" [src]="p.poster" [alt]="p.titulo" class="detail-poster" />
           <div *ngIf="!p.poster" class="no-poster">Sin Póster</div>
+
+          <!-- SECCIÓN: Calificar película abajo del póster -->
+          <div class="poster-rating-box">
+            @if (usuarioActual; as u) {
+              <div class="calificar-header">
+                <span class="calificar-titulo">⭐ Calificar película</span>
+                @if (miResenaPelicula()) {
+                  <span class="badge-tu-resena">Tu calificación</span>
+                }
+              </div>
+
+              <!-- Selector interactivo de 5 estrellas con pasos de 0.5 puntos -->
+              <div class="calificar-stars-wrapper">
+                <app-rating-estrellas
+                  [valor]="miPuntaje()"
+                  [soloLectura]="false"
+                  tamano="md"
+                  [mostrarNumero]="true"
+                  (valorChange)="onPuntajeChange($event)"
+                ></app-rating-estrellas>
+              </div>
+
+              <!-- Directiva para insertar comentario -->
+              <div
+                class="comentario-directiva-container"
+                [appInsertarComentario]="miPuntaje()"
+              >
+                <div class="comentario-form">
+                  <label for="comentario-input" class="comentario-lbl">
+                    Dejá tu comentario corto:
+                  </label>
+                  <textarea
+                    id="comentario-input"
+                    rows="3"
+                    maxlength="250"
+                    [ngModel]="miComentario()"
+                    (ngModelChange)="miComentario.set($event)"
+                    placeholder="Escribí una opinión corta sobre la película..."
+                    class="comentario-textarea"
+                  ></textarea>
+
+                  <div class="comentario-footer">
+                    <span class="char-count">{{ miComentario().length }}/250</span>
+                    <div class="btn-group-resena">
+                      @if (miResenaPelicula()) {
+                        <button
+                          type="button"
+                          class="btn-eliminar-resena"
+                          [disabled]="guardandoResena()"
+                          (click)="eliminarMiResena()"
+                          title="Eliminar mi calificación"
+                        >
+                          🗑️
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="btn-guardar-resena"
+                        [disabled]="guardandoResena() || miPuntaje() < 0.5"
+                        (click)="guardarMiResena()"
+                      >
+                        {{ guardandoResena() ? 'Guardando...' : (miResenaPelicula() ? 'Actualizar' : 'Publicar') }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              @if (mensajeResena()) {
+                <div class="resena-alerta exito">{{ mensajeResena() }}</div>
+              }
+              @if (errorResena()) {
+                <div class="resena-alerta error">{{ errorResena() }}</div>
+              }
+            } @else {
+              <!-- Usuario no logueado -->
+              <div class="login-prompt-rating">
+                <span class="login-prompt-icon">⭐</span>
+                <p class="login-prompt-text">Iniciá sesión para calificar esta película y dejar tu reseña</p>
+                <a routerLink="/login" class="btn-login-prompt">Iniciar sesión</a>
+              </div>
+            }
+          </div>
         </div>
 
         <div class="detail-info-col">
-          <span *ngIf="esPeliculaPreventa(p.id)" class="badge-preventa">PREVENTA</span>
+          <div class="detail-header-row">
+            <span *ngIf="esPeliculaPreventa(p.id)" class="badge-preventa">PREVENTA</span>
+
+            <!-- Puntuación promedio con estrellas -->
+            <div class="promedio-destacado-badge" *ngIf="obtenerResumenActual(p.id) as r">
+              <span class="promedio-lbl">Puntuación:</span>
+              <app-rating-estrellas
+                [valor]="r.promedio"
+                [soloLectura]="true"
+                tamano="sm"
+                [mostrarNumero]="true"
+                [totalResenas]="r.total"
+              ></app-rating-estrellas>
+            </div>
+          </div>
+
           <h2 class="detail-titulo">{{ p.titulo }}</h2>
 
           <div class="detail-meta">
@@ -158,6 +259,53 @@
           <p *ngIf="p.restriccionEdad > 0" class="aviso-edad">
             🔞 Venta solo a mayores de {{ p.restriccionEdad }} años. Si llevás menores, deben ir acompañados por un adulto responsable.
           </p>
+
+          <hr class="detail-divider" />
+
+          <!-- SECCIÓN: Reseñas visibles antes de sacar las entradas -->
+          <div class="resenas-comunidad-seccion">
+            <div class="resenas-header-bar">
+              <h4 class="resenas-titulo">
+                💬 Opiniones de los espectadores
+                <span class="resenas-count-pill">({{ resenasPeliculaActual().length }})</span>
+              </h4>
+            </div>
+
+            <div *ngIf="cargandoResenas()" class="resenas-loading">
+              <div class="mini-spinner"></div>
+              <span>Cargando opiniones...</span>
+            </div>
+
+            <div *ngIf="!cargandoResenas() && resenasPeliculaActual().length === 0" class="empty-resenas">
+              <span class="empty-resenas-icon">🍿</span>
+              <p>Esta película aún no tiene reseñas. ¡Sé el primero en calificarla!</p>
+            </div>
+
+            <div *ngIf="!cargandoResenas() && resenasPeliculaActual().length > 0" class="resenas-cards-list">
+              @for (r of resenasPeliculaActual(); track r.id) {
+                <div class="resena-card-mini">
+                  <div class="resena-card-top">
+                    <div class="resena-user">
+                      <span class="resena-user-avatar">{{ r.usuarioNombre.charAt(0).toUpperCase() }}</span>
+                      <div class="resena-user-details">
+                        <span class="resena-user-nombre">{{ r.usuarioNombre }}</span>
+                        <span class="resena-fecha">{{ r.creadoEn | date:'d MMM yyyy' }}</span>
+                      </div>
+                    </div>
+                    <app-rating-estrellas
+                      [valor]="r.puntos"
+                      [soloLectura]="true"
+                      tamano="sm"
+                      [mostrarNumero]="true"
+                    ></app-rating-estrellas>
+                  </div>
+                  @if (r.comentario) {
+                    <p class="resena-comentario-txt">"{{ r.comentario }}"</p>
+                  }
+                </div>
+              }
+            </div>
+          </div>
         </div>
       </div>
     </div>
