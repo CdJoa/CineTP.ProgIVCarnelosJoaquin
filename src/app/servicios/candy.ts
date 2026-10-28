@@ -30,7 +30,37 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
   }
 
   async obtenerProductos(): Promise<ProductoCandy[]> {
-    return this.obtenerTodos('nombre', true);
+    const productos = await this.obtenerTodos('nombre', true);
+
+    // Sincronizar conteo real de unidades vendidas desde la tabla compras
+    try {
+      const { data: compras } = await this.supabase
+        .from('compras')
+        .select('items_candy, estado');
+
+      if (compras && compras.length > 0) {
+        const mapaVendidos = new Map<string, number>();
+        for (const c of compras) {
+          if (c.estado === 'cancelada' || !c.items_candy) continue;
+          for (const item of c.items_candy) {
+            const id = item.productoId || item.id;
+            const cant = Number(item.cantidad || 0);
+            if (id && cant > 0) {
+              mapaVendidos.set(id, (mapaVendidos.get(id) || 0) + cant);
+            }
+          }
+        }
+
+        for (const prod of productos) {
+          const vendidos = mapaVendidos.get(prod.id) || 0;
+          prod.cantidadVendida = Math.max(Number(prod.cantidadVendida || 0), vendidos);
+        }
+      }
+    } catch (err) {
+      console.warn('No se pudo sincronizar candy desde compras:', err);
+    }
+
+    return productos;
   }
 
   async actualizarProducto(id: string, datos: Partial<CrearCandyDto & { activo: boolean }>): Promise<ProductoCandy> {

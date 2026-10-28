@@ -34,7 +34,32 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
   }
 
   async obtenerPeliculas(): Promise<Pelicula[]> {
-    return this.obtenerTodos('fecha_estreno', false);
+    const peliculas = await this.obtenerTodos('fecha_estreno', false);
+
+    // Sincronizar conteo real de boletos vendidos desde la tabla compras
+    try {
+      const { data: compras } = await this.supabase
+        .from('compras')
+        .select('pelicula_id, asientos, estado');
+
+      if (compras && compras.length > 0) {
+        const mapaBoletos = new Map<string, number>();
+        for (const c of compras) {
+          if (c.estado === 'cancelada' || !c.pelicula_id) continue;
+          const cant = Array.isArray(c.asientos) && c.asientos.length > 0 ? c.asientos.length : 1;
+          mapaBoletos.set(c.pelicula_id, (mapaBoletos.get(c.pelicula_id) || 0) + cant);
+        }
+
+        for (const p of peliculas) {
+          const boletosCompras = mapaBoletos.get(p.id) || 0;
+          p.boletosVendidos = Math.max(Number(p.boletosVendidos || 0), boletosCompras);
+        }
+      }
+    } catch (err) {
+      console.warn('No se pudo sincronizar boletos desde compras:', err);
+    }
+
+    return peliculas;
   }
 
   async actualizarPelicula(id: string, datos: Partial<CrearPeliculaDto>): Promise<Pelicula> {
