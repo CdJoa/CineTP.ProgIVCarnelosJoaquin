@@ -8,6 +8,7 @@ import { FuncionesService } from './funciones';
 import { AsientosRealtimeService } from './asientos-realtime';
 import { CuponesService } from './cupones';
 import { AuditoriaService } from './auditoria';
+import { CandyService } from './candy';
 
 const HORAS_LIMITE_CANCELACION = 2;
 
@@ -24,6 +25,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
 
   private auth = inject(Auth);
   private peliculasService = inject(PeliculasService);
+  private candyService = inject(CandyService);
   private funcionesService = inject(FuncionesService);
   private asientosRealtime = inject(AsientosRealtimeService);
   private cuponesService = inject(CuponesService);
@@ -165,7 +167,6 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       qrImage,
     };
 
-    // Efectos secundarios de la compra:
     // 1. Incrementar boletos vendidos en la película
     if (dto.peliculaId && dto.asientos.length > 0) {
       try {
@@ -175,7 +176,20 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       }
     }
 
-    // 2. Sumar puntos al usuario si está autenticado
+    // 2. Incrementar productos vendidos en el Candy Bar
+    if (dto.itemsCandy && dto.itemsCandy.length > 0) {
+      for (const item of dto.itemsCandy) {
+        if (item.productoId && item.cantidad > 0) {
+          try {
+            await this.candyService.incrementarCantidadVendida(item.productoId, item.cantidad);
+          } catch (e) {
+            console.warn('No se pudo incrementar cantidad vendida de candy:', e);
+          }
+        }
+      }
+    }
+
+    // 3. Sumar puntos al usuario si está autenticado
     if (dto.usuarioId && puntos > 0) {
       try {
         await this.auth.actualizarPuntos(puntos);
@@ -184,7 +198,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       }
     }
 
-    // 3. Marcar cupón como usado si el usuario lo aplicó
+    // 4. Marcar cupón como usado si el usuario lo aplicó
     if (dto.usuarioId && dto.cuponId) {
       try {
         await this.cuponesService.marcarCuponUsado(dto.usuarioId, dto.cuponId);
@@ -193,7 +207,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       }
     }
 
-    // 4. Registrar evento en auditoría
+    // 5. Registrar evento en auditoría
     const detalleCompra = `Entradas para "${dto.peliculaTitulo || 'Película'}" en ${dto.salaNombre || 'Sala'} (${dto.asientos.join(', ')}). Total: $${dto.totalFinal}`;
     void this.auditoriaService.registrar('compra_realizada', detalleCompra, {
       id: dto.usuarioId,

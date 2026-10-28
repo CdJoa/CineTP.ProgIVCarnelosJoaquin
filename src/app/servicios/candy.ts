@@ -57,14 +57,21 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
   }
 
   async incrementarCantidadVendida(id: string, cantidad: number = 1): Promise<void> {
+    if (!id || cantidad <= 0) return;
     try {
-      const prod = await this.obtenerPorId(id);
-      if (prod) {
-        const actual = Number(prod.cantidadVendida || 0);
-        await this.actualizarAuto(id, { cantidad_vendida: actual + cantidad });
-      }
+      const { data } = await this.supabase
+        .from(this.nombreTabla)
+        .select('cantidad_vendida')
+        .eq('id', id)
+        .maybeSingle();
+
+      const actual = Number(data?.['cantidad_vendida'] || 0);
+      await this.supabase
+        .from(this.nombreTabla)
+        .update({ cantidad_vendida: actual + cantidad })
+        .eq('id', id);
     } catch (err) {
-      console.error('Error al incrementar cantidad vendida de candy:', err);
+      console.warn('Error al incrementar cantidad vendida de candy:', err);
     }
   }
 
