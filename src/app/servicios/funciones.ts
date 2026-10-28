@@ -263,22 +263,53 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     };
   }
 
-  async simularSalaLlenaDemo(funcionId: string): Promise<number> {
-    const { data, error } = await this.supabase.rpc('simular_sala_llena_demo', {
-      p_funcion_id: funcionId,
-    });
-    if (error) throw new Error(error.message);
-    return Number(data || 0);
+  async cambiarEstadoFuncion(funcion: Funcion, nuevoEstado: EstadoFuncion): Promise<Funcion> {
+    const actualizada = await this.actualizar(funcion.id, { estado: nuevoEstado });
+    void this.auditoriaService.registrar(
+      'funcion_estado_modificado',
+      `Función de ${this.describirFuncion(funcion)}: ${funcion.estado} → ${nuevoEstado}`
+    );
+    return actualizada;
   }
 
-  async liberarAsientosDemo(funcionId: string, cantidad: number, tipo: string): Promise<number> {
+  async eliminarFuncion(funcion: Funcion): Promise<void> {
+    await this.eliminar(funcion.id);
+    void this.auditoriaService.registrar(
+      'funcion_eliminada',
+      `Función eliminada: ${this.describirFuncion(funcion)} (${funcion.estado})`
+    );
+  }
+
+  async simularSalaLlenaDemo(funcion: Funcion): Promise<number> {
+    const { data, error } = await this.supabase.rpc('simular_sala_llena_demo', {
+      p_funcion_id: funcion.id,
+    });
+    if (error) throw new Error(error.message);
+    const agregados = Number(data || 0);
+    if (agregados > 0) {
+      void this.auditoriaService.registrar(
+        'butacas_demo_simuladas',
+        `${agregados} butacas demo ocupadas en la función de ${this.describirFuncion(funcion)}`
+      );
+    }
+    return agregados;
+  }
+
+  async liberarAsientosDemo(funcion: Funcion, cantidad: number, tipo: string): Promise<number> {
     const { data, error } = await this.supabase.rpc('liberar_asientos_demo', {
-      p_funcion_id: funcionId,
+      p_funcion_id: funcion.id,
       p_cantidad: cantidad,
       p_tipo: tipo,
     });
     if (error) throw new Error(error.message);
-    return Number(data || 0);
+    const liberados = Number(data || 0);
+    if (liberados > 0) {
+      void this.auditoriaService.registrar(
+        'butacas_demo_liberadas',
+        `${liberados} butacas demo (${tipo}) liberadas en la función de ${this.describirFuncion(funcion)}`
+      );
+    }
+    return liberados;
   }
 
   /**

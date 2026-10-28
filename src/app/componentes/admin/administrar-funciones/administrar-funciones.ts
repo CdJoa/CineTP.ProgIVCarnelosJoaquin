@@ -82,7 +82,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
     this.errorAsientosDemo.set('');
     this.mensajeAsientosDemo.set('');
     try {
-      const agregados = await this.funcionesService.simularSalaLlenaDemo(funcion.id);
+      const agregados = await this.funcionesService.simularSalaLlenaDemo(funcion);
       this.mensajeAsientosDemo.set(
         agregados > 0
           ? `Sala simulada: ${agregados} butacas demo ocupadas. No se registraron ventas.`
@@ -110,7 +110,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
     this.errorAsientosDemo.set('');
     this.mensajeAsientosDemo.set('');
     try {
-      const liberados = await this.funcionesService.liberarAsientosDemo(funcion.id, cantidad, tipo);
+      const liberados = await this.funcionesService.liberarAsientosDemo(funcion, cantidad, tipo);
       this.mensajeAsientosDemo.set(
         liberados > 0
           ? `Se liberaron ${liberados} butacas demo.`
@@ -563,7 +563,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
         );
         actualizada = { ...funcion, estado: 'cancelada' };
       } else {
-        actualizada = await this.funcionesService.actualizar(funcion.id, { estado: nuevoEstado });
+        actualizada = await this.funcionesService.cambiarEstadoFuncion(funcion, nuevoEstado);
       }
       this.items.set(
         this.items().map((f) => (f.id === actualizada.id ? { ...f, estado: nuevoEstado } : f))
@@ -600,7 +600,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
 
     try {
       this.guardando.set(true);
-      await this.funcionesService.eliminar(funcion.id);
+      await this.funcionesService.eliminarFuncion(funcion);
       this.items.set(this.items().filter((f) => f.id !== funcion.id));
       if (this.itemSeleccionado()?.id === funcion.id) {
         this.itemSeleccionado.set(null);

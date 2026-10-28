@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Cupon } from '../../../models/cupon';
 import { CuponesService } from '../../../servicios/cupones';
+import { AuditoriaService } from '../../../servicios/auditoria';
 import { crearFormularioCupon, generarPreviewCupon } from '../../../validators/cupon';
 import { AdministrarBase } from '../administrar-base';
 
@@ -15,6 +16,8 @@ import { AdministrarBase } from '../administrar-base';
 })
 export class AdministrarCuponesComponent extends AdministrarBase<Cupon> {
   private cuponesService = inject(CuponesService);
+  // La auditoría vive acá y no en CuponesService: Auth -> CuponesService -> AuditoriaService -> Auth sería circular.
+  private auditoriaService = inject(AuditoriaService);
 
   cupones = this.items;
   cuponSeleccionado = this.itemSeleccionado;
@@ -56,20 +59,11 @@ export class AdministrarCuponesComponent extends AdministrarBase<Cupon> {
     return this.cuponesService.obtenerCupones();
   }
 
-  protected override crearData(payload: any): Promise<Cupon> {
-    const dataFormatted = {
-      codigo: (payload.codigo || '').toUpperCase().trim(),
-      nombre: payload.nombre,
-      descripcion: payload.descripcion,
-      porcentaje_descuento: Number(payload.porcentajeDescuento),
-      edad_minima_requerida: payload.edadMinimaRequerida ? Number(payload.edadMinimaRequerida) : null,
-      es_primera_compra: !!payload.esPrimeraCompra,
-      activo: !!payload.activo,
-    };
-    return this.cuponesService.insertar(dataFormatted);
+  private describirCupon(cupon: Cupon): string {
+    return `Cupón ${cupon.codigo} "${cupon.nombre}" (-${cupon.porcentajeDescuento}%)${cupon.activo ? '' : ' - inactivo'}`;
   }
 
-  protected override actualizarData(id: string, payload: any): Promise<Cupon> {
+  protected override async crearData(payload: any): Promise<Cupon> {
     const dataFormatted = {
       codigo: (payload.codigo || '').toUpperCase().trim(),
       nombre: payload.nombre,
@@ -79,7 +73,24 @@ export class AdministrarCuponesComponent extends AdministrarBase<Cupon> {
       es_primera_compra: !!payload.esPrimeraCompra,
       activo: !!payload.activo,
     };
-    return this.cuponesService.actualizar(id, dataFormatted);
+    const creado = await this.cuponesService.insertar(dataFormatted);
+    void this.auditoriaService.registrar('cupon_creado', this.describirCupon(creado));
+    return creado;
+  }
+
+  protected override async actualizarData(id: string, payload: any): Promise<Cupon> {
+    const dataFormatted = {
+      codigo: (payload.codigo || '').toUpperCase().trim(),
+      nombre: payload.nombre,
+      descripcion: payload.descripcion,
+      porcentaje_descuento: Number(payload.porcentajeDescuento),
+      edad_minima_requerida: payload.edadMinimaRequerida ? Number(payload.edadMinimaRequerida) : null,
+      es_primera_compra: !!payload.esPrimeraCompra,
+      activo: !!payload.activo,
+    };
+    const actualizado = await this.cuponesService.actualizar(id, dataFormatted);
+    void this.auditoriaService.registrar('cupon_editado', this.describirCupon(actualizado));
+    return actualizado;
   }
 
   protected override mapearFormulario(cupon: Cupon): Record<string, any> {

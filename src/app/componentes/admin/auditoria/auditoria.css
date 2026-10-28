@@ -139,7 +139,13 @@ th {
 }
 
 .badge-accion-pelicula_creada,
-.badge-accion-funcion_creada {
+.badge-accion-funcion_creada,
+.badge-accion-sala_creada,
+.badge-accion-producto_candy_creado,
+.badge-accion-cupon_creado,
+.badge-accion-empleado_registrado,
+.badge-accion-rol_creado,
+.badge-accion-propuesta_pelicula_aceptada {
   background: #ecfdf5;
   color: #065f46;
   border-color: #a7f3d0;
@@ -147,7 +153,13 @@ th {
 
 .badge-accion-pelicula_editada,
 .badge-accion-funcion_editada,
-.badge-accion-precio_modificado {
+.badge-accion-precio_modificado,
+.badge-accion-funcion_estado_modificado,
+.badge-accion-sala_editada,
+.badge-accion-producto_candy_editado,
+.badge-accion-cupon_editado,
+.badge-accion-rol_editado,
+.badge-accion-rol_asignado {
   background: #fffbeb;
   color: #92400e;
   border-color: #fde68a;
@@ -165,7 +177,10 @@ th {
   border-color: #93c5fd;
 }
 
-.badge-accion-compra_cancelada {
+.badge-accion-compra_cancelada,
+.badge-accion-funcion_cancelada,
+.badge-accion-funcion_eliminada,
+.badge-accion-propuesta_pelicula_rechazada {
   background: #fef2f2;
   color: #b91c1c;
   border-color: #fca5a5;

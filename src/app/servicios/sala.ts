@@ -236,6 +236,10 @@ export class SalaService extends BaseSupabaseService<Sala> {
     });
 
     nuevaSala.filas = filas;
+    void this.auditoriaService.registrar(
+      'sala_creada',
+      `Sala "${nuevaSala.nombre}" (${nuevaSala.formato}) con ${capacidadTotal} butacas`
+    );
     return nuevaSala;
   }
 
@@ -248,6 +252,10 @@ export class SalaService extends BaseSupabaseService<Sala> {
 
     const salaActualizada = await this.actualizarAuto(id, datosActualizar);
     salaActualizada.filas = filas;
+    void this.auditoriaService.registrar(
+      'sala_editada',
+      `Sala "${salaActualizada.nombre}" (${salaActualizada.formato})${salaActualizada.activa === false ? ' - oculta' : ''}`
+    );
     return salaActualizada;
   }
 }

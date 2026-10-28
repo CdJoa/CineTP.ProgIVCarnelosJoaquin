@@ -106,12 +106,13 @@ export class AdministrarRolesComponent implements OnInit {
     this.error.set('');
     this.exito.set('');
     try {
-      await this.rolesService.asignarRol(usuario.id, valor || null);
+      const rol = this.roles().find((item) => item.id === valor) || null;
+      await this.rolesService.asignarRol(usuario, rol);
       this.usuarios.update((items) => items.map((item) => item.id === usuario.id
         ? {
             ...item,
-            rolPersonalizadoId: valor || null,
-            rolPersonalizadoNombre: this.roles().find((rol) => rol.id === valor)?.nombre || null,
+            rolPersonalizadoId: rol?.id || null,
+            rolPersonalizadoNombre: rol?.nombre || null,
           }
         : item));
       this.exito.set(`Permisos actualizados para ${usuario.nombre} ${usuario.apellido}.`);

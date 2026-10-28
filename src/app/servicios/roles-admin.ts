@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Auth } from './auth';
+import { AuditoriaService } from './auditoria';
 import { SupabaseClientService } from './supabase-client';
 
 export const SECCIONES_ADMIN = [
@@ -38,6 +39,7 @@ export interface UsuarioAsignable {
 export class RolesAdminService {
   private supabase = inject(SupabaseClientService).client;
   private auth = inject(Auth);
+  private auditoria = inject(AuditoriaService);
   private seccionesPorUsuario = new Map<string, string[]>();
   readonly seccionesActuales = signal<string[]>([]);
 
@@ -116,14 +118,31 @@ export class RolesAdminService {
       p_secciones: rol.secciones,
     });
     if (error) throw new Error(error.message);
+
+    const secciones = SECCIONES_ADMIN
+      .filter((seccion) => rol.secciones.includes(seccion.id))
+      .map((seccion) => seccion.nombre)
+      .join(', ');
+    void this.auditoria.registrar(
+      rol.id ? 'rol_editado' : 'rol_creado',
+      `Rol "${rol.nombre.trim()}" con acceso a: ${secciones}`
+    );
   }
 
-  async asignarRol(usuarioId: string, rolId: string | null): Promise<void> {
+  async asignarRol(usuario: UsuarioAsignable, rol: RolAdministrativo | null): Promise<void> {
     const { error } = await this.supabase.rpc('admin_asignar_rol_usuario', {
-      p_usuario_id: usuarioId,
-      p_rol_id: rolId,
+      p_usuario_id: usuario.id,
+      p_rol_id: rol?.id || null,
     });
     if (error) throw new Error(error.message);
-    this.seccionesPorUsuario.delete(usuarioId);
+    this.seccionesPorUsuario.delete(usuario.id);
+
+    const nombreUsuario = `${usuario.nombre} ${usuario.apellido}`.trim() || usuario.email;
+    void this.auditoria.registrar(
+      'rol_asignado',
+      rol
+        ? `Rol "${rol.nombre}" asignado a ${nombreUsuario} (${usuario.email})`
+        : `Rol personalizado quitado a ${nombreUsuario} (${usuario.email})`
+    );
   }
 }

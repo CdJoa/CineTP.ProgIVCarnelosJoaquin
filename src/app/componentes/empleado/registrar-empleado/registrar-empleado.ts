@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../../servicios/auth';
+import { AuditoriaService } from '../../../servicios/auditoria';
 import { registroValidators } from '../../../validators/registro';
 
 @Component({
@@ -15,6 +16,7 @@ import { registroValidators } from '../../../validators/registro';
 export class RegistrarEmpleado {
   private fb = inject(FormBuilder);
   private authService = inject(Auth);
+  private auditoriaService = inject(AuditoriaService);
   private router = inject(Router);
 
   empleadoForm: FormGroup = this.fb.group(
@@ -146,6 +148,8 @@ export class RegistrarEmpleado {
     this.mensajeExito.set(null);
 
     const { nombre, apellido, email, fechaNacimiento, password } = this.empleadoForm.value;
+    // signUp cambia la sesión momentáneamente: se guarda quién registra antes de llamarlo.
+    const admin = this.authService.usuarioActual();
 
     const resultado = await this.authService.registrarEmpleado({
       nombre,
@@ -158,6 +162,18 @@ export class RegistrarEmpleado {
     this.cargando.set(false);
 
     if (resultado.exito) {
+      void this.auditoriaService.registrar(
+        'empleado_registrado',
+        `Empleado ${nombre.trim()} ${apellido.trim()} (${email.trim()}) dado de alta`,
+        admin
+          ? {
+              id: admin.id,
+              nombre: `${admin.nombre || ''} ${admin.apellido || ''}`.trim() || admin.email,
+              email: admin.email,
+              rol: admin.rol,
+            }
+          : undefined
+      );
       this.mensajeExito.set('¡Empleado registrado con éxito!');
       this.empleadoForm.reset();
       setTimeout(() => {

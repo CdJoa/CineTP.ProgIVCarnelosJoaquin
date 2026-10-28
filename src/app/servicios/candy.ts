@@ -12,7 +12,7 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
   private auditoriaService = inject(AuditoriaService);
 
   async crearProducto(datos: CrearCandyDto): Promise<ProductoCandy> {
-    return this.insertar({
+    const creado = await this.insertar({
       nombre: datos.nombre,
       descripcion: datos.descripcion,
       categoria: datos.categoria,
@@ -22,6 +22,11 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
       cantidad_vendida: Number(datos.cantidadVendida || 0),
       activo: true,
     });
+    void this.auditoriaService.registrar(
+      'producto_candy_creado',
+      `Producto de Candy "${creado.nombre}" (${creado.categoria}) a $${creado.precio}`
+    );
+    return creado;
   }
 
   async obtenerProductos(): Promise<ProductoCandy[]> {
@@ -38,6 +43,10 @@ export class CandyService extends BaseSupabaseService<ProductoCandy> {
     const precioAnterior = datos.precio !== undefined ? (await this.obtenerPorId(id))?.precio : undefined;
 
     const actualizado = await this.actualizarAuto(id, payload);
+    void this.auditoriaService.registrar(
+      'producto_candy_editado',
+      `Producto de Candy "${actualizado.nombre}" (${actualizado.categoria}) a $${actualizado.precio}${actualizado.activo === false ? ' - inactivo' : ''}`
+    );
     if (precioAnterior !== undefined && Number(precioAnterior) !== Number(actualizado.precio)) {
       void this.auditoriaService.registrar(
         'precio_modificado',
