@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Auth } from '../../servicios/auth';
+import { RolesAdminService } from '../../servicios/roles-admin';
 
 @Component({
   selector: 'app-admin',
@@ -12,4 +13,5 @@ import { Auth } from '../../servicios/auth';
 })
 export class Admin {
   authService = inject(Auth);
+  rolesAdminService = inject(RolesAdminService);
 }

@@ -7,7 +7,7 @@
     @if (authService.usuarioActual(); as usuario) {
       <span class="user-greeting">Hola, {{ usuario.nombre }}</span>
       <a *appEmpleado routerLink="/empleado/validar" class="nav-link nav-admin">Validar Entradas</a>
-      <a *appAdmin routerLink="/admin" class="nav-link nav-admin">Panel Admin</a>
+      <a *ngIf="usuario.rol === 'admin' || rolesAdminService.seccionesActuales().length > 0" routerLink="/admin" class="nav-link nav-admin">Panel Admin</a>
       @if (usuario.rol === 'cliente') {
         <div class="notificaciones-nav">
           <button type="button" class="nav-link nav-notificaciones" (click)="verNotificaciones()" aria-label="Notificaciones">

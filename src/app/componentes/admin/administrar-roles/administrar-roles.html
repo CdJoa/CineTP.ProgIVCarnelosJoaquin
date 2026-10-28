@@ -1,0 +1,99 @@
+<section class="roles-admin-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">CONTROL DE ACCESO</span>
+      <h1>Roles y permisos</h1>
+      <p>Creá perfiles con acceso limitado a secciones del administrador y asignáselos a usuarios.</p>
+    </div>
+    <button type="button" class="primary-button" (click)="crearRol()">＋ Crear rol</button>
+  </header>
+
+  <div *ngIf="error()" class="feedback error" role="alert">{{ error() }}</div>
+  <div *ngIf="exito()" class="feedback success" role="status">{{ exito() }}</div>
+
+  <div *ngIf="cargando()" class="loading">Cargando roles y usuarios…</div>
+
+  <div class="roles-layout" *ngIf="!cargando()">
+    <section class="panel roles-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Roles configurados</h2>
+          <p>El administrador conserva acceso total.</p>
+        </div>
+        <button type="button" class="secondary-button" (click)="recargar()">Actualizar</button>
+      </div>
+
+      <div *ngIf="roles().length === 0" class="empty-state">Todavía no creaste roles personalizados.</div>
+      <button *ngFor="let rol of roles()" type="button" class="role-row"
+        [class.selected]="rolSeleccionado()?.id === rol.id" (click)="editarRol(rol)">
+        <span class="role-avatar">{{ rol.nombre.charAt(0) | uppercase }}</span>
+        <span class="role-copy">
+          <strong>{{ rol.nombre }}</strong>
+          <small>{{ rol.secciones.length }} sección(es) habilitada(s)</small>
+        </span>
+        <span class="role-chevron">›</span>
+      </button>
+    </section>
+
+    <section class="panel editor-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>{{ rolSeleccionado() ? 'Editar rol' : 'Nuevo rol' }}</h2>
+          <p>Seleccioná a qué partes del panel podrá entrar.</p>
+        </div>
+      </div>
+
+      <label class="field-label" for="nombre-rol">Nombre del rol</label>
+      <input id="nombre-rol" class="text-input" type="text" maxlength="60"
+        [value]="nombreRol()" (input)="nombreRol.set($any($event.target).value)"
+        placeholder="Ej.: Analista de reportes" />
+
+      <fieldset class="sections-fieldset">
+        <legend>Secciones permitidas</legend>
+        <label class="section-option" *ngFor="let seccion of secciones">
+          <input type="checkbox" [checked]="seccionesSeleccionadas().includes(seccion.id)"
+            (change)="alternarSeccion(seccion.id, $any($event.target).checked)" />
+          <span>{{ seccion.nombre }}</span>
+        </label>
+      </fieldset>
+
+      <button type="button" class="primary-button save-role" [disabled]="guardando()" (click)="guardarRol()">
+        {{ guardando() ? 'Guardando…' : 'Guardar permisos' }}
+      </button>
+    </section>
+  </div>
+
+  <section class="panel users-panel" *ngIf="!cargando()">
+    <div class="panel-heading users-heading">
+      <div>
+        <h2>Asignar rol a usuarios</h2>
+        <p>La asignación agrega permisos de panel; conserva el rol base de la cuenta.</p>
+      </div>
+      <input class="text-input user-search" type="search" placeholder="Buscar por nombre o correo…"
+        [value]="filtroUsuarios()" (input)="filtroUsuarios.set($any($event.target).value)" />
+    </div>
+
+    <div class="users-table-wrap">
+      <table class="users-table">
+        <thead>
+          <tr><th>Usuario</th><th>Rol base</th><th>Rol de acceso al panel</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let usuario of usuariosFiltrados">
+            <td><strong>{{ usuario.nombre }} {{ usuario.apellido }}</strong><small>{{ usuario.email }}</small></td>
+            <td><span class="base-role">{{ usuario.rol }}</span></td>
+            <td>
+              <select class="role-select" [value]="usuario.rolPersonalizadoId || ''"
+                [disabled]="usuario.rol === 'admin'" (change)="asignarRol(usuario, $any($event.target).value)">
+                <option value="">Sin permisos personalizados</option>
+                <option *ngFor="let rol of roles()" [value]="rol.id">{{ rol.nombre }}</option>
+              </select>
+              <small *ngIf="usuario.rol === 'admin'" class="admin-note">Acceso total integrado</small>
+            </td>
+          </tr>
+          <tr *ngIf="usuariosFiltrados.length === 0"><td colspan="3" class="empty-state">No hay usuarios que coincidan con la búsqueda.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

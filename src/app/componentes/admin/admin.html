@@ -6,35 +6,38 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a routerLink="/admin/peliculas" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('peliculas')" routerLink="/admin/peliculas" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
         Administrar Películas
       </a>
-      <a routerLink="/admin/propuestas" routerLinkActive="active" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('propuestas')" routerLink="/admin/propuestas" routerLinkActive="active" class="nav-item">
         💡 Propuestas de Clientes
       </a>
-      <a routerLink="/admin/funciones" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('funciones')" routerLink="/admin/funciones" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
         Administrar Funciones
       </a>
-      <a routerLink="/admin/candy" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('candy')" routerLink="/admin/candy" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
         Administrar Candy Bar
       </a>
-      <a routerLink="/admin/salas" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('salas')" routerLink="/admin/salas" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
         Administrar Salas
       </a>
-      <a routerLink="/admin/cupones" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('cupones')" routerLink="/admin/cupones" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
         Administrar Cupones
       </a>
-      <a routerLink="/admin/empleados/nuevo" routerLinkActive="active" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('empleados')" routerLink="/admin/empleados/nuevo" routerLinkActive="active" class="nav-item">
         Registrar Empleado
       </a>
-      <a routerLink="/admin/auditoria" routerLinkActive="active" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('auditoria')" routerLink="/admin/auditoria" routerLinkActive="active" class="nav-item">
         Auditoría
       </a>
-      <a routerLink="/admin/facturacion" routerLinkActive="active" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('facturacion')" routerLink="/admin/facturacion" routerLinkActive="active" class="nav-item">
         📊 Facturación y Reportes
       </a>
-      <a routerLink="/admin/graficos" routerLinkActive="active" class="nav-item">
+      <a *ngIf="rolesAdminService.tieneSeccion('graficos')" routerLink="/admin/graficos" routerLinkActive="active" class="nav-item">
         📈 Gráficos de Ventas
+      </a>
+      <a *ngIf="authService.usuarioActual()?.rol === 'admin'" routerLink="/admin/roles" routerLinkActive="active" class="nav-item">
+        🔐 Roles y permisos
       </a>
     </nav>
 

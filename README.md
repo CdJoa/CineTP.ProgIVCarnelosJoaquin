@@ -64,6 +64,8 @@ Para usar las herramientas **Butacas demo** en Administración de Funciones, eje
 
 Para habilitar la **lista de espera**, ejecuta `supabase/lista-espera.sql` después de `supabase/cancelacion-funciones.sql`. El script crea una tabla independiente `lista_espera_funciones` con `funcion_id`, `pelicula_id` y `usuario_id`, las RPC de inscripción/oferta y el procesamiento automático de ofertas vencidas. La sección **Lista de espera** del perfil muestra posición u oferta activa. Las notificaciones se entregan por el sistema in-app/Realtime existente; las notificaciones push del navegador cuando la app está cerrada requieren configurar VAPID y un servicio de envío.
 
+Para habilitar **roles administrativos personalizados**, ejecuta `supabase/roles-administrativos.sql`. Luego, un administrador abre **Panel Admin → Roles y permisos**, crea roles seleccionando secciones y los asigna a usuarios. La autorización se valida tanto en la navegación como en cada ruta; la cuenta con rol base `admin` conserva acceso total.
+
 ### Pasos de instalación y puesta en marcha
 
 1. **Ingresar a la carpeta del proyecto:**

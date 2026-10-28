@@ -3,26 +3,32 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { Auth } from '../../servicios/auth';
-import { AdminDirective } from '../../directivas/admin.directive';
 import { EmpleadoDirective } from '../../directivas/empleado.directive';
 import { Notificacion, NotificacionesService } from '../../servicios/notificaciones';
+import { RolesAdminService } from '../../servicios/roles-admin';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, AdminDirective, EmpleadoDirective],
+  imports: [CommonModule, RouterLink, EmpleadoDirective],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
 export class Navbar implements OnDestroy {
   authService = inject(Auth);
   private notificacionesService = inject(NotificacionesService);
+  rolesAdminService = inject(RolesAdminService);
   private router = inject(Router);
   notificaciones = signal<Notificacion[]>([]);
   mostrarNotificaciones = signal(false);
   private canalNotificaciones?: RealtimeChannel;
 
   constructor() {
+    effect(() => {
+      const usuario = this.authService.usuarioActual();
+      if (usuario) void this.rolesAdminService.obtenerMisSecciones().catch(() => undefined);
+    });
+
     effect(() => {
       const usuario = this.authService.usuarioActual();
       if (usuario?.rol === 'cliente') {

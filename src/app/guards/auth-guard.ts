@@ -2,9 +2,11 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Auth } from '../servicios/auth';
 import { rutaInicioPorRol } from './role-guard';
+import { RolesAdminService } from '../servicios/roles-admin';
 
 export const authGuard: CanActivateFn = async (route, state) => {
   const authService = inject(Auth);
+  const rolesAdminService = inject(RolesAdminService);
   const router = inject(Router);
 
   // Espera a que se restaure la sesión para no rebotar al login al recargar la página
@@ -13,6 +15,9 @@ export const authGuard: CanActivateFn = async (route, state) => {
   if (usuario) {
     // Si ya está autenticado y trata de ir al login/registro, va a la pantalla de su rol
     if (state.url.startsWith('/login') || state.url.startsWith('/registro')) {
+      if (usuario.rol !== 'admin' && await rolesAdminService.puedeAcceder()) {
+        return router.parseUrl(await rolesAdminService.obtenerPrimeraRuta());
+      }
       return router.parseUrl(rutaInicioPorRol(usuario.rol));
     }
     return true;

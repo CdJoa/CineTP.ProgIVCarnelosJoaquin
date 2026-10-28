@@ -18,6 +18,7 @@ import { Auditoria } from './componentes/admin/auditoria/auditoria';
 import { GraficosVentasComponent } from './componentes/admin/graficos-ventas/graficos-ventas';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
+import { adminAccessGuard, adminSectionGuard } from './guards/admin-access-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -51,29 +52,35 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: Admin,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['admin'] },
+    canActivate: [adminAccessGuard],
+    canActivateChild: [adminSectionGuard],
     children: [
       { path: '', redirectTo: 'peliculas', pathMatch: 'full' },
-      { path: 'peliculas', component: AdministrarPeliculas },
-      { path: 'peliculas/nueva', redirectTo: 'peliculas', pathMatch: 'full' },
+      { path: 'peliculas', component: AdministrarPeliculas, data: { adminSection: 'peliculas' } },
+      { path: 'peliculas/nueva', redirectTo: 'peliculas', pathMatch: 'full', data: { adminSection: 'peliculas' } },
       {
         path: 'propuestas',
         loadComponent: () =>
           import('./componentes/admin/administrar-propuestas/administrar-propuestas').then(
             (m) => m.AdministrarPropuestasComponent
           ),
+        data: { adminSection: 'propuestas' },
       },
-      { path: 'funciones', component: AdministrarFunciones },
-      { path: 'funciones/nueva', redirectTo: 'funciones', pathMatch: 'full' },
-      { path: 'candy', component: AdministrarCandy },
-      { path: 'candy/nuevo', redirectTo: 'candy', pathMatch: 'full' },
-      { path: 'salas', component: AdministrarSalas },
-      { path: 'salas/nueva', redirectTo: 'salas', pathMatch: 'full' },
-      { path: 'cupones', component: AdministrarCuponesComponent },
-      { path: 'cupones/nuevo', redirectTo: 'cupones', pathMatch: 'full' },
-      { path: 'empleados/nuevo', component: RegistrarEmpleado },
-      { path: 'auditoria', component: Auditoria },
+      { path: 'funciones', component: AdministrarFunciones, data: { adminSection: 'funciones' } },
+      { path: 'funciones/nueva', redirectTo: 'funciones', pathMatch: 'full', data: { adminSection: 'funciones' } },
+      { path: 'candy', component: AdministrarCandy, data: { adminSection: 'candy' } },
+      { path: 'candy/nuevo', redirectTo: 'candy', pathMatch: 'full', data: { adminSection: 'candy' } },
+      { path: 'salas', component: AdministrarSalas, data: { adminSection: 'salas' } },
+      { path: 'salas/nueva', redirectTo: 'salas', pathMatch: 'full', data: { adminSection: 'salas' } },
+      { path: 'cupones', component: AdministrarCuponesComponent, data: { adminSection: 'cupones' } },
+      { path: 'cupones/nuevo', redirectTo: 'cupones', pathMatch: 'full', data: { adminSection: 'cupones' } },
+      { path: 'empleados/nuevo', component: RegistrarEmpleado, data: { adminSection: 'empleados' } },
+      { path: 'auditoria', component: Auditoria, data: { adminSection: 'auditoria' } },
+      {
+        path: 'roles',
+        loadComponent: () => import('./componentes/admin/administrar-roles/administrar-roles').then((m) => m.AdministrarRolesComponent),
+        data: { adminOnly: true },
+      },
       {
         path: 'facturacion',
         //lazy loading):jsPDF y XLSX
@@ -81,8 +88,9 @@ export const routes: Routes = [
           import('./componentes/admin/reporte-facturacion/reporte-facturacion').then(
             (m) => m.ReporteFacturacionComponent
           ),
+        data: { adminSection: 'facturacion' },
       },
-      { path: 'graficos', component: GraficosVentasComponent },
+      { path: 'graficos', component: GraficosVentasComponent, data: { adminSection: 'graficos' } },
     ],
   },
   { path: '**', redirectTo: 'login' },

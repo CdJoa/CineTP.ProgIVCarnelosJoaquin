@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Auth } from '../../servicios/auth';
 import { loginValidators } from '../../validators/login';
 import { rutaInicioPorRol } from '../../guards/role-guard';
+import { RolesAdminService } from '../../servicios/roles-admin';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ import { rutaInicioPorRol } from '../../guards/role-guard';
 export class Login {
   private fb = inject(FormBuilder);
   private authService = inject(Auth);
+  private rolesAdminService = inject(RolesAdminService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -56,7 +58,11 @@ export class Login {
         return;
       }
 
-      this.router.navigateByUrl(rutaInicioPorRol(resultado.usuario?.rol));
+      if (resultado.usuario && resultado.usuario.rol !== 'admin' && await this.rolesAdminService.puedeAcceder()) {
+        this.router.navigateByUrl(await this.rolesAdminService.obtenerPrimeraRuta());
+      } else {
+        this.router.navigateByUrl(rutaInicioPorRol(resultado.usuario?.rol));
+      }
     } else {
       this.mensajeError.set(resultado.mensaje || 'Error al iniciar sesión');
     }
