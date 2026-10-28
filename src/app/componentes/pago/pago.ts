@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ComprasService } from '../../servicios/compras';
@@ -27,6 +27,8 @@ export class PagoComponent implements OnInit {
   cancelando = signal<boolean>(false);
   errorCancelacion = signal<string | null>(null);
   creditoAcreditado = signal<number | null>(null);
+
+  esAnonimo = computed(() => !this.compra()?.usuarioId || !this.authService.estaAutenticado());
 
   async ngOnInit(): Promise<void> {
     const compraIdQuery = this.route.snapshot.queryParamMap.get('compraId');

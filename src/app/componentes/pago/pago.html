@@ -35,6 +35,17 @@
       </div>
     </div>
 
+    <!-- Aviso limpio y directo para compra anónima -->
+    <div *ngIf="esAnonimo()" class="aviso-anonimo">
+      <div class="aviso-anonimo-icono">⚠️</div>
+      <div class="aviso-anonimo-texto">
+        <strong>Compra desde anónimo:</strong> Recordá guardar estos datos (código <code>{{ c.codigo }}</code> o código QR).
+        <span class="aviso-beneficios">
+          A futuro podés <a routerLink="/registro" class="link-registro-inline">registrarte para acumular beneficios</a>.
+        </span>
+      </div>
+    </div>
+
     <!-- Contenedor del Ticket y QR -->
     <div class="ticket-wrapper">
       <div class="ticket-card" id="ticket-imprimible">
@@ -45,6 +56,7 @@
             <span class="ticket-tipo">Ticket de Entrada Oficial</span>
           </div>
           <div class="ticket-estado">
+            <span *ngIf="esAnonimo()" class="badge-anonimo">👤 COMPRA DESDE ANÓNIMO</span>
             <span *ngIf="c.estado === 'confirmada'" class="badge-confirmado">✓ COMPRA CONFIRMADA</span>
             <span *ngIf="c.estado === 'usado'" class="badge-confirmado">✓ ENTRADA USADA</span>
             <span *ngIf="c.estado === 'cancelada'" class="badge-confirmado badge-cancelado">✕ COMPRA CANCELADA</span>
@@ -116,8 +128,11 @@
                 <span>Total Abonado:</span>
                 <strong class="monto-final">${{ c.totalFinal - c.creditoUsado }}</strong>
               </div>
-              <div *ngIf="c.puntosGanados > 0" class="puntos-sumados">
+              <div *ngIf="c.puntosGanados > 0 && !esAnonimo()" class="puntos-sumados">
                 ✨ ¡Sumaste <strong>+{{ c.puntosGanados }} puntos</strong> con esta compra!
+              </div>
+              <div *ngIf="c.puntosGanados > 0 && esAnonimo()" class="puntos-aviso-anonimo">
+                ✨ Con una cuenta registrada habrías sumado <strong>+{{ c.puntosGanados }} puntos</strong>. ¡Registrate a futuro para acumular beneficios!
               </div>
             </div>
           </div>
@@ -164,8 +179,11 @@
 
         <!-- Pie del Ticket -->
         <footer class="ticket-footer">
-          <p>
+          <p *ngIf="!esAnonimo()">
             Conserva este comprobante digital. Podrás consultarlo en cualquier momento desde tu perfil.
+          </p>
+          <p *ngIf="esAnonimo()" class="texto-aviso-anonimo">
+            ⚠️ <strong>Compra desde anónimo:</strong> Guardá este ticket o tu código <code>{{ c.codigo }}</code> para presentar en el cine.
           </p>
         </footer>
       </div>
@@ -206,8 +224,11 @@
       <button type="button" class="btn-accion btn-imprimir" (click)="imprimirTicket()">
         🖨️ Imprimir / Guardar Ticket
       </button>
-      <a routerLink="/perfil" class="btn-accion btn-perfil">
+      <a *ngIf="!esAnonimo()" routerLink="/perfil" class="btn-accion btn-perfil">
         👤 Ver en Mi Perfil
+      </a>
+      <a *ngIf="esAnonimo()" routerLink="/registro" class="btn-accion btn-beneficios">
+        ✨ Registrarse para acumular beneficios
       </a>
       <a routerLink="/home" class="btn-accion btn-volver">
         🎬 Volver a la Cartelera
