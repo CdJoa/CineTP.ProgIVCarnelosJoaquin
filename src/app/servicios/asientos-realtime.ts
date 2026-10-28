@@ -113,11 +113,25 @@ export class AsientosRealtimeService {
         },
         (payload) => {
           const row = payload.new as Record<string, any> | undefined;
-          if (row?.['funcion_id']) {
+          if (row?.['funcion_id'] && row['es_demo'] !== true) {
             alVender(row['funcion_id']);
           }
         }
       )
+      .subscribe();
+  }
+
+  suscribirCambiosDisponibilidad(alCambiar: (funcionId: string) => void): RealtimeChannel {
+    return this.auth.clienteSupabase
+      .channel('cartelera-disponibilidad-asientos-global')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'asientos_funcion',
+      }, (payload) => {
+        const row = (payload.new && Object.keys(payload.new).length ? payload.new : payload.old) as Record<string, any> | undefined;
+        if (row?.['funcion_id']) alCambiar(String(row['funcion_id']));
+      })
       .subscribe();
   }
 

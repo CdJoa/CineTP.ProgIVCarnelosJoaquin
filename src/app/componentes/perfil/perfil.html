@@ -58,6 +58,9 @@
       <button *ngIf="n.tipo === 'funcion_cancelada'" type="button" class="btn-cartelera" (click)="reubicarPorNotificacion(n)">
         Elegir otra función de esta película con mi crédito →
       </button>
+      <button *ngIf="n.tipo === 'lista_espera'" type="button" class="btn-cartelera" (click)="abrirOfertaListaEspera(n)">
+        Comprar la butaca ofrecida →
+      </button>
     </article>
   </section>
 
@@ -103,12 +106,68 @@
     <button
       type="button"
       class="tab-btn"
+      [class.active]="tabActiva() === 'espera'"
+      (click)="cambiarTab('espera')"
+    >
+      ⏳ Lista de espera
+      <span class="tab-badge" *ngIf="listasEspera().length > 0">{{ listasEspera().length }}</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
       [class.active]="tabActiva() === 'datos'"
       (click)="cambiarTab('datos')"
     >
       👤 Datos de mi Cuenta
     </button>
   </nav>
+
+  <section class="perfil-seccion" *ngIf="tabActiva() === 'espera'">
+    <div class="seccion-header-row">
+      <div>
+        <h2 class="seccion-titulo">⏳ Mis listas de espera</h2>
+        <p class="seccion-subtitulo">Consultá tu posición y las ofertas de butacas disponibles.</p>
+      </div>
+      <button type="button" class="btn-cartelera" (click)="cargarListasEspera()">Actualizar</button>
+    </div>
+
+    <p *ngIf="errorListaEspera()" class="modal-error" role="alert">{{ errorListaEspera() }}</p>
+    <div *ngIf="cargandoListaEspera()" class="loading-state"><p>Cargando listas de espera...</p></div>
+    <div *ngIf="!cargandoListaEspera() && listasEspera().length === 0" class="historial-vacio-card">
+      <div class="icono-vacio">⏳</div>
+      <h3>No estás en ninguna lista de espera</h3>
+      <p>Si una función está agotada, podés anotarte desde el mapa de asientos.</p>
+      <a routerLink="/home" class="btn-comprar-entradas">Ver cartelera</a>
+    </div>
+
+    <div *ngIf="!cargandoListaEspera() && listasEspera().length > 0" class="compras-grid">
+      <article *ngFor="let entrada of listasEspera()" class="compra-card">
+        <div class="compra-card-header">
+          <span class="compra-sala">🏛️ {{ entrada.salaNombre }}</span>
+          <span class="badge-usada" *ngIf="entrada.estado === 'ofrecida'">BUTACA OFRECIDA</span>
+        </div>
+        <div class="compra-card-body">
+          <div class="compra-detalles-col">
+            <h3 class="compra-pelicula-titulo">{{ entrada.peliculaTitulo }}</h3>
+            <p class="compra-fecha-hora">📅 {{ formatearFechaHora(entrada.inicio) }}</p>
+            <p *ngIf="entrada.estado === 'espera'">Posición en la fila: <strong>{{ entrada.posicion }}</strong></p>
+            <p *ngIf="entrada.estado === 'ofrecida'">
+              Butaca <strong>{{ entrada.asientoId }}</strong> reservada para vos hasta
+              <strong>{{ entrada.ofertaHasta | date:'shortTime' }}</strong>. Tenés 15 minutos para completar la compra.
+            </p>
+          </div>
+        </div>
+        <div class="compra-card-footer">
+          <button *ngIf="entrada.estado === 'ofrecida'" type="button" class="btn-ver-qr" (click)="irAFuncionEnEspera(entrada.funcionId)">
+            Ir a comprar →
+          </button>
+          <button type="button" class="btn-cancelar-compra" [disabled]="procesandoListaEsperaId() === entrada.id" (click)="salirListaEspera(entrada)">
+            {{ procesandoListaEsperaId() === entrada.id ? 'Procesando...' : 'Salir de la lista' }}
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
 
   <!-- ======================================================== -->
   <!-- SECCIÓN 1: MIS PELÍCULAS (HISTORIAL VISUAL Y CALIFICACIÓN) -->

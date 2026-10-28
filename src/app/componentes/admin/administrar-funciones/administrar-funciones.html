@@ -21,6 +21,14 @@
   <!-- Barra de Filtros -->
   <div class="filtros-bar">
     <div class="filtro-item">
+      <label>Película:</label>
+      <select [value]="filtroPelicula()" (change)="filtroPelicula.set($any($event.target).value)" class="select-filtro">
+        <option value="todas">Todas las películas</option>
+        <option *ngFor="let p of peliculas()" [value]="p.id">{{ p.titulo }}</option>
+      </select>
+    </div>
+
+    <div class="filtro-item">
       <label>Sala:</label>
       <select [value]="filtroSala()" (change)="filtroSala.set($any($event.target).value)" class="select-filtro">
         <option value="todas">Todas las salas</option>
@@ -80,6 +88,11 @@
             <span class="info-label">Precio:</span>
             <strong class="precio-val">${{ funcion.precio }}</strong>
           </div>
+
+          <div class="info-row">
+            <span class="info-label">Lista de espera:</span>
+            <strong class="info-val">{{ conteosListaEspera()[funcion.id] || 0 }} persona(s)</strong>
+          </div>
         </div>
 
         <div class="card-actions">
@@ -93,6 +106,14 @@
             (click)="cambiarEstado(funcion, 'cancelada')"
           >
             Suspender y acreditar
+          </button>
+          <button
+            *ngIf="funcion.estado === 'programada'"
+            type="button"
+            class="btn-accion demo"
+            (click)="abrirGestionAsientosDemo(funcion)"
+          >
+            Butacas demo
           </button>
           <button
             type="button"
@@ -367,6 +388,48 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL PARA SIMULAR OCUPACIÓN DE BUTACAS -->
+  <div class="modal-overlay" *ngIf="funcionAsientosDemo() as funcionDemo" (click)="cerrarGestionAsientosDemo()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Butacas demo · {{ funcionDemo.peliculaTitulo }}</h2>
+        <button type="button" class="btn-close" (click)="cerrarGestionAsientosDemo()">✕</button>
+      </div>
+
+      <div class="modal-form">
+        <p class="demo-aviso">
+          Estas acciones ocupan/liberan butacas solo para demostración: no crean compras, tickets ni ingresos.
+        </p>
+
+        <button type="button" class="btn-save demo-fill" [disabled]="procesandoAsientosDemo()" (click)="simularSalaLlena()">
+          {{ procesandoAsientosDemo() ? 'Procesando...' : '🎟️ Simular sala llena' }}
+        </button>
+
+        <hr class="demo-separator" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tipo de butaca a liberar</label>
+            <select [value]="tipoAsientoDemo()" (change)="tipoAsientoDemo.set($any($event.target).value)" class="form-input">
+              <option *ngFor="let tipo of tiposAsientoDemo" [value]="tipo.valor">{{ tipo.etiqueta }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cantidad</label>
+            <input type="number" min="1" max="532" [value]="cantidadLiberarDemo()" (input)="cantidadLiberarDemo.set(+$any($event.target).value)" class="form-input" />
+          </div>
+        </div>
+
+        <button type="button" class="btn-save demo-release" [disabled]="procesandoAsientosDemo()" (click)="liberarAsientosDemo()">
+          {{ procesandoAsientosDemo() ? 'Procesando...' : 'Liberar cantidad indicada' }}
+        </button>
+
+        <p *ngIf="mensajeAsientosDemo()" class="demo-mensaje demo-exito" role="status">{{ mensajeAsientosDemo() }}</p>
+        <p *ngIf="errorAsientosDemo()" class="demo-mensaje demo-error" role="alert">{{ errorAsientosDemo() }}</p>
+      </div>
     </div>
   </div>
 </div>

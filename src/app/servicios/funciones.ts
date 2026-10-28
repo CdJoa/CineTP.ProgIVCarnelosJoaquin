@@ -263,6 +263,24 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     };
   }
 
+  async simularSalaLlenaDemo(funcionId: string): Promise<number> {
+    const { data, error } = await this.supabase.rpc('simular_sala_llena_demo', {
+      p_funcion_id: funcionId,
+    });
+    if (error) throw new Error(error.message);
+    return Number(data || 0);
+  }
+
+  async liberarAsientosDemo(funcionId: string, cantidad: number, tipo: string): Promise<number> {
+    const { data, error } = await this.supabase.rpc('liberar_asientos_demo', {
+      p_funcion_id: funcionId,
+      p_cantidad: cantidad,
+      p_tipo: tipo,
+    });
+    if (error) throw new Error(error.message);
+    return Number(data || 0);
+  }
+
   /**
    * Generación automática de funciones alternando formatos, idiomas, turnos y prioridad.
    */

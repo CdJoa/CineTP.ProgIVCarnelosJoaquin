@@ -11,6 +11,8 @@ import { FuncionesService } from '../../../servicios/funciones';
 import { AsientosRealtimeService } from '../../../servicios/asientos-realtime';
 import { ResenasService } from '../../../servicios/resenas';
 import { Auth } from '../../../servicios/auth';
+import { SalaService } from '../../../servicios/sala';
+import { EntradaListaEspera, ListaEsperaService } from '../../../servicios/lista-espera';
 import { CartaPelicula } from '../carta-pelicula/carta-pelicula';
 import { RatingEstrellas } from '../rating-estrellas/rating-estrellas';
 import { InsertarComentarioDirective } from '../../../directivas/insertar-comentario.directive';
@@ -36,6 +38,8 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   private resenasService = inject(ResenasService);
   private router = inject(Router);
   private authService = inject(Auth);
+  private salaService = inject(SalaService);
+  private listaEsperaService = inject(ListaEsperaService);
 
   get usuarioActual() {
     return this.authService.usuarioActual();
@@ -63,6 +67,11 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   funciones = signal<Funcion[]>([]);
   cargando = signal<boolean>(true);
   cargandoFunciones = signal<boolean>(false);
+  disponibilidadFuncionesCargada = signal(false);
+  funcionesAgotadas = signal<Record<string, boolean>>({});
+  entradasListaEspera = signal<Record<string, EntradaListaEspera>>({});
+  uniendoListaEspera = signal<string | null>(null);
+  mensajeListaEspera = signal<Record<string, string>>({});
 
   busqueda = signal<string>('');
   generoSeleccionado = signal<string>('todos');
@@ -76,7 +85,10 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   filtroFuncionIdioma = signal<string>('todos');
 
   private canalesRealtime: RealtimeChannel[] = [];
+  private usuarioListaEsperaSuscripto?: string;
   private canalLocal?: BroadcastChannel;
+  private capacidadesSalas = new Map<string, number>();
+  private refrescosDisponibilidad = new Map<string, ReturnType<typeof setTimeout>>();
 
   async ngOnInit(): Promise<void> {
     await Promise.all([
@@ -97,6 +109,9 @@ export class CarteleraComponent implements OnInit, OnDestroy {
       canal.unsubscribe();
     }
     this.canalesRealtime = [];
+
+    for (const timeout of this.refrescosDisponibilidad.values()) clearTimeout(timeout);
+    this.refrescosDisponibilidad.clear();
 
     if (this.canalLocal) {
       this.canalLocal.close();
@@ -161,6 +176,13 @@ export class CarteleraComponent implements OnInit, OnDestroy {
     });
     this.canalesRealtime.push(canalAsientos);
 
+    // Refrescar disponibilidad al cambiar una reserva, una venta o al liberarse
+    // un asiento (incluidas las ofertas temporales de lista de espera).
+    const canalDisponibilidad = this.asientosRealtimeService.suscribirCambiosDisponibilidad((funcionId) => {
+      this.programarRefrescoDisponibilidad(funcionId);
+    });
+    this.canalesRealtime.push(canalDisponibilidad);
+
     // 3. Escuchar cambios en reseñas y valoraciones
     const canalResenas = this.resenasService.suscribirCambios(() => {
       this.cargarResumenesRating();
@@ -195,13 +217,161 @@ export class CarteleraComponent implements OnInit, OnDestroy {
 
   async cargarFunciones(): Promise<void> {
     this.cargandoFunciones.set(true);
+    this.disponibilidadFuncionesCargada.set(false);
     try {
       const list = await this.funcionesService.obtenerFuncionesCompleta();
       this.funciones.set(list);
+      await this.cargarDisponibilidadFunciones(list);
     } catch (err) {
       console.error('Error al cargar funciones:', err);
     } finally {
       this.cargandoFunciones.set(false);
+      this.disponibilidadFuncionesCargada.set(true);
+    }
+  }
+
+  private async cargarDisponibilidadFunciones(funciones: Funcion[]): Promise<void> {
+    const [salas, usuario] = await Promise.all([
+      this.salaService.obtenerSalas().catch(() => []),
+      this.authService.obtenerUsuario().catch(() => null),
+    ]);
+    const capacidades = new Map(
+      salas.map((sala) => [sala.id, sala.capacidadTotal || this.salaService.calcularCapacidadTotal(sala.filas)])
+    );
+    this.capacidadesSalas = capacidades;
+
+    const agotadas: Record<string, boolean> = {};
+    await Promise.all(funciones.filter((fn) => fn.estado === 'programada').map(async (fn) => {
+      if (!fn.salaId) return;
+      const capacidad = capacidades.get(fn.salaId) || 0;
+      if (!capacidad) return;
+      try {
+        const estados = await this.asientosRealtimeService.obtenerEstado(fn.id);
+        const ocupadas = estados.filter((asiento) =>
+          asiento.estado === 'vendido' ||
+          (asiento.estado === 'reservado' && (!asiento.expiraEn || new Date(asiento.expiraEn).getTime() > Date.now()))
+        ).length;
+        agotadas[fn.id] = ocupadas >= capacidad;
+      } catch (error) {
+        console.warn(`No se pudo consultar la disponibilidad de la función ${fn.id}:`, error);
+      }
+    }));
+    this.funcionesAgotadas.set(agotadas);
+
+    if (usuario && ['cliente', 'empleado', 'admin'].includes(usuario.rol)) {
+      try {
+        const entradas = await this.listaEsperaService.obtenerMisListas();
+        this.entradasListaEspera.set(Object.fromEntries(entradas.map((entrada) => [entrada.funcionId, entrada])));
+        this.suscribirCambiosListaEspera(usuario.id);
+      } catch (error) {
+        console.warn('No se pudieron cargar las inscripciones de lista de espera:', error);
+      }
+    }
+  }
+
+  private suscribirCambiosListaEspera(usuarioId: string): void {
+    if (this.usuarioListaEsperaSuscripto === usuarioId) return;
+    this.usuarioListaEsperaSuscripto = usuarioId;
+    this.canalesRealtime.push(this.listaEsperaService.suscribirCambios(usuarioId, () => {
+      void this.actualizarMisListasEspera(usuarioId);
+    }));
+  }
+
+  private async actualizarMisListasEspera(usuarioId: string): Promise<void> {
+    try {
+      const entradas = await this.listaEsperaService.obtenerMisListas();
+      if (this.authService.usuarioActual()?.id !== usuarioId) return;
+      this.entradasListaEspera.set(Object.fromEntries(entradas.map((entrada) => [entrada.funcionId, entrada])));
+    } catch (error) {
+      console.warn('No se pudo actualizar el estado de lista de espera:', error);
+    }
+  }
+
+  funcionAgotada(funcionId: string): boolean {
+    return this.funcionesAgotadas()[funcionId] === true;
+  }
+
+  private programarRefrescoDisponibilidad(funcionId: string): void {
+    const pendiente = this.refrescosDisponibilidad.get(funcionId);
+    if (pendiente) clearTimeout(pendiente);
+    this.refrescosDisponibilidad.set(funcionId, setTimeout(() => {
+      this.refrescosDisponibilidad.delete(funcionId);
+      void this.actualizarDisponibilidadFuncion(funcionId);
+    }, 100));
+  }
+
+  private async actualizarDisponibilidadFuncion(funcionId: string): Promise<void> {
+    const funcion = this.funciones().find((item) => item.id === funcionId);
+    if (!funcion?.salaId) return;
+    const capacidad = this.capacidadesSalas.get(funcion.salaId) || 0;
+    if (!capacidad) return;
+
+    try {
+      const estados = await this.asientosRealtimeService.obtenerEstado(funcionId);
+      const ahora = Date.now();
+      const ocupadas = estados.filter((asiento) =>
+        asiento.estado === 'vendido' ||
+        (asiento.estado === 'reservado' && (!asiento.expiraEn || new Date(asiento.expiraEn).getTime() > ahora))
+      ).length;
+      this.funcionesAgotadas.update((actual) => ({ ...actual, [funcionId]: ocupadas >= capacidad }));
+    } catch (error) {
+      console.warn(`No se pudo actualizar disponibilidad de ${funcionId}:`, error);
+    }
+  }
+
+  async anotarseListaEspera(funcion: Funcion): Promise<void> {
+    if (this.uniendoListaEspera()) return;
+    const pelicula = this.peliculaSeleccionada();
+    if (pelicula && this.bloqueoPorEdad(pelicula)) return;
+
+    const usuario = await this.authService.obtenerUsuario();
+    if (!usuario || !['cliente', 'empleado', 'admin'].includes(usuario.rol)) {
+      await this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      return;
+    }
+
+    this.uniendoListaEspera.set(funcion.id);
+    this.mensajeListaEspera.update((actual) => ({ ...actual, [funcion.id]: '' }));
+    try {
+      const entrada = await this.listaEsperaService.unirse(funcion.id);
+      const peliculaActual = this.peliculaSeleccionada();
+      if (peliculaActual) {
+        const listas = await this.listaEsperaService.obtenerMisListas();
+        const listaFuncion = listas.find((item) => item.funcionId === funcion.id);
+        if (listaFuncion) {
+          this.entradasListaEspera.update((actual) => ({ ...actual, [funcion.id]: listaFuncion }));
+        } else {
+          this.entradasListaEspera.update((actual) => ({
+            ...actual,
+            [funcion.id]: {
+              id: entrada.id,
+              funcionId: funcion.id,
+              peliculaId: peliculaActual.id,
+              peliculaTitulo: peliculaActual.titulo,
+              salaNombre: funcion.salaNombre || 'Sala',
+              inicio: funcion.inicio,
+              estado: entrada.estado === 'ofrecida' ? 'ofrecida' : 'espera',
+              posicion: entrada.posicion,
+              asientoId: entrada.asientoId,
+              ofertaHasta: entrada.ofertaHasta,
+              creadaEn: new Date().toISOString(),
+            },
+          }));
+        }
+      }
+      this.mensajeListaEspera.update((actual) => ({
+        ...actual,
+        [funcion.id]: entrada.estado === 'ofrecida'
+          ? 'Tenés una oferta activa. Revisá tu perfil para completar la compra.'
+          : `¡Listo! Te anotamos en la lista${entrada.posicion ? `, posición ${entrada.posicion}` : ''}.`,
+      }));
+    } catch (error) {
+      this.mensajeListaEspera.update((actual) => ({
+        ...actual,
+        [funcion.id]: error instanceof Error ? error.message : 'No se pudo ingresar a la lista de espera.',
+      }));
+    } finally {
+      this.uniendoListaEspera.set(null);
     }
   }
 

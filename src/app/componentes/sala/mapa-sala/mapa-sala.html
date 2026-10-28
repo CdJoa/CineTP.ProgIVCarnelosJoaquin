@@ -2,7 +2,7 @@
 <div class="compra-alerta error" *ngIf="esModoCompra() && errorCompra()">{{ errorCompra() }}</div>
 
 <div class="mapa-sala-wrapper" *ngIf="sala() as s" [class.modo-compra-layout]="esModoCompra()">
-  
+
   <!-- Columna Izquierda: Mapa de la Sala -->
   <div class="sala-mapa-area">
     <!-- Título cuando no está en modo compra -->
@@ -162,6 +162,7 @@
             <span class="asiento-tipo-txt">{{ a.tipo }}</span>
           </div>
           <strong class="asiento-precio-txt">${{ precioAsiento(a) }}</strong>
+          <span *ngIf="asientoOfertaListaEspera() === a.id" class="asiento-oferta-propia">Reservada para vos · 15 min</span>
         </div>
       </div>
     </div>

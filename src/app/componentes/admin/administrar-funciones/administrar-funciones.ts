@@ -2,11 +2,13 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Funcion, EstadoFuncion } from '../../../models/funcion';
+import { TipoFila } from '../../../models/sala';
 import { Pelicula } from '../../../models/pelicula';
 import { Sala } from '../../../models/sala';
 import { FuncionesService } from '../../../servicios/funciones';
 import { PeliculasService } from '../../../servicios/peliculas';
 import { SalaService } from '../../../servicios/sala';
+import { ListaEsperaService } from '../../../servicios/lista-espera';
 import { AdministrarBase } from '../administrar-base';
 import {
   ESTADOS_FUNCION,
@@ -26,6 +28,7 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
   private funcionesService = inject(FuncionesService);
   private peliculasService = inject(PeliculasService);
   private salaService = inject(SalaService);
+  private listaEsperaService = inject(ListaEsperaService);
 
   readonly formatosList = FORMATOS_FUNCION;
   readonly idiomasList = IDIOMAS_FUNCION;
@@ -39,6 +42,86 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
   filtroPelicula = signal<string>('todas');
   filtroSala = signal<string>('todas');
   filtroEstado = signal<string>('todas');
+  conteosListaEspera = signal<Record<string, number>>({});
+
+  funcionAsientosDemo = signal<Funcion | null>(null);
+  tipoAsientoDemo = signal<TipoFila>('comun');
+  cantidadLiberarDemo = signal(10);
+  procesandoAsientosDemo = signal(false);
+  mensajeAsientosDemo = signal('');
+  errorAsientosDemo = signal('');
+
+  readonly tiposAsientoDemo: { valor: TipoFila; etiqueta: string }[] = [
+    { valor: 'comun', etiqueta: 'Común' },
+    { valor: 'vip', etiqueta: 'VIP' },
+    { valor: 'discapacitado', etiqueta: 'Discapacitado ♿' },
+  ];
+
+  abrirGestionAsientosDemo(funcion: Funcion): void {
+    this.funcionAsientosDemo.set(funcion);
+    this.tipoAsientoDemo.set('comun');
+    this.cantidadLiberarDemo.set(10);
+    this.mensajeAsientosDemo.set('');
+    this.errorAsientosDemo.set('');
+  }
+
+  cerrarGestionAsientosDemo(): void {
+    if (this.procesandoAsientosDemo()) return;
+    this.funcionAsientosDemo.set(null);
+  }
+
+  async simularSalaLlena(): Promise<void> {
+    const funcion = this.funcionAsientosDemo();
+    if (!funcion || this.procesandoAsientosDemo()) return;
+    const confirmado = confirm(
+      'Esto ocupará las butacas disponibles en modo DEMO. No crea compras ni ingresos. ¿Continuar?'
+    );
+    if (!confirmado) return;
+
+    this.procesandoAsientosDemo.set(true);
+    this.errorAsientosDemo.set('');
+    this.mensajeAsientosDemo.set('');
+    try {
+      const agregados = await this.funcionesService.simularSalaLlenaDemo(funcion.id);
+      this.mensajeAsientosDemo.set(
+        agregados > 0
+          ? `Sala simulada: ${agregados} butacas demo ocupadas. No se registraron ventas.`
+          : 'No se agregaron butacas: ya estaban ocupadas o reservadas.'
+      );
+    } catch (error) {
+      this.errorAsientosDemo.set(error instanceof Error ? error.message : 'No se pudo simular la sala.');
+    } finally {
+      this.procesandoAsientosDemo.set(false);
+    }
+  }
+
+  async liberarAsientosDemo(): Promise<void> {
+    const funcion = this.funcionAsientosDemo();
+    const cantidad = Math.floor(Number(this.cantidadLiberarDemo()));
+    if (!funcion || this.procesandoAsientosDemo()) return;
+    if (!Number.isFinite(cantidad) || cantidad < 1) {
+      this.errorAsientosDemo.set('Ingresá una cantidad mayor que cero.');
+      return;
+    }
+    const tipo = this.tipoAsientoDemo();
+    if (!confirm(`¿Liberar hasta ${cantidad} butacas demo de tipo ${tipo}?`)) return;
+
+    this.procesandoAsientosDemo.set(true);
+    this.errorAsientosDemo.set('');
+    this.mensajeAsientosDemo.set('');
+    try {
+      const liberados = await this.funcionesService.liberarAsientosDemo(funcion.id, cantidad, tipo);
+      this.mensajeAsientosDemo.set(
+        liberados > 0
+          ? `Se liberaron ${liberados} butacas demo.`
+          : `No había butacas demo ocupadas de tipo ${tipo} para liberar.`
+      );
+    } catch (error) {
+      this.errorAsientosDemo.set(error instanceof Error ? error.message : 'No se pudieron liberar las butacas.');
+    } finally {
+      this.procesandoAsientosDemo.set(false);
+    }
+  }
 
   esPeliculaPreventa(peliculaId: string | undefined): boolean {
     if (!peliculaId) return false;
@@ -258,6 +341,13 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
 
     this.peliculas.set(peliList);
     this.salas.set(salaList);
+
+    try {
+      this.conteosListaEspera.set(await this.listaEsperaService.obtenerConteos());
+    } catch (error) {
+      console.warn('No se pudieron cargar los conteos de lista de espera:', error);
+      this.conteosListaEspera.set({});
+    }
 
     return this.funcionesService.obtenerFuncionesCompleta();
   }

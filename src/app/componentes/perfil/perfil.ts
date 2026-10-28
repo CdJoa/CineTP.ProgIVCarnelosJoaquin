@@ -12,8 +12,9 @@ import { Resena } from '../../models/resena';
 import { PropuestaPelicula } from '../../models/propuesta';
 import { RatingEstrellas } from '../pelicula/rating-estrellas/rating-estrellas';
 import { HoverZoomDirective } from '../../directivas/hover-zoom.directive';
+import { EntradaListaEspera, ListaEsperaService } from '../../servicios/lista-espera';
 
-export type TabPerfil = 'peliculas' | 'entradas' | 'propuesta' | 'datos';
+export type TabPerfil = 'peliculas' | 'entradas' | 'espera' | 'propuesta' | 'datos';
 export type FiltroCalificacion = 'todas' | 'calificadas' | 'sin_calificar';
 export type OrdenHistorial = 'fecha_desc' | 'fecha_asc' | 'calif_desc';
 
@@ -30,6 +31,7 @@ export class PerfilComponent implements OnInit {
   private resenasService = inject(ResenasService);
   private propuestasService = inject(PropuestasService);
   private notificacionesService = inject(NotificacionesService);
+  private listaEsperaService = inject(ListaEsperaService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -46,6 +48,10 @@ export class PerfilComponent implements OnInit {
   resenasUsuario = signal<Record<string, Resena>>({});
   cargandoResenas = signal<boolean>(true);
   notificaciones = signal<Notificacion[]>([]);
+  listasEspera = signal<EntradaListaEspera[]>([]);
+  cargandoListaEspera = signal(true);
+  procesandoListaEsperaId = signal<string | null>(null);
+  errorListaEspera = signal<string | null>(null);
 
   // Filtros de la sección "Mis películas"
   busquedaPelicula = signal<string>('');
@@ -176,6 +182,8 @@ export class PerfilComponent implements OnInit {
         this.tabActiva.set('entradas');
       } else if (params['tab'] === 'propuesta' || params['seccion'] === 'propuesta') {
         this.tabActiva.set('propuesta');
+      } else if (params['tab'] === 'espera' || params['seccion'] === 'espera') {
+        this.tabActiva.set('espera');
       } else if (params['tab'] === 'datos' || params['seccion'] === 'datos') {
         this.tabActiva.set('datos');
       }
@@ -186,7 +194,53 @@ export class PerfilComponent implements OnInit {
       this.cargarResenas(),
       this.cargarPropuesta(),
       this.cargarNotificaciones(),
+      this.cargarListasEspera(),
     ]);
+  }
+
+  async cargarListasEspera(): Promise<void> {
+    this.cargandoListaEspera.set(true);
+    try {
+      this.listasEspera.set(await this.listaEsperaService.obtenerMisListas());
+      this.errorListaEspera.set(null);
+    } catch (error) {
+      this.errorListaEspera.set(error instanceof Error ? error.message : 'No se pudieron cargar tus listas de espera.');
+    } finally {
+      this.cargandoListaEspera.set(false);
+    }
+  }
+
+  async salirListaEspera(entrada: EntradaListaEspera): Promise<void> {
+    if (this.procesandoListaEsperaId()) return;
+    this.procesandoListaEsperaId.set(entrada.id);
+    this.errorListaEspera.set(null);
+    try {
+      await this.listaEsperaService.salir(entrada.id);
+      this.listasEspera.update((items) => items.filter((item) => item.id !== entrada.id));
+    } catch (error) {
+      this.errorListaEspera.set(error instanceof Error ? error.message : 'No se pudo salir de la lista.');
+    } finally {
+      this.procesandoListaEsperaId.set(null);
+    }
+  }
+
+  async abrirOfertaListaEspera(notificacion: Notificacion): Promise<void> {
+    const funcionId = String(notificacion.metadata['funcion_id'] || '');
+    if (!funcionId) return;
+    try {
+      await this.notificacionesService.marcarLeida(notificacion.id);
+      this.notificaciones.update((items) => items.map((item) =>
+        item.id === notificacion.id ? { ...item, leida: true } : item
+      ));
+    } catch (error) {
+      console.warn('No se pudo marcar la notificación como leída:', error);
+    }
+    await this.irAFuncionEnEspera(funcionId);
+  }
+
+  async irAFuncionEnEspera(funcionId: string): Promise<void> {
+    if (!funcionId) return;
+    await this.router.navigate(['/sala'], { queryParams: { funcionId } });
   }
 
   async cargarNotificaciones(): Promise<void> {

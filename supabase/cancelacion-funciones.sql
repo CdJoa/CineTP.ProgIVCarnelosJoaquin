@@ -277,10 +277,12 @@ BEGIN
   SET estado = 'cancelada'
   WHERE funcion_id::TEXT = p_funcion_id::TEXT AND estado <> 'cancelada';
 
+  -- Marcar primero la función para que el trigger de lista de espera no oferte
+  -- butacas de una función que se está cancelando.
+  UPDATE public.funciones SET estado = 'cancelada' WHERE id::TEXT = p_funcion_id::TEXT;
+
   -- Libera tanto butacas vendidas como reservas temporales de esa función.
   DELETE FROM public.asientos_funcion WHERE funcion_id::TEXT = p_funcion_id::TEXT;
-
-  UPDATE public.funciones SET estado = 'cancelada' WHERE id::TEXT = p_funcion_id::TEXT;
 
   RETURN jsonb_build_object(
     'funcion_id', p_funcion_id,

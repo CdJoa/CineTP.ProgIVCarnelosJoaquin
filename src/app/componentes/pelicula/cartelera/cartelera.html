@@ -399,12 +399,14 @@
             *ngFor="let fn of funcionesDePeliculaFiltradas"
             class="fn-card-vertical"
             [class.fn-bloqueada]="bloqueoPorEdad(p)"
-            (click)="irASala(fn)"
+            [class.fn-agotada]="funcionAgotada(fn.id)"
+            (click)="!funcionAgotada(fn.id) && irASala(fn)"
           >
             <div class="fn-card-top">
               <span class="fn-hora-bold">{{ formatearFechaHora(fn.inicio).hora }}</span>
               <span class="fn-dia-badge">{{ formatearFechaHora(fn.inicio).dia }}</span>
               <span *ngIf="fn.esPreventa" class="badge-preventa-mini">⭐ PREVENTA</span>
+              <span *ngIf="funcionAgotada(fn.id)" class="badge-agotada-mini">AGOTADA</span>
             </div>
 
             <div class="fn-card-mid">
@@ -415,12 +417,41 @@
               </div>
             </div>
 
-            <div class="fn-card-bot">
+            <div class="fn-card-bot" [class.fn-card-bot-oferta]="entradasListaEspera()[fn.id]?.estado === 'ofrecida'">
               <span class="fn-precio-txt">${{ fn.precio }}</span>
-              <button type="button" class="btn-comprar-fn" [disabled]="!!bloqueoPorEdad(p)" (click)="$event.stopPropagation(); irASala(fn)">
+              <button
+                *ngIf="!funcionAgotada(fn.id)"
+                type="button"
+                class="btn-comprar-fn"
+                [disabled]="!!bloqueoPorEdad(p) || (cargandoFunciones() && !disponibilidadFuncionesCargada())"
+                (click)="$event.stopPropagation(); irASala(fn)"
+              >
                 {{ fn.esPreventa ? '⭐ Compra Anticipada' : '🎟️ Comprar' }}
               </button>
+              <button
+                *ngIf="funcionAgotada(fn.id) && !entradasListaEspera()[fn.id]"
+                type="button"
+                class="btn-espera-fn"
+                [disabled]="!!bloqueoPorEdad(p) || uniendoListaEspera() === fn.id"
+                (click)="$event.stopPropagation(); anotarseListaEspera(fn)"
+              >
+                {{ uniendoListaEspera() === fn.id ? 'Anotando...' : '⏳ Lista de espera' }}
+              </button>
+              <span *ngIf="funcionAgotada(fn.id) && entradasListaEspera()[fn.id] as entrada" class="estado-espera-fn">
+                {{ entrada.estado === 'ofrecida' ? '🎟️ ¡Es tu turno!' : '✓ En espera · posición ' + entrada.posicion }}
+              </span>
+              <button
+                *ngIf="funcionAgotada(fn.id) && entradasListaEspera()[fn.id]?.estado === 'ofrecida'"
+                type="button"
+                class="btn-oferta-espera-fn"
+                (click)="$event.stopPropagation(); irASala(fn)"
+              >
+                Comprar ahora · 15 min
+              </button>
             </div>
+            <p *ngIf="mensajeListaEspera()[fn.id]" class="mensaje-espera-fn" role="status">
+              {{ mensajeListaEspera()[fn.id] }}
+            </p>
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { FuncionesService } from '../../../servicios/funciones';
 import { PeliculasService } from '../../../servicios/peliculas';
 import { AsientosRealtimeService, EstadoAsientoFuncion } from '../../../servicios/asientos-realtime';
 import { Auth } from '../../../servicios/auth';
+import { ListaEsperaService } from '../../../servicios/lista-espera';
 
 @Component({
   selector: 'app-mapa-sala',
@@ -22,7 +23,8 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
   private funcionesService = inject(FuncionesService);
   private peliculasService = inject(PeliculasService);
   private asientosService = inject(AsientosRealtimeService);
-  private authService = inject(Auth);
+  authService = inject(Auth);
+  private listaEsperaService = inject(ListaEsperaService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -41,6 +43,7 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
   seleccionados = signal<string[]>([]);
   estadosAsientos = signal<Record<string, EstadoAsientoFuncion>>({});
   realtimeDisponible = signal(false);
+  asientoOfertaListaEspera = signal<string | null>(null);
 
   private canalRealtime?: RealtimeChannel;
   private reloj?: ReturnType<typeof setInterval>;
@@ -96,6 +99,24 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
       if (!sala) throw new Error('No se encontró la sala asignada a esta función.');
       this.salaFallback.set(sala);
 
+      const usuario = await this.authService.obtenerUsuario();
+      if (usuario && ['cliente', 'empleado', 'admin'].includes(usuario.rol)) {
+        try {
+          const credenciales = this.asientosService.obtenerCredencialesSesion();
+          const asientoOfertado = await this.listaEsperaService.tomarOferta(
+            funcion.id,
+            credenciales.id,
+            credenciales.token
+          );
+          if (asientoOfertado) {
+            this.asientoOfertaListaEspera.set(asientoOfertado);
+            this.mensajeCompra.set(`La butaca ${asientoOfertado} quedó reservada para vos. Tenés 15 minutos para continuar la compra.`);
+          }
+        } catch (error) {
+          this.errorCompra.set(error instanceof Error ? error.message : 'No se pudo recuperar la butaca ofrecida.');
+        }
+      }
+
       this.canalRealtime = this.asientosService.suscribir(funcionId, (estado, eliminado) => {
         if (!estado) return;
         const estados = { ...this.estadosAsientos() };
@@ -112,11 +133,27 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
       });
 
       const estados = await this.asientosService.obtenerEstado(funcionId);
-      this.estadosAsientos.set(Object.fromEntries(estados.map((estado) => [estado.asientoId, estado])));
+      const mapaEstados = Object.fromEntries(estados.map((estado) => [estado.asientoId, estado]));
+      const asientoOferta = this.asientoOfertaListaEspera();
+      if (asientoOferta) {
+        // Asegura que la butaca ofertada aparezca seleccionada para esta sesión,
+        // aunque el primer snapshot de Realtime haya llegado antes de refrescar.
+        mapaEstados[asientoOferta] = {
+          funcionId,
+          asientoId: asientoOferta,
+          sesionId: this.asientosService.sesionId,
+          estado: 'reservado',
+          expiraEn: new Date(Date.now() + 15 * 60_000).toISOString(),
+        };
+      }
+      this.estadosAsientos.set(mapaEstados);
       this.realtimeDisponible.set(true);
-      this.seleccionados.set(estados
+      this.seleccionados.set([...new Set([
+        ...estados
         .filter((estado) => estado.sesionId === this.asientosService.sesionId && estado.estado === 'reservado' && this.estaVigente(estado))
-        .map((estado) => estado.asientoId));
+        .map((estado) => estado.asientoId),
+        ...(asientoOferta ? [asientoOferta] : []),
+      ])]);
     } catch (error) {
       this.errorCompra.set(error instanceof Error ? error.message : 'No se pudo cargar la función.');
     } finally {
@@ -143,6 +180,10 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
   async alternarAsiento(asiento: Asiento): Promise<void> {
     const funcion = this.funcion();
     if (!funcion || this.procesandoAsiento()) return;
+    if (this.asientoOfertaListaEspera() === asiento.id) {
+      this.mensajeCompra.set(`La butaca ${asiento.id} está reservada exclusivamente para vos por 15 minutos. Continuá la compra para conservarla.`);
+      return;
+    }
     this.errorCompra.set('');
     const estado = this.estadoAsiento(asiento);
     if (estado === 'vendido' || estado === 'ocupado') {
@@ -219,7 +260,9 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
   }
 
   asientoDeshabilitado(asiento: Asiento): boolean {
-    return !this.esModoCompra() || !this.realtimeDisponible() || !!this.procesandoAsiento() || ['ocupado', 'vendido'].includes(this.estadoAsiento(asiento));
+    return !this.esModoCompra() || !this.realtimeDisponible() || !!this.procesandoAsiento() ||
+      this.asientoOfertaListaEspera() === asiento.id ||
+      ['ocupado', 'vendido'].includes(this.estadoAsiento(asiento));
   }
 
   continuarAlCandy(): void {
@@ -252,6 +295,13 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
     const ids = new Set(this.seleccionados().filter((id) => this.estadoAsientoPorId(id) === 'seleccionado'));
     return (this.sala()?.filas || []).flatMap((fila) => [...fila.bloque1, ...fila.bloque2, ...fila.bloque3])
       .filter((asiento) => ids.has(asiento.id));
+  }
+
+  get cantidadAsientosDisponibles(): number {
+    return (this.sala()?.filas || [])
+      .flatMap((fila) => [...fila.bloque1, ...fila.bloque2, ...fila.bloque3])
+      .filter((asiento) => !['ocupado', 'vendido'].includes(this.estadoAsientoPorId(asiento.id)))
+      .length;
   }
 
   precioAsiento(asiento: Asiento): number {

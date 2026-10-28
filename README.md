@@ -60,6 +60,10 @@ Formularios reactivos con validaciones estrictas desacopladas, control de coinci
 
 Antes de usar la cancelación administrativa, ejecuta el script `supabase/cancelacion-funciones.sql` completo en el SQL Editor del proyecto Supabase. Crea las RPC transaccionales, la tabla/políticas de notificaciones y el campo de crédito usado en compras. La acreditación, cancelación de tickets, liberación de butacas y notificación se confirman juntas o se revierten juntas.
 
+Para usar las herramientas **Butacas demo** en Administración de Funciones, ejecuta también `supabase/asientos-demo.sql` completo en el SQL Editor. Simular una sala llena ocupa butacas solo en el mapa: no genera compras, tickets ni ingresos; la liberación afecta exclusivamente las butacas demo.
+
+Para habilitar la **lista de espera**, ejecuta `supabase/lista-espera.sql` después de `supabase/cancelacion-funciones.sql`. El script crea una tabla independiente `lista_espera_funciones` con `funcion_id`, `pelicula_id` y `usuario_id`, las RPC de inscripción/oferta y el procesamiento automático de ofertas vencidas. La sección **Lista de espera** del perfil muestra posición u oferta activa. Las notificaciones se entregan por el sistema in-app/Realtime existente; las notificaciones push del navegador cuando la app está cerrada requieren configurar VAPID y un servicio de envío.
+
 ### Pasos de instalación y puesta en marcha
 
 1. **Ingresar a la carpeta del proyecto:**

@@ -522,6 +522,32 @@
   background: #f0f6ff;
 }
 
+.fn-card-vertical.fn-agotada {
+  border: 2px solid #ef4444;
+  background: #fff1f2;
+  cursor: default;
+  box-shadow: 0 3px 12px rgba(220, 38, 38, 0.14);
+}
+
+.fn-card-vertical.fn-agotada:hover {
+  border-color: #dc2626;
+  background: #ffe4e6;
+  box-shadow: 0 3px 12px rgba(220, 38, 38, 0.18);
+}
+
+.fn-agotada .fn-hora-bold,
+.fn-agotada .fn-sala-txt {
+  color: #991b1b;
+}
+
+.fn-agotada .fn-card-bot {
+  border-top-color: #fecaca;
+}
+
+.fn-agotada .fn-precio-txt {
+  color: #b91c1c;
+}
+
 .fn-card-top {
   display: flex;
   justify-content: space-between;
@@ -577,11 +603,19 @@
 
 .fn-card-bot {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
   margin-top: 0.25rem;
   padding-top: 0.5rem;
   border-top: 1px solid #f1f5f9;
+}
+
+.fn-card-bot-oferta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
 }
 
 .fn-precio-txt {
@@ -616,6 +650,16 @@
   letter-spacing: 0.02em;
 }
 
+.badge-agotada-mini {
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+
 .btn-comprar-fn {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #ffffff;
@@ -635,6 +679,83 @@
   background: linear-gradient(135deg, #1d4ed8, #1e40af);
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.btn-espera-fn {
+  background: #7c3aed;
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-espera-fn:hover:not(:disabled) {
+  background: #6d28d9;
+}
+
+.btn-espera-fn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.estado-espera-fn {
+  display: block;
+  width: 100%;
+  color: #6d28d9;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.btn-oferta-espera-fn {
+  width: 100%;
+  min-height: 42px;
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 0;
+  border-radius: 8px;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: clamp(0.75rem, 3.2vw, 0.85rem);
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.btn-oferta-espera-fn:hover {
+  background: #15803d;
+}
+
+@media (max-width: 380px) {
+  .fn-card-vertical {
+    padding: 0.75rem;
+  }
+
+  .fn-card-top,
+  .fn-card-mid {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .fn-card-bot-oferta .fn-precio-txt {
+    font-size: 0.95rem;
+  }
+}
+
+.mensaje-espera-fn {
+  margin: 0.2rem 0 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: 7px;
+  background: #f5f3ff;
+  color: #5b21b6;
+  font-size: 0.75rem;
+  line-height: 1.35;
 }
 
 /* --- Restricción de edad --- */
