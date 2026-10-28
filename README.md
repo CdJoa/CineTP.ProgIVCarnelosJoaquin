@@ -36,6 +36,78 @@ Formularios reactivos con validaciones estrictas desacopladas, control de coinci
 
 ---
 
+### 5. Perfil del Cliente (`/perfil`)
+Puntos acumulados, crédito a favor por cancelaciones, historial de películas vistas con calificaciones, tickets con QR, propuesta activa, lista de espera y datos de la cuenta.
+![Perfil del Cliente](docs/screenshots/06-perfil-cliente.png)
+
+---
+
+### 6. Propuestas de Películas (`/propuestas`)
+Los clientes sugieren películas que no están en cartelera (una propuesta activa a la vez), que luego el administrador acepta o rechaza.
+![Proponer Película](docs/screenshots/07-propuestas.png)
+
+---
+
+### 7. Validación de Entradas para Empleados (`/empleado/validar`)
+Escaneo del QR del ticket con la cámara web o ingreso manual del código `CINE-XXXXXX`. Al validarla, la compra pasa a estado *usada*.
+![Validar Entradas](docs/screenshots/08-validar-entrada.png)
+
+---
+
+### 8. Panel de Administración (`/admin`)
+Cada sección del panel puede habilitarse por separado mediante roles personalizados.
+
+<table>
+  <tr>
+    <td width="50%">
+      <b>Películas</b> · Alta y edición de la cartelera con póster, duración, géneros y clasificación por edad.<br><br>
+      <img src="docs/screenshots/09-admin-peliculas.png" alt="Administrar Películas">
+    </td>
+    <td width="50%">
+      <b>Funciones</b> · Programación manual o automática, suspensión con acreditación al cliente y butacas demo.<br><br>
+      <img src="docs/screenshots/10-admin-funciones.png" alt="Administrar Funciones">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>Salas y tarifas</b> · Multiplicadores de precio por tipo de butaca (Normal, VIP, Discapacitados).<br><br>
+      <img src="docs/screenshots/11-admin-salas.png" alt="Administrar Salas">
+    </td>
+    <td>
+      <b>Candy Bar</b> · Productos por categoría con precio, puntos otorgados y unidades vendidas.<br><br>
+      <img src="docs/screenshots/12-admin-candy.png" alt="Administrar Candy Bar">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>Cupones</b> · Descuentos por primera compra, por edad (+50 años) y promociones generales.<br><br>
+      <img src="docs/screenshots/13-admin-cupones.png" alt="Administrar Cupones">
+    </td>
+    <td>
+      <b>Roles y permisos</b> · Creación de roles con acceso limitado a secciones y asignación a usuarios.<br><br>
+      <img src="docs/screenshots/14-admin-roles.png" alt="Roles y Permisos">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>Auditoría</b> · Registro de compras, cancelaciones, validaciones de QR y cambios administrativos.<br><br>
+      <img src="docs/screenshots/15-admin-auditoria.png" alt="Auditoría del Sistema">
+    </td>
+    <td>
+      <b>Facturación</b> · Métricas de recaudación, filtros por período y exportación a PDF y Excel.<br><br>
+      <img src="docs/screenshots/16-admin-facturacion.png" alt="Reporte de Facturación">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <b>Gráficos de Ventas</b> · Películas más vistas y productos más vendidos por semana, mes o todo el historial.<br><br>
+      <img src="docs/screenshots/17-admin-graficos.png" alt="Gráficos de Ventas" width="60%">
+    </td>
+  </tr>
+</table>
+
+---
+
 ## Tecnologías Utilizadas
 
 | Capa / Área | Tecnología | Propósito en el Sistema |
