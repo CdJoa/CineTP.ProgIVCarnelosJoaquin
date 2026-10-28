@@ -50,6 +50,17 @@
     </div>
   </section>
 
+  <section *ngIf="notificaciones().length > 0" aria-label="Notificaciones" style="display:grid; gap:12px; margin:18px 0;">
+    <article *ngFor="let n of notificaciones()" [style.opacity]="n.leida ? '0.72' : '1'"
+      style="padding:16px 18px; border:1px solid #bfdbfe; border-radius:12px; background:#eff6ff;">
+      <strong>{{ n.titulo }}</strong>
+      <p style="margin:6px 0 12px;">{{ n.mensaje }}</p>
+      <button *ngIf="n.tipo === 'funcion_cancelada'" type="button" class="btn-cartelera" (click)="reubicarPorNotificacion(n)">
+        Elegir otra función de esta película con mi crédito →
+      </button>
+    </article>
+  </section>
+
   <!-- Navegación de Pestañas del Perfil -->
   <nav class="perfil-tabs-nav" aria-label="Secciones del perfil">
     <button

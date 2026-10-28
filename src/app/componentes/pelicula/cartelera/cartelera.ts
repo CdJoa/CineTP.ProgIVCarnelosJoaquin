@@ -84,6 +84,11 @@ export class CarteleraComponent implements OnInit, OnDestroy {
       this.cargarFunciones(),
       this.cargarResumenesRating(),
     ]);
+    const peliculaReubicarId = this.router.parseUrl(this.router.url).queryParams['reubicar'];
+    if (peliculaReubicarId) {
+      const pelicula = this.peliculas().find((item) => item.id === peliculaReubicarId);
+      if (pelicula) this.abrirDetalle(pelicula);
+    }
     this.iniciarSuscripcionesRealtime();
   }
 
@@ -272,7 +277,12 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   get funcionesProgramadasPelicula(): Funcion[] {
     const p = this.peliculaSeleccionada();
     if (!p) return [];
-    return this.funciones().filter((f) => f.peliculaId === p.id && f.estado === 'programada');
+    const ahora = Date.now();
+    return this.funciones().filter((f) => {
+      if (f.peliculaId !== p.id || f.estado !== 'programada' || !f.inicio) return false;
+      const inicioMs = new Date(f.inicio).getTime();
+      return !isNaN(inicioMs) && inicioMs > ahora;
+    });
   }
 
   get diasDisponiblesPelicula(): { valor: string; etiqueta: string }[] {

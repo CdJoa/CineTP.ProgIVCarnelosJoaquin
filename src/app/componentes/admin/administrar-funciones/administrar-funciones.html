@@ -15,6 +15,9 @@
     </div>
   </header>
 
+  <div *ngIf="mensajeExito()" class="alert alert-success" role="status">{{ mensajeExito() }}</div>
+  <div *ngIf="mensajeError()" class="alert alert-danger" role="alert">{{ mensajeError() }}</div>
+
   <!-- Barra de Filtros -->
   <div class="filtros-bar">
     <div class="filtro-item">
@@ -89,19 +92,12 @@
             class="btn-accion cancel"
             (click)="cambiarEstado(funcion, 'cancelada')"
           >
-            Cancelar
-          </button>
-          <button
-            *ngIf="funcion.estado === 'cancelada'"
-            type="button"
-            class="btn-accion reactivate"
-            (click)="cambiarEstado(funcion, 'programada')"
-          >
-            Reactivar
+            Suspender y acreditar
           </button>
           <button
             type="button"
             class="btn-accion delete"
+            *ngIf="funcion.estado !== 'programada'"
             (click)="borrarFuncion(funcion)"
           >
             Borrar

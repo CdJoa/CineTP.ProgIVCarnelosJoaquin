@@ -24,6 +24,11 @@ export class AsientosRealtimeService {
     return this.obtenerSesion().id;
   }
 
+  obtenerCredencialesSesion(): SesionAsientos {
+    const sesion = this.obtenerSesion();
+    return { ...sesion };
+  }
+
   async obtenerEstado(funcionId: string): Promise<EstadoAsientoFuncion[]> {
     const { data, error } = await this.auth.clienteSupabase
       .from('asientos_funcion')

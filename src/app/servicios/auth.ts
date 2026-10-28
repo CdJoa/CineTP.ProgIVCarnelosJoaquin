@@ -365,6 +365,18 @@ export class Auth {
     this.usuarioActual.set({ ...usuario, puntos, credito });
   }
 
+  async recargarSaldo(): Promise<void> {
+    const usuario = this.usuarioActual();
+    if (!usuario) return;
+    const { data, error } = await this.supabase
+      .from('usuarios')
+      .select('puntos, credito')
+      .eq('id', usuario.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (data) this.establecerSaldo(Number(data['puntos'] || 0), Number(data['credito'] || 0));
+  }
+
   private traducirError(msg: string): string {
     if (msg.includes('Invalid login credentials')) {
       return 'Credenciales inválidas. Verifica tu correo y contraseña.';

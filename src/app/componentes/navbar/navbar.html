@@ -9,6 +9,20 @@
       <a *appEmpleado routerLink="/empleado/validar" class="nav-link nav-admin">Validar Entradas</a>
       <a *appAdmin routerLink="/admin" class="nav-link nav-admin">Panel Admin</a>
       @if (usuario.rol === 'cliente') {
+        <div class="notificaciones-nav">
+          <button type="button" class="nav-link nav-notificaciones" (click)="verNotificaciones()" aria-label="Notificaciones">
+            Avisos <span *ngIf="notificacionesNoLeidas > 0" class="notificaciones-badge">{{ notificacionesNoLeidas }}</span>
+          </button>
+          <div *ngIf="mostrarNotificaciones()" class="notificaciones-panel">
+            <strong>Notificaciones</strong>
+            <p *ngIf="notificaciones().length === 0">No tienes avisos nuevos.</p>
+            <button *ngFor="let n of notificaciones().slice(0, 4)" type="button" class="notificacion-item" (click)="abrirNotificaciones()">
+              <span>{{ n.titulo }}</span>
+              <small>{{ n.mensaje }}</small>
+            </button>
+            <button *ngIf="notificaciones().length > 0" type="button" class="ver-todas-notificaciones" (click)="abrirNotificaciones()">Ver avisos y opciones de reubicación</button>
+          </div>
+        </div>
         <a routerLink="/perfil" class="nav-link nav-perfil">Mi Perfil</a>
       }
       <button type="button" (click)="cerrarSesion()" class="nav-btn">Cerrar Sesión</button>

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, effect } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CandyService } from '../../../servicios/candy';
@@ -28,6 +28,7 @@ export interface CompraContexto {
   cuponNombre?: string;
   descuento?: number;
   porcentajeDescuento?: number;
+  aplicarCredito?: boolean;
 }
 
 @Component({
@@ -58,16 +59,7 @@ export class SeleccionCandyComponent implements OnInit {
   cuponesDisponibles = signal<Cupon[]>([]);
   cargandoCupones = signal<boolean>(false);
   cuponSeleccionado = signal<Cupon | null>(null);
-
-  constructor() {
-    // Reaccionar de inmediato cuando el usuario se carga o cambia
-    effect(() => {
-      const u = this.authService.usuarioActual();
-      if (u) {
-        this.cargarCuponesDisponibles();
-      }
-    });
-  }
+  aplicarCredito = signal(false);
 
   readonly categorias: { id: string; label: string }[] = [
     { id: 'todas', label: 'Todos' },
@@ -101,6 +93,7 @@ export class SeleccionCandyComponent implements OnInit {
             }
             this.carrito.set(inicial);
           }
+          this.aplicarCredito.set(Boolean(parsed.aplicarCredito));
         } catch {
           sessionStorage.removeItem('cinetp_compra_actual');
         }
@@ -132,21 +125,31 @@ export class SeleccionCandyComponent implements OnInit {
    * Carga los cupones que coinciden con el usuario_id del usuario actual en cupones_usuario
    */
   async cargarCuponesDisponibles(): Promise<void> {
-    const usuario = await this.authService.obtenerUsuario();
-    if (!usuario) {
-      this.cuponesDisponibles.set([]);
-      return;
-    }
-
     this.cargandoCupones.set(true);
     try {
-      const edad = this.calcularEdadUsuario(usuario.fechaNacimiento);
-      const comprasPrevias = await this.comprasService.obtenerComprasUsuario(usuario.id);
+      const usuario = await this.authService.obtenerUsuario();
+      if (!usuario) {
+        this.cuponesDisponibles.set([]);
+        return;
+      }
+
+      await this.consultarCuponesUsuario(usuario.id, usuario.fechaNacimiento);
+    } catch (e) {
+      console.warn('Error cargando cupones asignados al usuario:', e);
+    } finally {
+      this.cargandoCupones.set(false);
+    }
+  }
+
+  private async consultarCuponesUsuario(usuarioId: string, fechaNacimiento?: string): Promise<void> {
+    try {
+      const edad = this.calcularEdadUsuario(fechaNacimiento);
+      const comprasPrevias = await this.comprasService.obtenerComprasUsuario(usuarioId);
       const esPrimeraCompra = comprasPrevias.length === 0;
 
       // Consultar en la base de datos los cupones asignados a este usuario
       const cupones = await this.cuponesService.obtenerCuponesDisponiblesUsuario(
-        usuario.id,
+        usuarioId,
         edad,
         esPrimeraCompra
       );
@@ -163,8 +166,6 @@ export class SeleccionCandyComponent implements OnInit {
       }
     } catch (e) {
       console.warn('Error cargando cupones asignados al usuario:', e);
-    } finally {
-      this.cargandoCupones.set(false);
     }
   }
 
@@ -277,6 +278,21 @@ export class SeleccionCandyComponent implements OnInit {
     return Math.max(0, total);
   });
 
+  creditoDisponible(): number {
+    return Math.max(0, Number(this.authService.usuarioActual()?.credito || 0));
+  }
+
+  creditoAplicado = computed<number>(() =>
+    this.aplicarCredito() ? Math.min(this.creditoDisponible(), this.totalFinal()) : 0
+  );
+
+  totalAPagar = computed<number>(() => Math.max(0, this.totalFinal() - this.creditoAplicado()));
+
+  cambiarUsoCredito(event: Event): void {
+    this.aplicarCredito.set((event.target as HTMLInputElement).checked);
+    this.guardarContexto();
+  }
+
   guardarContexto(): void {
     const actual = this.compraContexto();
     const cupon = this.cuponSeleccionado();
@@ -290,6 +306,7 @@ export class SeleccionCandyComponent implements OnInit {
         cuponNombre: cupon?.nombre,
         descuento: this.descuentoMonto(),
         porcentajeDescuento: cupon?.porcentajeDescuento,
+        aplicarCredito: this.aplicarCredito(),
       };
       sessionStorage.setItem('cinetp_compra_actual', JSON.stringify(actualizado));
       this.compraContexto.set(actualizado);

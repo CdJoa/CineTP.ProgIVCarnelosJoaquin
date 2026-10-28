@@ -27,6 +27,7 @@ export interface Compra {
   itemsCandy: ItemCandyCompra[];
   totalCandy: number;
   descuento: number;
+  creditoUsado: number;
   cuponCodigo?: string;
   totalFinal: number;
   puntosGanados: number;
@@ -56,4 +57,5 @@ export interface CrearCompraDto {
   cuponCodigo?: string;
   totalFinal: number;
   puntosGanados?: number;
+  aplicarCredito?: boolean;
 }

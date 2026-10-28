@@ -117,6 +117,7 @@ export class PagoComponent implements OnInit {
         cuponCodigo: ctx.cuponCodigo,
         totalFinal,
         puntosGanados: Math.round(totalFinal),
+        aplicarCredito: Boolean(ctx.aplicarCredito),
       };
 
       const compraCreada = await this.comprasService.crearCompra(dto);

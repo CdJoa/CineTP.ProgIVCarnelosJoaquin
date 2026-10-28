@@ -56,6 +56,10 @@ Formularios reactivos con validaciones estrictas desacopladas, control de coinci
 
 ## Correr Localmente
 
+### Configuración de Supabase para cancelación de funciones
+
+Antes de usar la cancelación administrativa, ejecuta el script `supabase/cancelacion-funciones.sql` completo en el SQL Editor del proyecto Supabase. Crea las RPC transaccionales, la tabla/políticas de notificaciones y el campo de crédito usado en compras. La acreditación, cancelación de tickets, liberación de butacas y notificación se confirman juntas o se revierten juntas.
+
 ### Pasos de instalación y puesta en marcha
 
 1. **Ingresar a la carpeta del proyecto:**

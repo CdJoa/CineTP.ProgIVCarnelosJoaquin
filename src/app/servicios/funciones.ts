@@ -234,6 +234,35 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     return actualizada;
   }
 
+  async cancelarFuncionPorAdmin(funcion: Funcion): Promise<{
+    comprasCanceladas: number;
+    usuariosNotificados: number;
+    creditoTotal: number;
+  }> {
+    const { data, error } = await this.supabase.rpc('cancelar_funcion', {
+      p_funcion_id: funcion.id,
+    });
+    if (error) {
+      if (error.code === 'PGRST202' || error.code === '42883') {
+        throw new Error(
+          'Supabase no encuentra la función cancelar_funcion(UUID). Ejecuta completo supabase/cancelacion-funciones.sql en el proyecto Supabase configurado y recarga el esquema PostgREST.'
+        );
+      }
+      throw new Error(error.message);
+    }
+
+    void this.auditoriaService.registrar(
+      'funcion_cancelada',
+      `Función cancelada: ${this.describirFuncion(funcion)}. ${Number(data?.['compras_canceladas'] || 0)} compras canceladas; $${Number(data?.['credito_total'] || 0)} acreditados.`
+    );
+
+    return {
+      comprasCanceladas: Number(data?.['compras_canceladas'] || 0),
+      usuariosNotificados: Number(data?.['usuarios_notificados'] || 0),
+      creditoTotal: Number(data?.['credito_total'] || 0),
+    };
+  }
+
   /**
    * Generación automática de funciones alternando formatos, idiomas, turnos y prioridad.
    */

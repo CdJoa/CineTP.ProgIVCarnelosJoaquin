@@ -6,6 +6,7 @@ import { Auth } from '../../servicios/auth';
 import { ComprasService } from '../../servicios/compras';
 import { ResenasService } from '../../servicios/resenas';
 import { PropuestasService } from '../../servicios/propuestas';
+import { Notificacion, NotificacionesService } from '../../servicios/notificaciones';
 import { Compra } from '../../models/compra';
 import { Resena } from '../../models/resena';
 import { PropuestaPelicula } from '../../models/propuesta';
@@ -28,6 +29,7 @@ export class PerfilComponent implements OnInit {
   private comprasService = inject(ComprasService);
   private resenasService = inject(ResenasService);
   private propuestasService = inject(PropuestasService);
+  private notificacionesService = inject(NotificacionesService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -43,6 +45,7 @@ export class PerfilComponent implements OnInit {
   cargandoCompras = signal<boolean>(true);
   resenasUsuario = signal<Record<string, Resena>>({});
   cargandoResenas = signal<boolean>(true);
+  notificaciones = signal<Notificacion[]>([]);
 
   // Filtros de la sección "Mis películas"
   busquedaPelicula = signal<string>('');
@@ -178,7 +181,37 @@ export class PerfilComponent implements OnInit {
       }
     });
 
-    await Promise.all([this.cargarCompras(), this.cargarResenas(), this.cargarPropuesta()]);
+    await Promise.all([
+      this.cargarCompras(),
+      this.cargarResenas(),
+      this.cargarPropuesta(),
+      this.cargarNotificaciones(),
+    ]);
+  }
+
+  async cargarNotificaciones(): Promise<void> {
+    const u = this.usuario;
+    if (!u) return;
+    try {
+      this.notificaciones.set(await this.notificacionesService.obtenerMisNotificaciones(u.id));
+    } catch (err) {
+      console.warn('No se pudieron cargar las notificaciones:', err);
+    }
+  }
+
+  async reubicarPorNotificacion(notificacion: Notificacion): Promise<void> {
+    const peliculaId = String(notificacion.metadata['pelicula_id'] || '');
+    if (peliculaId) {
+      try {
+        await this.notificacionesService.marcarLeida(notificacion.id);
+        this.notificaciones.update((lista) =>
+          lista.map((item) => item.id === notificacion.id ? { ...item, leida: true } : item)
+        );
+      } catch (err) {
+        console.warn('No se pudo marcar la notificación como leída:', err);
+      }
+      await this.router.navigate(['/home'], { queryParams: { reubicar: peliculaId } });
+    }
   }
 
   cambiarTab(tab: TabPerfil): void {

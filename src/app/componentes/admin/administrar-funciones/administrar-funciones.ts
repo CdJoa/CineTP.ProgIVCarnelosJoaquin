@@ -281,7 +281,22 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
     return this.funcionesService.crearFuncionConValidacion(payload, duracion);
   }
 
-  protected override actualizarData(id: string, payload: any): Promise<Funcion> {
+  protected override async actualizarData(id: string, payload: any): Promise<Funcion> {
+    const funcionActual = this.funciones().find((item) => item.id === id);
+    if (funcionActual?.estado === 'cancelada' && payload.estado === 'programada') {
+      throw new Error('Una función cancelada no se puede reactivar porque ya se acreditó a sus compradores. Crea una función nueva.');
+    }
+    if (payload.estado === 'cancelada' && funcionActual?.estado === 'programada') {
+      const confirmar = confirm(
+        `Se cancelará toda la función de "${funcionActual.peliculaTitulo}". Las compras confirmadas recibirán crédito por el total abonado (incluido Candy), se liberarán las butacas y se notificará a los compradores. ¿Continuar?`
+      );
+      if (!confirmar) throw new Error('Cancelación no confirmada.');
+      const resultado = await this.funcionesService.cancelarFuncionPorAdmin(funcionActual);
+      this.mensajeExito.set(
+        `Función cancelada. ${resultado.comprasCanceladas} compras canceladas, ${resultado.usuariosNotificados} compradores notificados y $${resultado.creditoTotal} acreditados.`
+      );
+      return { ...funcionActual, estado: 'cancelada' };
+    }
     if (payload.fecha && payload.hora) {
       const inicioDate = new Date(`${payload.fecha}T${payload.hora}:00`);
       payload.inicio = inicioDate.toISOString();
@@ -440,14 +455,31 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
   }
 
   async cambiarEstado(funcion: Funcion, nuevoEstado: EstadoFuncion): Promise<void> {
+    if (funcion.estado === 'cancelada' && nuevoEstado === 'programada') {
+      this.mensajeError.set('Una función cancelada no se puede reactivar porque ya se acreditó a sus compradores. Crea una función nueva.');
+      return;
+    }
     try {
       this.guardando.set(true);
-      const actualizada = await this.funcionesService.actualizar(funcion.id, { estado: nuevoEstado });
+      let actualizada: Funcion;
+      if (nuevoEstado === 'cancelada') {
+        const confirmar = confirm(
+          `Se cancelará toda la función de "${funcion.peliculaTitulo}". Las compras confirmadas recibirán crédito por el total abonado (incluido Candy), se liberarán las butacas y se notificará a los compradores. ¿Continuar?`
+        );
+        if (!confirmar) return;
+        const resultado = await this.funcionesService.cancelarFuncionPorAdmin(funcion);
+        this.mensajeExito.set(
+          `Función cancelada. ${resultado.comprasCanceladas} compras canceladas, ${resultado.usuariosNotificados} compradores notificados y $${resultado.creditoTotal} acreditados.`
+        );
+        actualizada = { ...funcion, estado: 'cancelada' };
+      } else {
+        actualizada = await this.funcionesService.actualizar(funcion.id, { estado: nuevoEstado });
+      }
       this.items.set(
         this.items().map((f) => (f.id === actualizada.id ? { ...f, estado: nuevoEstado } : f))
       );
     } catch (err) {
-      console.error('Error al cambiar estado de función:', err);
+      this.mensajeError.set(err instanceof Error ? err.message : 'Error al cambiar estado de función.');
     } finally {
       this.guardando.set(false);
     }
@@ -467,6 +499,10 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
   }
 
   async borrarFuncion(funcion: Funcion): Promise<void> {
+    if (funcion.estado === 'programada') {
+      this.mensajeError.set('No se puede borrar una función programada. Cancélala primero para acreditar a sus compradores.');
+      return;
+    }
     const confirmacion = confirm(
       `¿Estás seguro de que deseas borrar la función de "${funcion.peliculaTitulo}" (${this.formatearFechaHora(funcion.inicio)})?`
     );

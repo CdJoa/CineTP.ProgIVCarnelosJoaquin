@@ -108,9 +108,13 @@
                 <span>Cupón de Descuento ({{ c.cuponCodigo || 'PROMO' }}):</span>
                 <strong class="descuento-monto">-${{ c.descuento }}</strong>
               </div>
+              <div *ngIf="c.creditoUsado > 0" class="total-fila descuento-fila">
+                <span>Crédito aplicado:</span>
+                <strong class="descuento-monto">-${{ c.creditoUsado }}</strong>
+              </div>
               <div class="total-fila total-pagado">
                 <span>Total Abonado:</span>
-                <strong class="monto-final">${{ c.totalFinal }}</strong>
+                <strong class="monto-final">${{ c.totalFinal - c.creditoUsado }}</strong>
               </div>
               <div *ngIf="c.puntosGanados > 0" class="puntos-sumados">
                 ✨ ¡Sumaste <strong>+{{ c.puntosGanados }} puntos</strong> con esta compra!

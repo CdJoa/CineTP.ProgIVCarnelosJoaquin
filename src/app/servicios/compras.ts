@@ -48,6 +48,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       itemsCandy: Array.isArray(data['items_candy']) ? data['items_candy'] : [],
       totalCandy: Number(data['total_candy'] || 0),
       descuento: Number(data['descuento'] || 0),
+      creditoUsado: Number(data['credito_usado'] || 0),
       cuponCodigo: data['cupon_codigo'] || undefined,
       totalFinal: Number(data['total_final'] || 0),
       puntosGanados: Number(data['puntos_ganados'] || 0),
@@ -128,18 +129,32 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       estado: 'confirmada',
     };
 
-    const { data, error } = await this.supabase
-      .from(this.nombreTabla)
-      .insert(payloadBd)
-      .select()
-      .single();
+    const sesionAsientos = this.asientosRealtime.obtenerCredencialesSesion();
+    const { data, error } = await this.supabase.rpc('crear_compra_con_credito', {
+      p_compra: payloadBd,
+      p_aplicar_credito: Boolean(dto.aplicarCredito),
+      p_session_id: sesionAsientos.id,
+      p_session_token: sesionAsientos.token,
+    });
 
     if (error) {
+      if (error.code === 'PGRST202') {
+        throw new Error('La compra requiere actualizar las funciones SQL de Supabase.');
+      }
       throw new Error(`No se pudo registrar la compra: ${error.message}`);
     }
 
+    if (!data) throw new Error('Supabase no devolvió la compra registrada.');
+
+    if (dto.usuarioId && dto.aplicarCredito) {
+      this.auth.establecerSaldo(
+        this.auth.usuarioActual()?.puntos || 0,
+        Number(data['credito_actual'] || 0)
+      );
+    }
+
     const compraCreada: Compra = {
-      ...this.mapear(data),
+      ...this.mapear(data as Record<string, any>),
       usuarioEmail: dto.usuarioEmail,
       peliculaTitulo: dto.peliculaTitulo,
       peliculaPoster: dto.peliculaPoster,
@@ -151,16 +166,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
     };
 
     // Efectos secundarios de la compra:
-    // 1. Confirmar asientos en realtime
-    if (dto.asientos.length > 0) {
-      try {
-        await this.asientosRealtime.confirmar(dto.funcionId, dto.asientos);
-      } catch (e) {
-        console.warn('No se pudo confirmar asientos via RPC:', e);
-      }
-    }
-
-    // 2. Incrementar boletos vendidos en la película
+    // 1. Incrementar boletos vendidos en la película
     if (dto.peliculaId && dto.asientos.length > 0) {
       try {
         await this.peliculasService.incrementarBoletosVendidos(dto.peliculaId, dto.asientos.length);
@@ -169,7 +175,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       }
     }
 
-    // 3. Sumar puntos al usuario si está autenticado
+    // 2. Sumar puntos al usuario si está autenticado
     if (dto.usuarioId && puntos > 0) {
       try {
         await this.auth.actualizarPuntos(puntos);
@@ -178,7 +184,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       }
     }
 
-    // 4. Marcar cupón como usado si el usuario lo aplicó
+    // 3. Marcar cupón como usado si el usuario lo aplicó
     if (dto.usuarioId && dto.cuponId) {
       try {
         await this.cuponesService.marcarCuponUsado(dto.usuarioId, dto.cuponId);
@@ -187,7 +193,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       }
     }
 
-    // 5. Registrar evento en auditoría
+    // 4. Registrar evento en auditoría
     const detalleCompra = `Entradas para "${dto.peliculaTitulo || 'Película'}" en ${dto.salaNombre || 'Sala'} (${dto.asientos.join(', ')}). Total: $${dto.totalFinal}`;
     void this.auditoriaService.registrar('compra_realizada', detalleCompra, {
       id: dto.usuarioId,

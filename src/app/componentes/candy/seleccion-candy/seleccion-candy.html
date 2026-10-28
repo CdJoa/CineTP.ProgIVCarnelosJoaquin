@@ -277,6 +277,13 @@
 
         <hr class="carrito-divider" />
 
+        <div *ngIf="creditoDisponible() > 0" class="cupones-seccion">
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+            <input type="checkbox" [checked]="aplicarCredito()" (change)="cambiarUsoCredito($event)" />
+            <span>Usar crédito de mi cuenta (disponible: <strong>${{ creditoDisponible() }}</strong>)</span>
+          </label>
+        </div>
+
         <!-- Totales con Desglose -->
         <div class="totales-desglose">
           <div class="total-linea-item">
@@ -289,10 +296,15 @@
             <strong class="descuento-num">-${{ descuentoMonto() }}</strong>
           </div>
 
+          <div *ngIf="creditoAplicado() > 0" class="total-linea-item descuento-linea">
+            <span>Crédito aplicado</span>
+            <strong class="descuento-num">-${{ creditoAplicado() }}</strong>
+          </div>
+
           <!-- Total Final -->
           <div class="total-row">
             <span>Total a Pagar</span>
-            <strong class="total-monto">${{ totalFinal() }}</strong>
+            <strong class="total-monto">${{ totalAPagar() }}</strong>
           </div>
         </div>
 

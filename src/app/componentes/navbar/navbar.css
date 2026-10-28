@@ -1,3 +1,72 @@
+.notificaciones-nav {
+  position: relative;
+}
+
+.nav-notificaciones {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.notificaciones-badge {
+  display: inline-flex;
+  min-width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.notificaciones-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1200;
+  width: min(340px, 85vw);
+  padding: 14px;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  background: #fff;
+  color: #0f172a;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, .18);
+}
+
+.notificacion-item,
+.ver-todas-notificaciones {
+  display: grid;
+  width: 100%;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notificacion-item small {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: #475569;
+}
+
+.ver-todas-notificaciones {
+  display: block;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
 .navbar {
   display: flex;
   justify-content: space-between;
