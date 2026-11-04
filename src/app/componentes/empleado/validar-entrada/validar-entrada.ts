@@ -1,13 +1,19 @@
 import { Component, ElementRef, OnDestroy, ViewChild, inject, signal } from '@angular/core';
 import jsQR from 'jsqr';
-import { ComprasService, ResultadoUsoCompra } from '../../../servicios/compras';
+import { ComprasService, PuntoValidacion, ResultadoUsoCompra } from '../../../servicios/compras';
 import { AuditoriaService } from '../../../servicios/auditoria';
 
 const DESCRIPCION_RESULTADO: Record<ResultadoUsoCompra['resultado'], string> = {
-  usada: 'compra válida, marcada como usada',
-  ya_usada: 'rechazada, la compra ya estaba usada',
-  cancelada: 'rechazada, la compra está cancelada',
-  inexistente: 'rechazada, el código no existe',
+  usada: 'válido, marcado como usado',
+  ya_usada: 'rechazado, ya había sido usado',
+  cancelada: 'rechazado, la compra está cancelada',
+  inexistente: 'rechazado, el código no existe',
+  sin_candy: 'rechazado, la compra no incluye productos de candy',
+};
+
+const NOMBRE_PUNTO: Record<PuntoValidacion, string> = {
+  entrada: 'ingreso a sala',
+  candy: 'Candy Bar',
 };
 
 @Component({
@@ -22,6 +28,8 @@ export class ValidarEntrada implements OnDestroy {
 
   @ViewChild('video') private videoRef?: ElementRef<HTMLVideoElement>;
 
+  /** Punto donde está trabajando el empleado: puerta de la sala o mostrador del candy. */
+  punto = signal<PuntoValidacion>('entrada');
   codigo = signal<string>('');
   escaneando = signal<boolean>(false);
   procesando = signal<boolean>(false);
@@ -31,6 +39,12 @@ export class ValidarEntrada implements OnDestroy {
   private stream?: MediaStream;
   private cuadroId?: number;
   private canvas?: HTMLCanvasElement;
+
+  cambiarPunto(punto: PuntoValidacion): void {
+    this.punto.set(punto);
+    this.resultado.set(null);
+    this.error.set(null);
+  }
 
   ngOnDestroy(): void {
     this.detenerEscaner();
@@ -121,23 +135,24 @@ export class ValidarEntrada implements OnDestroy {
     const limpio = codigo.trim();
     if (!limpio || this.procesando()) return;
 
+    const punto = this.punto();
     this.procesando.set(true);
     this.error.set(null);
     this.resultado.set(null);
     try {
-      const resultado = await this.comprasService.usarCompra(limpio);
+      const resultado = await this.comprasService.usarCompra(limpio, punto);
       this.resultado.set(resultado);
       this.codigo.set('');
       void this.auditoriaService.registrar(
         'lectura_qr',
-        `${limpio.toUpperCase()} leído por ${medio}: ${DESCRIPCION_RESULTADO[resultado.resultado]}`
+        `${limpio.toUpperCase()} leído por ${medio} en ${NOMBRE_PUNTO[punto]}: ${DESCRIPCION_RESULTADO[resultado.resultado]}`
       );
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : 'No se pudo validar la compra.';
       this.error.set(mensaje);
       void this.auditoriaService.registrar(
         'lectura_qr',
-        `${limpio.toUpperCase()} leído por ${medio}: error al validar (${mensaje})`
+        `${limpio.toUpperCase()} leído por ${medio} en ${NOMBRE_PUNTO[punto]}: error al validar (${mensaje})`
       );
     } finally {
       this.procesando.set(false);

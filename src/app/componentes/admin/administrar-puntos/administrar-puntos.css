@@ -1,0 +1,149 @@
+.puntos-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: var(--font-ui);
+  color: var(--text);
+}
+
+.header-bar {
+  margin-bottom: 16px;
+}
+
+.header-bar h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.header-bar p {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.actual {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.actual strong {
+  color: var(--primary);
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+input {
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.preview {
+  padding: 10px 12px;
+  border: 1px solid var(--primary-border);
+  background: var(--primary-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+  border: 1px solid var(--primary);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mensaje {
+  margin: 0;
+  font-size: 13px;
+  color: #6ee7a0;
+}
+
+.error,
+.mensaje.error {
+  color: var(--danger-text);
+}
+
+.historial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-link {
+  border: none;
+  background: none;
+  color: var(--primary);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.vacio {
+  color: var(--text-faint);
+  font-size: 13px;
+}

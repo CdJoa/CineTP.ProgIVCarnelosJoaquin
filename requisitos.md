@@ -41,7 +41,7 @@
     Aclaracion de adulto responsable acompañante
 
 
-    Filas J y K para discapcaitados 2, 10, 2
+    Fila J para discapacitados 2, 10, 2 (reemplaza a las filas J y K)
 
 
     Selección de butacas en tiempo real

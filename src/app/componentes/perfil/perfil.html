@@ -19,12 +19,12 @@
 
   <!-- Métricas Rápidas: Puntos y Créditos -->
   <section class="metricas-grid">
-    <div class="metrica-card puntos">
+    <div class="metrica-card puntos" (click)="cambiarTab('puntos')" style="cursor: pointer;">
       <div class="metrica-icon">✨</div>
       <div class="metrica-content">
         <span class="metrica-lbl">Puntos Acumulados</span>
         <strong class="metrica-valor">{{ u.puntos || 0 }} pts</strong>
-        <p class="metrica-desc">Sumás puntos con cada compra en funciones y Candy Bar</p>
+        <p class="metrica-desc">1 punto por cada peso. Convertilos en crédito (ver)</p>
       </div>
     </div>
 
@@ -50,11 +50,17 @@
     </div>
   </section>
 
-  <section *ngIf="notificaciones().length > 0" aria-label="Notificaciones" style="display:grid; gap:12px; margin:18px 0;">
-    <article *ngFor="let n of notificaciones()" [style.opacity]="n.leida ? '0.72' : '1'"
-      style="padding:16px 18px; border:1px solid #bfdbfe; border-radius:12px; background:#eff6ff;">
+  <section *ngIf="notificaciones().length > 0" aria-label="Notificaciones" class="avisos">
+    <div class="avisos-header">
+      <strong>🔔 Avisos ({{ notificaciones().length }})</strong>
+      <button *ngIf="notificaciones().length > 1" type="button" class="btn-descartar-todas" (click)="descartarTodasNotificaciones()">
+        Descartar todos
+      </button>
+    </div>
+    <article *ngFor="let n of notificaciones()" class="aviso">
+      <button type="button" class="btn-descartar" (click)="descartarNotificacion(n)" aria-label="Descartar aviso" title="Descartar">✕</button>
       <strong>{{ n.titulo }}</strong>
-      <p style="margin:6px 0 12px;">{{ n.mensaje }}</p>
+      <p>{{ n.mensaje }}</p>
       <button *ngIf="n.tipo === 'funcion_cancelada'" type="button" class="btn-cartelera" (click)="reubicarPorNotificacion(n)">
         Elegir otra función de esta película con mi crédito →
       </button>
@@ -73,8 +79,8 @@
       (click)="cambiarTab('peliculas')"
     >
       🎬 Mis Películas
-      <span class="tab-badge" *ngIf="estadisticasCine().totalVistas > 0">
-        {{ estadisticasCine().totalVistas }}
+      <span class="tab-badge" *ngIf="estadisticasCine().pelisUnicas > 0">
+        {{ estadisticasCine().pelisUnicas }}
       </span>
     </button>
     <button
@@ -85,6 +91,14 @@
     >
       🎟️ Mis Tickets y Entradas
       <span class="tab-badge" *ngIf="compras().length > 0">{{ compras().length }}</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="tabActiva() === 'puntos'"
+      (click)="cambiarTab('puntos')"
+    >
+      ✨ Mis Puntos
     </button>
     <button
       type="button"
@@ -121,6 +135,8 @@
       👤 Datos de mi Cuenta
     </button>
   </nav>
+
+  <app-convertidor-puntos *ngIf="tabActiva() === 'puntos'"></app-convertidor-puntos>
 
   <section class="perfil-seccion" *ngIf="tabActiva() === 'espera'">
     <div class="seccion-header-row">
@@ -186,7 +202,7 @@
     <!-- Barra de Estadísticas Cinematográficas -->
     <div class="stats-cine-bar" *ngIf="compras().length > 0">
       <div class="stat-cine-item">
-        <span class="stat-cine-num">{{ estadisticasCine().totalVistas }}</span>
+        <span class="stat-cine-num">{{ estadisticasCine().pelisUnicas }}</span>
         <span class="stat-cine-label">Películas vistas</span>
       </div>
       <div class="stat-cine-separador"></div>
@@ -315,11 +331,8 @@
       *ngIf="!cargandoCompras() && !cargandoResenas() && peliculasHistorialFiltradas().length > 0"
       class="peliculas-historial-grid"
     >
-      <article
-        *ngFor="let c of peliculasHistorialFiltradas()"
-        class="pelicula-visual-card"
-        [class.card-cancelada]="c.estado === 'cancelada'"
-      >
+      <ng-container *ngFor="let g of peliculasHistorialFiltradas()">
+      <article *ngIf="g.compra as c" class="pelicula-visual-card">
         <!-- PÓSTER CINEMATOGRÁFICO -->
         <div class="peli-poster-container" [appHoverZoom]="1.04">
           <img
@@ -337,10 +350,10 @@
           <!-- Badges sobre el póster -->
           <div class="poster-overlay-top">
             <span class="formato-pill">{{ c.formato || '2D' }}</span>
-            <span *ngIf="c.estado === 'cancelada'" class="badge-estado-overlay cancelada">
-              CANCELADA
+            <span *ngIf="g.veces > 1" class="badge-estado-overlay usada">
+              🔁 {{ g.veces }} funciones
             </span>
-            <span *ngIf="c.estado === 'usado'" class="badge-estado-overlay usada">
+            <span *ngIf="g.veces === 1 && c.estado === 'usado'" class="badge-estado-overlay usada">
               ✓ VISTA
             </span>
           </div>
@@ -359,7 +372,7 @@
 
           <div class="peli-metadatos">
             <span class="peli-fecha-hora">
-              🕒 {{ formatearFechaHora(c.funcionInicio) }}
+              🕒 {{ g.veces > 1 ? 'Última: ' : '' }}{{ formatearFechaHora(c.funcionInicio) }}
             </span>
             <span class="peli-sala-butacas">
               🏛️ {{ c.salaNombre }} · {{ c.asientos.length }} butaca(s) ({{ c.asientos.join(', ') }})
@@ -417,24 +430,27 @@
 
           <!-- PIE DE TARJETA: ACCIONES -->
           <div class="peli-card-actions">
-            <button
-              type="button"
-              class="btn-ver-ticket-mini"
-              (click)="verTicketCompleto(c)"
-            >
-              🎟️ Ver Ticket / QR
-            </button>
-            <button
-              *ngIf="puedeCancelar(c) && c.estado !== 'cancelada'"
-              type="button"
-              class="btn-cancelar-mini"
-              (click)="pedirCancelacion(c)"
-            >
-              Cancelar función
-            </button>
+            @if (g.veces === 1) {
+              <button type="button" class="btn-ver-ticket-mini" (click)="verTicketCompleto(c)">
+                🎟️ Ver Ticket / QR
+              </button>
+              <button
+                *ngIf="puedeCancelar(c)"
+                type="button"
+                class="btn-cancelar-mini"
+                (click)="pedirCancelacion(c)"
+              >
+                Cancelar función
+              </button>
+            } @else {
+              <button type="button" class="btn-ver-ticket-mini" (click)="cambiarTab('entradas')">
+                🎟️ Ver mis {{ g.veces }} entradas
+              </button>
+            }
           </div>
         </div>
       </article>
+      </ng-container>
     </div>
   </section>
 

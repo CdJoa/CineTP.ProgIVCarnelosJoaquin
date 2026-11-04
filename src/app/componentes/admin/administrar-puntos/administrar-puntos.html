@@ -1,0 +1,76 @@
+<div class="puntos-container">
+  <div class="header-bar">
+    <div>
+      <h2>✨ Programa de Puntos</h2>
+      <p>El cliente gana 1 punto por cada peso gastado y los convierte en crédito desde su perfil.</p>
+    </div>
+  </div>
+
+  <div class="layout">
+    <form class="card" [formGroup]="form" (ngSubmit)="guardar()">
+      <h3>Tasa de conversión</h3>
+      <p class="actual">
+        Vigente: <strong>{{ config().puntosPorPeso }} puntos = $1 de crédito</strong> · mínimo
+        {{ config().minimoPuntos }} puntos
+      </p>
+
+      <label>
+        Puntos por cada $1 de crédito
+        <input type="number" min="1" max="1000" formControlName="puntosPorPeso" />
+        @if (form.controls.puntosPorPeso.invalid && form.controls.puntosPorPeso.touched) {
+          <small class="error">Ingresá un valor entre 1 y 1000.</small>
+        }
+      </label>
+
+      <label>
+        Mínimo de puntos por conversión
+        <input type="number" min="1" formControlName="minimoPuntos" />
+        @if (form.controls.minimoPuntos.invalid && form.controls.minimoPuntos.touched) {
+          <small class="error">Debe ser mayor a 0.</small>
+        }
+      </label>
+
+      <div class="preview">
+        Con esta tasa, una compra de <strong>${{ ejemplo().puntos }}</strong> da {{ ejemplo().puntos }} puntos, que se
+        convierten en <strong>${{ ejemplo().credito }}</strong> de crédito ({{ porcentajeReintegro() }}% de reintegro).
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando...' : 'Guardar configuración' }}
+      </button>
+
+      @if (mensaje(); as m) {
+        <p class="mensaje" [class.error]="m.tipo === 'error'">{{ m.texto }}</p>
+      }
+    </form>
+
+    <section class="card">
+      <div class="historial-header">
+        <h3>Últimas conversiones</h3>
+        <button type="button" class="btn-link" (click)="cargarHistorial()">Actualizar</button>
+      </div>
+      @if (cargandoHistorial()) {
+        <p class="vacio">Cargando...</p>
+      } @else {
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Usuario</th><th>Puntos</th><th>Crédito</th><th>Tasa</th></tr>
+          </thead>
+          <tbody>
+            @for (c of historial(); track c.id) {
+              <tr>
+                <td>{{ c.creadoEn | date: 'dd/MM/yy HH:mm' }}</td>
+                <td>{{ c.usuario }}</td>
+                <td>−{{ c.puntos }}</td>
+                <td>+${{ c.credito }}</td>
+                <td>{{ c.puntosPorPeso }}:1</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="vacio">Todavía no hay conversiones.</td></tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  </div>
+</div>

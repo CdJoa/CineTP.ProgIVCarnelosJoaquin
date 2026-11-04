@@ -13,28 +13,28 @@
 
 .header-bar h2 {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 800;
   margin: 0 0 4px;
 }
 
 .header-bar p {
-  color: #666;
+  color: var(--text-muted);
   font-size: 13px;
   margin: 0;
 }
 
 .btn-crear {
-  background: #000;
-  color: #fff;
+  background: var(--primary);
+  color: var(--on-primary);
   padding: 8px 16px;
   text-decoration: none;
   font-size: 13px;
-  border: 1px solid #000;
+  border: 1px solid var(--primary);
   display: inline-block;
 }
 
 .btn-crear:hover {
-  background: #333;
+  background: var(--primary-hover);
 }
 
 .filtros-bar {
@@ -44,13 +44,13 @@
   justify-content: space-between;
   margin-bottom: 20px;
   padding: 12px;
-  background: #fafafa;
-  border: 1px solid #ddd;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
 }
 
 .search-box input {
   padding: 8px 12px;
-  border: 1px solid #000;
+  border: 1px solid var(--border-strong);
   font-size: 13px;
   width: 250px;
 }
@@ -62,17 +62,17 @@
 }
 
 .filtro-btn {
-  background: #fff;
-  color: #000;
-  border: 1px solid #000;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
 }
 
 .filtro-btn.active {
-  background: #000;
-  color: #fff;
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .candy-grid {
@@ -85,14 +85,14 @@
 .empty-state {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(6, 6, 16, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -101,37 +101,37 @@
 }
 
 .modal-content {
-  background: #fff;
-  border: 1px solid #000;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   padding: 20px;
   width: 100%;
   max-width: 850px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 12px;
   margin-bottom: 16px;
 }
 
 .modal-header h3 {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 800;
   margin: 0;
-  color: #000;
+  color: var(--text);
 }
 
 .btn-close {
   background: none;
   border: none;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -161,17 +161,17 @@
 
 .edit-form label {
   font-size: 13px;
-  font-weight: bold;
-  color: #000;
+  font-weight: 800;
+  color: var(--text);
 }
 
 .edit-form input,
 .edit-form select,
 .edit-form textarea {
   padding: 8px;
-  border: 1px solid #000;
-  background: #fff;
-  color: #000;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
   font-size: 13px;
   box-sizing: border-box;
 }
@@ -185,15 +185,15 @@
 .modal-preview {
   width: 220px;
   flex-shrink: 0;
-  background: #fafafa;
-  border: 1px solid #ddd;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   padding: 12px;
 }
 
 .modal-preview h4 {
   font-size: 13px;
   margin: 0 0 10px;
-  color: #555;
+  color: var(--text-muted);
 }
 
 .modal-actions {
@@ -202,22 +202,22 @@
   justify-content: flex-end;
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border);
 }
 
 .btn-primary {
-  background: #000;
-  color: #fff;
-  border: 1px solid #000;
+  background: var(--primary);
+  color: var(--on-primary);
+  border: 1px solid var(--primary);
   padding: 8px 16px;
   font-size: 13px;
   cursor: pointer;
 }
 
 .btn-secondary {
-  background: #fff;
-  color: #000;
-  border: 1px solid #000;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
   padding: 8px 16px;
   font-size: 13px;
   cursor: pointer;
@@ -230,22 +230,22 @@
 }
 
 .alert-error {
-  background: #fee;
-  border: 1px solid #c00;
-  color: #c00;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-text);
+  color: var(--danger-text);
 }
 
 .alert-success {
-  background: #efe;
-  border: 1px solid #080;
-  color: #080;
+  background: var(--success-soft);
+  border: 1px solid var(--success-text);
+  color: var(--success-text);
 }
 
 /* Detalle seleccionado abajo */
 .detail-panel {
   margin-top: 24px;
-  background: #fff;
-  border: 1px solid #000;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   padding: 16px;
 }
 
@@ -254,7 +254,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 8px;
 }
 
@@ -281,11 +281,11 @@
 }
 
 .btn-primary-sm {
-  background: #000;
-  color: #fff;
-  border: 1px solid #000;
+  background: var(--primary);
+  color: var(--on-primary);
+  border: 1px solid var(--primary);
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   margin-right: 6px;
 }

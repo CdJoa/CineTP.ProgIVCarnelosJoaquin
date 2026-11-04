@@ -4,8 +4,8 @@
   "description": "Sistema de cine - Compra de entradas y candy",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a2e",
-  "theme_color": "#e94560",
+  "background_color": "#070b1a",
+  "theme_color": "#070b1a",
   "orientation": "portrait-primary",
   "icons": [
     {

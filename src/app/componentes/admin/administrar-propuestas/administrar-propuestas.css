@@ -13,30 +13,30 @@
 
 .header-bar h2 {
   margin: 0 0 5px;
-  color: #212529;
+  color: var(--text);
   font-size: 24px;
 }
 
 .header-bar p {
   margin: 0;
-  color: #666666;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
 .badge-pendientes-total {
-  background: #ffc107;
-  color: #212529;
-  font-weight: bold;
+  background: var(--warning);
+  color: var(--on-warning);
+  font-weight: 800;
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 13px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.28);
 }
 
 .alert-error {
-  background: #fff5f5;
-  border: 1px solid #dc3545;
-  color: #dc3545;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-text);
+  color: var(--danger-text);
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 15px;
@@ -44,9 +44,9 @@
 }
 
 .alert-success {
-  background: #f0fff4;
-  border: 1px solid #28a745;
-  color: #28a745;
+  background: var(--success-soft);
+  border: 1px solid var(--success-text);
+  color: var(--success-text);
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 15px;
@@ -61,25 +61,25 @@
 }
 
 .filtro-btn {
-  background: #ffffff;
-  border: 1px solid #cccccc;
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 7px 14px;
   border-radius: 20px;
   font-size: 13px;
-  color: #495057;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .filtro-btn:hover {
-  background: #e9ecef;
+  background: var(--surface-3);
 }
 
 .filtro-btn.active {
-  background: #0056b3;
-  color: #ffffff;
-  border-color: #0056b3;
-  font-weight: 600;
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+  font-weight: 700;
 }
 
 .loading-box {
@@ -87,17 +87,17 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  color: #666666;
+  color: var(--text-muted);
   gap: 10px;
 }
 
 .empty-state {
-  background: #ffffff;
-  border: 1px dashed #cccccc;
+  background: var(--surface);
+  border: 1px dashed var(--border);
   border-radius: 8px;
   padding: 40px;
   text-align: center;
-  color: #777777;
+  color: var(--text-muted);
 }
 
 .propuestas-grid {
@@ -107,27 +107,27 @@
 }
 
 .propuesta-card {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.2s, transform 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14);
 }
 
 .propuesta-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
 }
 
 .propuesta-card.card-pendiente {
-  border-left: 5px solid #ffc107;
+  border-left: 5px solid var(--warning-text);
 }
 
 .card-header {
   padding: 14px 16px;
-  background: #fdfdfd;
-  border-bottom: 1px solid #eeeeee;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -141,45 +141,45 @@
 }
 
 .cliente-nombre {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
-  color: #212529;
+  color: var(--text);
 }
 
 .cliente-email {
-  font-size: 12px;
-  color: #666666;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
 .prop-fecha {
-  font-size: 11px;
-  color: #999999;
+  font-size: 13px;
+  color: var(--text-faint);
 }
 
 .badge-estado {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   padding: 4px 8px;
   border-radius: 12px;
   white-space: nowrap;
 }
 
 .badge-pendiente {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
+  background: var(--warning-soft);
+  color: var(--warning-text);
+  border: 1px solid var(--warning-border);
 }
 
 .badge-aceptada {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: var(--success-soft);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
 }
 
 .badge-rechazada {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
 }
 
 .card-body {
@@ -193,7 +193,7 @@
 .pelicula-titulo {
   margin: 0;
   font-size: 18px;
-  color: #0056b3;
+  color: var(--primary);
 }
 
 .seccion-info {
@@ -203,27 +203,27 @@
 }
 
 .seccion-info label {
-  font-size: 11px;
-  font-weight: bold;
+  font-size: 13px;
+  font-weight: 800;
   text-transform: uppercase;
-  color: #777777;
+  color: var(--text-muted);
   letter-spacing: 0.5px;
 }
 
 .texto-sinopsis {
   margin: 0;
   font-size: 13px;
-  color: #333333;
+  color: var(--text);
   line-height: 1.4;
 }
 
 .texto-explicacion {
   margin: 0;
   font-size: 13px;
-  color: #495057;
+  color: var(--text-muted);
   line-height: 1.4;
-  background: #f8f9fa;
-  border-left: 3px solid #6c757d;
+  background: var(--primary-soft);
+  border-left: 3px solid var(--border-strong);
   padding: 8px 10px;
   border-radius: 3px;
   font-style: italic;
@@ -231,8 +231,8 @@
 
 .card-footer {
   padding: 12px 16px;
-  background: #fdfdfd;
-  border-top: 1px solid #eeeeee;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
 }
 
 .acciones-propuesta {
@@ -242,30 +242,30 @@
 }
 
 .btn-rechazar {
-  background: #ffffff;
-  color: #dc3545;
-  border: 1px solid #dc3545;
+  background: var(--surface);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-text);
   padding: 7px 12px;
   border-radius: 4px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-rechazar:hover:not(:disabled) {
-  background: #dc3545;
-  color: #ffffff;
+  background: var(--danger-hover);
+  color: var(--on-danger);
 }
 
 .btn-aceptar {
-  background: #28a745;
-  color: #ffffff;
-  border: 1px solid #28a745;
+  background: var(--success);
+  color: var(--on-success);
+  border: 1px solid var(--success-text);
   padding: 7px 14px;
   border-radius: 4px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: background-color 0.2s;
   display: inline-flex;
@@ -274,7 +274,7 @@
 }
 
 .btn-aceptar:hover:not(:disabled) {
-  background: #218838;
+  background: var(--success-hover);
 }
 
 .btn-aceptar:disabled,
@@ -288,39 +288,39 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .texto-verde {
-  color: #155724;
-  font-weight: 600;
+  color: var(--success-text);
+  font-weight: 700;
 }
 
 .texto-rojo {
-  color: #721c24;
-  font-weight: 600;
+  color: var(--danger-text);
+  font-weight: 700;
 }
 
 .btn-crear-nuevo {
-  background: #0056b3;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   padding: 5px 10px;
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .btn-crear-nuevo:hover {
-  background: #004494;
+  background: var(--primary-hover);
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(0, 86, 179, 0.2);
-  border-top-color: #0056b3;
+  border: 2px solid rgba(var(--primary-rgb), 0.2);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -329,7 +329,7 @@
   width: 12px;
   height: 12px;
   border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #ffffff;
+  border-top-color: var(--border-strong);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   display: inline-block;

@@ -12,8 +12,11 @@ import { CandyService } from './candy';
 
 const HORAS_LIMITE_CANCELACION = 2;
 
+/** Dónde se escanea el QR: en la puerta de la sala o en el Candy Bar. */
+export type PuntoValidacion = 'entrada' | 'candy';
+
 export interface ResultadoUsoCompra {
-  resultado: 'usada' | 'ya_usada' | 'cancelada' | 'inexistente';
+  resultado: 'usada' | 'ya_usada' | 'cancelada' | 'inexistente' | 'sin_candy';
   compra: Compra | null;
 }
 
@@ -56,6 +59,8 @@ export class ComprasService extends BaseSupabaseService<Compra> {
       puntosGanados: Number(data['puntos_ganados'] || 0),
       qrData: String(data['qr_data'] || ''),
       estado: data['estado'] || 'confirmada',
+      entradaUsadaEn: data['entrada_usada_en'] || undefined,
+      candyEntregadoEn: data['candy_entregado_en'] || undefined,
       creadoEn: String(data['creado_en'] || new Date().toISOString()),
     };
   }
@@ -147,6 +152,7 @@ export class ComprasService extends BaseSupabaseService<Compra> {
     }
 
     if (!data) throw new Error('Supabase no devolvió la compra registrada.');
+    this.asientosRealtime.marcarAsientosConfirmados(dto.funcionId, dto.asientos);
 
     if (dto.usuarioId && dto.aplicarCredito) {
       this.auth.establecerSaldo(
@@ -343,29 +349,58 @@ export class ComprasService extends BaseSupabaseService<Compra> {
   }
 
   /**
-   * Valida una compra por su código (escaneado del QR o dictado) y la pasa de
-   * 'confirmada' a 'usado'. Sirve tanto para el ingreso a sala como para el Candy Bar.
+   * Valida una compra por su código (escaneado del QR o ingresado a mano).
+   * El mismo QR se usa en dos puntos, y cada uno se consume una sola vez:
+   *  - 'entrada': ingreso a la sala. Marca entrada_usada_en y pasa la compra a 'usado'.
+   *  - 'candy':   retiro de productos. Marca candy_entregado_en (no toca el estado,
+   *               así la entrada sigue sirviendo si el cliente pasa primero por el candy).
    */
-  async usarCompra(codigo: string): Promise<ResultadoUsoCompra> {
+  async usarCompra(codigo: string, punto: PuntoValidacion): Promise<ResultadoUsoCompra> {
     const compra = await this.obtenerPorCodigo(codigo);
     if (!compra) return { resultado: 'inexistente', compra: null };
     if (compra.estado === 'cancelada') return { resultado: 'cancelada', compra };
-    if (compra.estado === 'usado') return { resultado: 'ya_usada', compra };
 
-    // El filtro por estado evita que dos escaneos simultáneos validen la misma compra
+    const ahora = new Date().toISOString();
+
+    if (punto === 'entrada') {
+      if (compra.estado === 'usado' || compra.entradaUsadaEn) return { resultado: 'ya_usada', compra };
+
+      // Los filtros evitan que dos escaneos simultáneos validen la misma entrada
+      const { data, error } = await this.supabase
+        .from(this.nombreTabla)
+        .update({ estado: 'usado', entrada_usada_en: ahora })
+        .eq('id', compra.id)
+        .eq('estado', 'confirmada')
+        .is('entrada_usada_en', null)
+        .select();
+
+      if (error) throw new Error(this.mensajeErrorValidacion(error));
+      if (!data || data.length === 0) return { resultado: 'ya_usada', compra };
+      return { resultado: 'usada', compra: { ...compra, estado: 'usado', entradaUsadaEn: ahora } };
+    }
+
+    if (compra.itemsCandy.length === 0) return { resultado: 'sin_candy', compra };
+    if (compra.candyEntregadoEn) return { resultado: 'ya_usada', compra };
+
     const { data, error } = await this.supabase
       .from(this.nombreTabla)
-      .update({ estado: 'usado' })
+      .update({ candy_entregado_en: ahora })
       .eq('id', compra.id)
-      .eq('estado', 'confirmada')
+      .neq('estado', 'cancelada')
+      .is('candy_entregado_en', null)
       .select();
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(this.mensajeErrorValidacion(error));
     if (!data || data.length === 0) return { resultado: 'ya_usada', compra };
+    return { resultado: 'usada', compra: { ...compra, candyEntregadoEn: ahora } };
+  }
 
-    return { resultado: 'usada', compra: { ...compra, estado: 'usado' } };
+  private mensajeErrorValidacion(error: { code?: string; message: string }): string {
+    // 42703 (Postgres) / PGRST204 (PostgREST): la columna todavía no existe
+    if (error.code === '42703' || error.code === 'PGRST204') {
+      return 'Falta ejecutar supabase/qr-entrada-candy.sql en Supabase.';
+    }
+    return error.message;
   }
 
   /**
@@ -374,6 +409,8 @@ export class ComprasService extends BaseSupabaseService<Compra> {
    */
   puedeCancelar(compra: Compra): boolean {
     if (compra.estado !== 'confirmada') return false;
+    // Si ya retiró el candy no se puede devolver como crédito
+    if (compra.candyEntregadoEn) return false;
 
     const inicio = new Date(compra.funcionInicio).getTime();
     if (isNaN(inicio)) return false;

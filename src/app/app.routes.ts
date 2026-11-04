@@ -146,6 +146,14 @@ export const routes: Routes = [
         data: { adminSection: 'auditoria' },
       },
       {
+        path: 'puntos',
+        loadComponent: () =>
+          import('./componentes/admin/administrar-puntos/administrar-puntos').then(
+            (m) => m.AdministrarPuntosComponent
+          ),
+        data: { adminOnly: true },
+      },
+      {
         path: 'roles',
         loadComponent: () =>
           import('./componentes/admin/administrar-roles/administrar-roles').then(

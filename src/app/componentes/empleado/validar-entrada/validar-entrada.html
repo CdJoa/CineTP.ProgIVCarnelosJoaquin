@@ -1,6 +1,17 @@
 <div class="validar-container">
   <h1>Validar entradas y Candy Bar</h1>
-  <p class="validar-ayuda">Escaneá el QR del ticket o ingresá el código. Al validarla, la compra pasa a <strong>usada</strong>.</p>
+  <p class="validar-ayuda">
+    El mismo QR sirve para entrar a la sala y para retirar el candy. Cada uno se puede usar <strong>una sola vez</strong>.
+  </p>
+
+  <div class="selector-punto" role="group" aria-label="Punto de validación">
+    <button type="button" [class.activo]="punto() === 'entrada'" (click)="cambiarPunto('entrada')">
+      🎬 Ingreso a sala
+    </button>
+    <button type="button" [class.activo]="punto() === 'candy'" (click)="cambiarPunto('candy')">
+      🍿 Candy Bar
+    </button>
+  </div>
 
   <section class="validar-card">
     <div class="visor" [hidden]="!escaneando()">
@@ -37,10 +48,21 @@
     <section class="validar-card">
       @switch (r.resultado) {
         @case ('usada') {
-          <p class="estado estado-ok">✓ Compra válida. Quedó marcada como usada.</p>
+          @if (punto() === 'entrada') {
+            <p class="estado estado-ok">✓ Entrada válida. Puede ingresar a la sala.</p>
+          } @else {
+            <p class="estado estado-ok">✓ Candy válido. Entregá los productos.</p>
+          }
         }
         @case ('ya_usada') {
-          <p class="estado estado-error">✕ Esta compra ya fue usada.</p>
+          @if (punto() === 'entrada') {
+            <p class="estado estado-error">✕ Esta entrada ya fue usada.</p>
+          } @else {
+            <p class="estado estado-error">✕ El candy de esta compra ya fue entregado.</p>
+          }
+        }
+        @case ('sin_candy') {
+          <p class="estado estado-error">✕ Esta compra no incluye productos de Candy Bar.</p>
         }
         @case ('cancelada') {
           <p class="estado estado-error">✕ Esta compra fue cancelada.</p>
@@ -57,12 +79,19 @@
           <div><dt>Función</dt><dd>{{ formatearFechaHora(c.funcionInicio) }} · {{ c.salaNombre }}</dd></div>
           <div><dt>Butacas</dt><dd>{{ c.asientos.join(', ') }}</dd></div>
           <div>
+            <dt>Entrada</dt>
+            <dd>{{ c.entradaUsadaEn || c.estado === 'usado' ? 'Usada' : 'Pendiente' }}</dd>
+          </div>
+          <div>
             <dt>Candy Bar</dt>
             <dd>
               @for (item of c.itemsCandy; track item.productoId) {
                 <span class="candy-item">{{ item.cantidad }}x {{ item.nombre }}</span>
               } @empty {
                 Sin productos
+              }
+              @if (c.itemsCandy.length > 0) {
+                <span class="candy-estado">{{ c.candyEntregadoEn ? 'Entregado' : 'Pendiente de retiro' }}</span>
               }
             </dd>
           </div>

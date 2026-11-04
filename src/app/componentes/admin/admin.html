@@ -36,6 +36,9 @@
       <a *ngIf="rolesAdminService.tieneSeccion('graficos')" routerLink="/admin/graficos" routerLinkActive="active" class="nav-item">
         📈 Gráficos de Ventas
       </a>
+      <a *ngIf="authService.usuarioActual()?.rol === 'admin'" routerLink="/admin/puntos" routerLinkActive="active" class="nav-item">
+        ✨ Programa de Puntos
+      </a>
       <a *ngIf="authService.usuarioActual()?.rol === 'admin'" routerLink="/admin/roles" routerLinkActive="active" class="nav-item">
         🔐 Roles y permisos
       </a>

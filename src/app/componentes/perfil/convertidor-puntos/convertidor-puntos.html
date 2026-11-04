@@ -1,0 +1,66 @@
+<section class="perfil-seccion convertidor">
+  <div>
+    <h2 class="seccion-titulo">✨ Convertir puntos en crédito</h2>
+    <p class="seccion-subtitulo">
+      Ganás 1 punto por cada peso que gastás. Cada <strong>{{ config().puntosPorPeso }} puntos</strong> equivalen a
+      <strong>$1 de crédito</strong>, que podés usar en tus próximas compras. Mínimo {{ config().minimoPuntos }} puntos.
+    </p>
+  </div>
+
+  <div class="conversor">
+    <label class="campo">
+      <span>Puntos a convertir</span>
+      <input
+        type="number"
+        min="0"
+        [step]="config().puntosPorPeso"
+        [max]="saldoPuntos()"
+        [value]="puntosAConvertir()"
+        (input)="cambiarPuntos($any($event.target).value)"
+      />
+      <small>Disponibles: {{ saldoPuntos() }} pts</small>
+    </label>
+
+    <span class="flecha" aria-hidden="true">→</span>
+
+    <div class="resultado">
+      <span>Recibís</span>
+      <strong>${{ creditoResultante() }}</strong>
+      <small>de crédito</small>
+    </div>
+  </div>
+
+  <div class="acciones">
+    <button type="button" class="btn-secundario" (click)="usarMaximo()" [disabled]="maximoConvertible() === 0">
+      Usar todo ({{ maximoConvertible() }} pts)
+    </button>
+    <button type="button" class="btn-convertir" (click)="convertir()" [disabled]="!!motivoInvalido() || convirtiendo()">
+      {{ convirtiendo() ? 'Convirtiendo...' : 'Convertir' }}
+    </button>
+  </div>
+
+  @if (motivoInvalido(); as motivo) {
+    <p class="aviso">{{ motivo }}</p>
+  }
+  @if (exito()) {
+    <p class="mensaje ok" role="status">✓ {{ exito() }}</p>
+  }
+  @if (error()) {
+    <p class="mensaje error" role="alert">{{ error() }}</p>
+  }
+
+  <h3 class="historial-titulo">Historial de conversiones</h3>
+  @if (cargandoHistorial()) {
+    <p class="vacio">Cargando...</p>
+  } @else {
+    @for (c of historial(); track c.id) {
+      <div class="historial-item">
+        <span class="fecha">{{ c.creadoEn | date: 'dd/MM/yyyy HH:mm' }}</span>
+        <span>−{{ c.puntos }} pts</span>
+        <strong>+${{ c.credito }}</strong>
+      </div>
+    } @empty {
+      <p class="vacio">Todavía no convertiste puntos.</p>
+    }
+  }
+</section>

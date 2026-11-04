@@ -19,6 +19,13 @@ interface SesionAsientos {
 export class AsientosRealtimeService {
   private auth = inject(Auth);
   private sesion?: SesionAsientos;
+  private reservasActivas = new Map<string, Set<string>>();
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pagehide', this.liberarReservasAlCerrar);
+    }
+  }
 
   get sesionId(): string {
     return this.obtenerSesion().id;
@@ -49,7 +56,9 @@ export class AsientosRealtimeService {
     });
 
     if (error) throw new Error(error.message);
-    return Boolean(data);
+    const reservado = Boolean(data);
+    if (reservado) this.registrarReservaActiva(funcionId, asientoId);
+    return reservado;
   }
 
   async liberar(funcionId: string, asientoId: string): Promise<void> {
@@ -62,6 +71,7 @@ export class AsientosRealtimeService {
     });
 
     if (error) throw new Error(error.message);
+    this.quitarReservaActiva(funcionId, asientoId);
   }
 
   async confirmar(funcionId: string, asientos: string[]): Promise<number> {
@@ -74,8 +84,44 @@ export class AsientosRealtimeService {
     });
 
     if (error) throw new Error(error.message);
-    return Number(data || 0);
+    const cantidad = Number(data || 0);
+    if (cantidad > 0) this.marcarAsientosConfirmados(funcionId, asientos);
+    return cantidad;
   }
+
+  registrarReservaActiva(funcionId: string, asientoId: string): void {
+    const asientos = this.reservasActivas.get(funcionId) || new Set<string>();
+    asientos.add(asientoId);
+    this.reservasActivas.set(funcionId, asientos);
+  }
+
+  marcarAsientosConfirmados(funcionId: string, asientos: string[]): void {
+    const activos = this.reservasActivas.get(funcionId);
+    if (!activos) return;
+    for (const asientoId of asientos) activos.delete(asientoId);
+    if (activos.size === 0) this.reservasActivas.delete(funcionId);
+  }
+
+  private quitarReservaActiva(funcionId: string, asientoId: string): void {
+    this.marcarAsientosConfirmados(funcionId, [asientoId]);
+  }
+
+  private readonly liberarReservasAlCerrar = (): void => {
+    const sesion = this.obtenerSesion();
+    for (const [funcionId, asientos] of this.reservasActivas) {
+      for (const asientoId of asientos) {
+        void Promise.resolve(this.auth.clienteSupabase.rpc('liberar_asiento', {
+          p_funcion_id: funcionId,
+          p_asiento_id: asientoId,
+          p_session_id: sesion.id,
+          p_session_token: sesion.token,
+        })).catch(() => {
+          // Si el navegador corta la solicitud al cerrarse, la reserva expira automáticamente.
+        });
+      }
+    }
+    this.reservasActivas.clear();
+  };
 
   suscribir(
     funcionId: string,

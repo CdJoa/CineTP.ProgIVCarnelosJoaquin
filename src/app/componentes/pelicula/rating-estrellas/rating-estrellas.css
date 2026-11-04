@@ -42,8 +42,8 @@
 }
 
 .star-empty {
-  fill: #cbd5e1;
-  stroke: #94a3b8;
+  fill: var(--star-empty);
+  stroke: var(--star-empty);
   stroke-width: 1;
 }
 
@@ -58,10 +58,10 @@
 }
 
 .star-filled {
-  fill: #f59e0b;
-  stroke: #d97706;
+  fill: var(--star);
+  stroke: var(--star);
   stroke-width: 0.5;
-  filter: drop-shadow(0 1px 2px rgba(245, 158, 11, 0.4));
+  filter: drop-shadow(0 1px 2px rgba(255, 200, 61, 0.55));
 }
 
 /* Hitboxes para interacción táctil/ratón 0.5 y 1.0 */
@@ -91,12 +91,12 @@
   align-items: center;
   gap: 3px;
   font-size: 0.85rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-weight: 800;
+  color: var(--text);
 }
 
 .tamano-sm .puntuacion-texto {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
 }
 
 .tamano-lg .puntuacion-texto {
@@ -104,24 +104,24 @@
 }
 
 .valor-numero {
-  color: #d97706;
+  color: var(--star-text);
 }
 
 .valor-max {
-  color: #94a3b8;
-  font-weight: 500;
+  color: var(--text-faint);
+  font-weight: 600;
   font-size: 0.8em;
 }
 
 .sin-calificar {
-  color: #94a3b8;
-  font-weight: 500;
+  color: var(--text-faint);
+  font-weight: 600;
   font-size: 0.8em;
 }
 
 .total-resenas {
-  color: #64748b;
-  font-weight: 500;
+  color: var(--text-muted);
+  font-weight: 600;
   font-size: 0.8em;
   margin-left: 2px;
 }

@@ -12,9 +12,11 @@ import {
   TipoFila,
 } from '../models/sala';
 
+// La K no existe: J y K se unificaron en una sola fila accesible. No se reasignan letras
+// porque el id de cada butaca (ej: L-5) queda guardado en las compras.
 export const LETRAS_FILAS: string[] = [
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-  'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+  'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
 ];
 
 const STORAGE_KEY_PRECIOS = 'cinetp_precios_butacas';
@@ -156,7 +158,7 @@ export class SalaService extends BaseSupabaseService<Sala> {
   public generarFilas(): FilaSala[] {
     return LETRAS_FILAS.map((letra, index) => {
       let tipo: TipoFila =
-        letra === 'J' || letra === 'K' ? 'discapacitado' :
+        letra === 'J' ? 'discapacitado' :
         letra === 'R' || letra === 'S' || letra === 'T' ? 'vip' : 'comun';
 
       return this.crearFila(letra, index + 1, tipo);

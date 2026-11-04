@@ -2,7 +2,7 @@
   padding: 16px;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-ui);
 }
 
 .header-bar {
@@ -14,23 +14,23 @@
 
 .header-bar h2 {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 800;
   margin: 0 0 4px;
 }
 
 .header-bar p {
-  color: #666;
+  color: var(--text-muted);
   font-size: 13px;
   margin: 0;
 }
 
 .btn-primary {
-  background: #000;
-  color: #fff;
-  border: 1px solid #000;
+  background: var(--primary);
+  color: var(--on-primary);
+  border: 1px solid var(--primary);
   padding: 8px 16px;
   font-size: 13px;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -42,45 +42,45 @@
 .estado-box {
   padding: 24px;
   text-align: center;
-  color: #666;
+  color: var(--text-muted);
   font-size: 14px;
-  border: 1px solid #ddd;
-  background: #fafafa;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
   margin: 0;
 }
 
 .estado-error {
-  color: #b91c1c;
+  color: var(--danger-text);
 }
 
 .tabla-wrapper {
   overflow-x: auto;
-  border: 1px solid #000;
+  border: 1px solid var(--border-strong);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  background: #fff;
+  background: var(--surface);
 }
 
 th,
 td {
   text-align: left;
   padding: 10px 12px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
 }
 
 th {
-  background: #fafafa;
-  font-weight: bold;
+  background: var(--surface-2);
+  font-weight: 800;
 }
 
 .celda-fecha {
   white-space: nowrap;
-  color: #555;
-  font-size: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .celda-nombre {
@@ -88,8 +88,8 @@ th {
 }
 
 .celda-email {
-  color: #555;
-  font-size: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .celda-detalle {
@@ -101,41 +101,41 @@ th {
   display: inline-block;
   padding: 3px 8px;
   border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .badge-rol {
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--surface-3);
+  color: var(--text);
 }
 
 .badge-rol.badge-admin {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
 }
 
 .badge-rol.badge-empleado {
-  background: #eff6ff;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid var(--primary-border);
 }
 
 .badge-rol.badge-cliente {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background: var(--success-soft);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
 }
 
 .badge-accion {
-  background: #f1f5f9;
-  color: #1e293b;
-  border: 1px solid #cbd5e1;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
   text-transform: none;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .badge-accion-pelicula_creada,
@@ -146,9 +146,9 @@ th {
 .badge-accion-empleado_registrado,
 .badge-accion-rol_creado,
 .badge-accion-propuesta_pelicula_aceptada {
-  background: #ecfdf5;
-  color: #065f46;
-  border-color: #a7f3d0;
+  background: var(--success-soft);
+  color: var(--success-text);
+  border-color: var(--success-text);
 }
 
 .badge-accion-pelicula_editada,
@@ -160,29 +160,29 @@ th {
 .badge-accion-cupon_editado,
 .badge-accion-rol_editado,
 .badge-accion-rol_asignado {
-  background: #fffbeb;
-  color: #92400e;
-  border-color: #fde68a;
+  background: var(--warning-soft);
+  color: var(--warning-text);
+  border-color: var(--warning-text);
 }
 
 .badge-accion-compra_realizada {
-  background: #f0fdf4;
-  color: #15803d;
-  border-color: #86efac;
+  background: var(--success-soft);
+  color: var(--success-text);
+  border-color: var(--success-text);
 }
 
 .badge-accion-lectura_qr {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-color: #93c5fd;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .badge-accion-compra_cancelada,
 .badge-accion-funcion_cancelada,
 .badge-accion-funcion_eliminada,
 .badge-accion-propuesta_pelicula_rechazada {
-  background: #fef2f2;
-  color: #b91c1c;
-  border-color: #fca5a5;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+  border-color: var(--danger-text);
 }
 

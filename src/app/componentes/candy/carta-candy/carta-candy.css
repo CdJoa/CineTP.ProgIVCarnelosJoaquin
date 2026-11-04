@@ -3,8 +3,8 @@
 }
 
 .candy-card {
-  background: #fff;
-  border: 1px solid #000;
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 12px;
   cursor: pointer;
   display: flex;
@@ -12,10 +12,15 @@
   height: 100%;
 }
 
+.candy-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--glow);
+}
+
 .imagen-box {
   width: 100%;
   height: 180px;
-  background: #eee;
+  background: var(--surface-2);
   position: relative;
 }
 
@@ -30,29 +35,29 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #666;
-  font-size: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .badge-categoria {
   position: absolute;
   top: 6px;
   right: 6px;
-  background: #000;
-  color: #fff;
-  font-size: 10px;
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 13px;
   padding: 3px 6px;
 }
 
 .candy-nombre {
   font-size: 15px;
-  font-weight: bold;
+  font-weight: 800;
   margin: 10px 0 6px;
 }
 
 .candy-descripcion {
   font-size: 13px;
-  color: #444;
+  color: var(--text);
   margin-bottom: 12px;
   line-height: 1.4;
 }
@@ -63,7 +68,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 8px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border);
 }
 
 .candy-precio {
@@ -71,25 +76,25 @@
 }
 
 .puntos-tag {
-  color: #555;
-  font-size: 11px;
+  color: var(--text-muted);
+  font-size: 13px;
   margin-left: 4px;
 }
 
 .vendidos-tag {
-  font-size: 11px;
-  color: #475569;
-  background: #f1f5f9;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--surface-2);
   padding: 2px 6px;
   border-radius: 4px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .btn-editar {
-  background: #000;
-  color: #fff;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
 }

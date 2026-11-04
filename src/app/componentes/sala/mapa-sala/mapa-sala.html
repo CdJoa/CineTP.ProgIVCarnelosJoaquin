@@ -41,7 +41,7 @@
 
     <!-- Plano de Butacas en 3 Bloques -->
     <div class="grid-asientos">
-      <div *ngFor="let fila of s.filas" class="fila-linea">
+      <div *ngFor="let fila of s.filas" class="fila-linea" [class.fila-accesible]="fila.tipo === 'discapacitado'">
         <!-- Letra de Fila Izquierda -->
         <span class="row-label">{{ fila.letra }}</span>
 

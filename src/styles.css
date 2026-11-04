@@ -1,1 +1,206 @@
-/* You can add global styles to this file, and also import other style files */
+/* Tema Y2K de CineTP: los componentes solo deberian usar estas variables. */
+:root {
+  color-scheme: dark;
+  accent-color: var(--primary);
+
+  /* Tipografias */
+  --font-ui: 'Exo 2', Verdana, Tahoma, sans-serif;
+  --font-display: 'Orbitron', 'Exo 2', Verdana, sans-serif;
+
+  /* Maquina: cromo, vidrio y bisel */
+  --chrome: linear-gradient(180deg, #ffffff 0%, #d6e1f0 42%, #93a8c7 52%, #dce6f3 100%);
+  --panel-gloss: linear-gradient(180deg, #2a4478 0%, #122145 48%, #0a1329 52%, #101a33 100%);
+  --bevel: inset 1px 1px 0 rgba(255, 255, 255, 0.4), inset -1px -1px 0 rgba(0, 0, 0, 0.35);
+  --glow: 0 0 14px rgba(var(--primary-rgb), 0.35);
+
+  /* Superficies, de la mas profunda a la mas elevada */
+  --bg: #070b1a;
+  --surface: #101a33;
+  --bg-page:
+    linear-gradient(rgba(var(--primary-rgb), 0.05) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, rgba(var(--primary-rgb), 0.05) 1px, transparent 1px) 0 0 / 32px 32px,
+    var(--bg);
+  --surface-2: #18264a;
+  --surface-3: #223461;
+  --border: #35507f;
+  --border-strong: #8ba3c7;
+
+  /* Texto */
+  --text: #e8f2ff;
+  --text-muted: #b0c6e4;
+  --text-faint: #93adcf;
+
+  /* Marca */
+  --accent: #ff3cac;
+
+  /* Calificaciones y resenas */
+  --star: #ffc83d;
+  --star-empty: #4f6389;
+  --star-text: #ffd76a;
+  --star-soft: rgba(255, 200, 61, 0.12);
+  --star-border: rgba(255, 200, 61, 0.5);
+  --review: #ff8ccd;
+  --review-soft: rgba(255, 60, 172, 0.12);
+  --review-border: rgba(255, 60, 172, 0.5);
+  --on-review: #2a0519;
+
+  /* Accion principal */
+  --primary: #29e7ff;
+  --primary-rgb: 41, 231, 255;
+  --primary-hover: #86f2ff;
+  --primary-soft: rgba(var(--primary-rgb), 0.13);
+  --primary-border: rgba(var(--primary-rgb), 0.45);
+  --on-primary: #04121f;
+
+  /* Estados */
+  --danger: #c81e3a;
+  --danger-hover: #a81530;
+  --danger-soft: rgba(255, 107, 129, 0.15);
+  --danger-border: rgba(255, 107, 129, 0.4);
+  --danger-text: #ff9aa8;
+  --on-danger: #ffffff;
+
+  --success: #15803d;
+  --success-hover: #116932;
+  --success-soft: rgba(74, 222, 150, 0.14);
+  --success-border: rgba(74, 222, 150, 0.4);
+  --success-text: #8dff7a;
+  --on-success: #ffffff;
+
+  --warning: #ff9f43;
+  --warning-hover: #ffb36b;
+  --warning-soft: rgba(255, 159, 67, 0.15);
+  --warning-border: rgba(255, 159, 67, 0.4);
+  --warning-text: #ffb877;
+  --on-warning: #04121f;
+
+  --info: #2f6fdb;
+  --info-hover: #255cbc;
+  --info-soft: rgba(125, 176, 255, 0.14);
+  --info-border: rgba(125, 176, 255, 0.4);
+  --info-text: #a3c7ff;
+  --on-info: #ffffff;
+
+  --purple: #7c4dff;
+  --purple-hover: #6a3df0;
+  --purple-soft: rgba(176, 148, 255, 0.15);
+  --purple-border: rgba(176, 148, 255, 0.4);
+  --purple-text: #c7b3ff;
+  --on-purple: #ffffff;
+}
+
+/* Panel de admin: paleta calma para jornadas largas, debajo de la navbar.
+   Sin efectos: fondo liso, poca saturacion y texto que no llega al blanco puro.
+   Las variables compuestas se repiten porque se resuelven donde se declaran. */
+.admin-layout,
+app-admin {
+  --bg: #171c1f;
+  --bg-page: var(--bg);
+  --surface: #1f2629;
+  --surface-2: #283135;
+  --surface-3: #333e43;
+  --border: #3f4c52;
+  --border-strong: #75888f;
+  --text: #e3e9e7;
+  --text-muted: #b7c3c1;
+  --text-faint: #a3b1b0;
+  --primary: #86c3b5;
+  --primary-rgb: 134, 195, 181;
+  --primary-hover: #a0d4c8;
+  --on-primary: #12201c;
+  --primary-soft: rgba(var(--primary-rgb), 0.13);
+  --primary-border: rgba(var(--primary-rgb), 0.4);
+  --danger: #a8434f;
+  --danger-hover: #8f3742;
+  --danger-text: #eaa9a9;
+  --success: #3d7a58;
+  --success-hover: #336849;
+  --success-text: #a8d8b0;
+  --warning: #d9a86c;
+  --warning-hover: #e4bb87;
+  --warning-text: #e6c294;
+  --on-warning: #12201c;
+  --info: #4a74a8;
+  --info-hover: #3f6492;
+  --info-text: #b1cbe8;
+  --purple: #76659e;
+  --purple-hover: #665789;
+  --purple-text: #c9bde3;
+  --glow: none;
+  --bevel: none;
+  --font-display: var(--font-ui);
+  accent-color: var(--primary);
+}
+
+/* Las scanlines son de la parte publica: en el panel se trabaja todo el dia */
+body:has(.admin-layout)::after {
+  display: none;
+}
+
+/* El ticket se imprime en claro aunque la app sea oscura */
+@media print {
+  :root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --bg-page: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f4f4f7;
+    --surface-3: #e8e8ee;
+    --border: #cccccc;
+    --border-strong: #888888;
+    --text: #111111;
+    --text-muted: #444444;
+    --text-faint: #666666;
+    --primary: #111111;
+    --on-primary: #ffffff;
+    --danger-text: #b91c1c;
+    --success-text: #15803d;
+    --warning-text: #92400e;
+    --info-text: #1e40af;
+    --purple-text: #5b21b6;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-weight: 600;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-ui);
+  font-weight: 600;
+}
+
+button {
+  box-shadow: var(--bevel);
+}
+
+/* Scanlines de monitor CRT */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 3px);
+}
+
+@media print {
+  body::after {
+    display: none;
+  }
+}

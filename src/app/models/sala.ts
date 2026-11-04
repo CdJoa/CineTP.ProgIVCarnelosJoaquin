@@ -14,7 +14,7 @@ export interface Asiento {
 
 export interface FilaSala {
   letra: string; // "A" a "T"
-  numeroFila: number; // 1 a 20
+  numeroFila: number; // 1 a 19
   tipo: TipoFila;
   bloque1: Asiento[]; // Izquierda (4 o 2 asientos)
   bloque2: Asiento[]; // Centro (20 o 10 asientos)

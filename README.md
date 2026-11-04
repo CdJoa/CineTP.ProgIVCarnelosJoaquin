@@ -18,7 +18,7 @@ Filtros dinámicos por género y formato (2D/3D), buscador por título en tiempo
 ---
 
 ### 2. Mapa Interactivo de Sala y Selección de Butacas (`/sala`)
-Matriz de 20 filas (A a T) distribuida en 3 bloques (4-20-4), filas J y K para personas con discapacidad y filas R, S y T VIP. Sincronización en vivo con WebSockets mediante Supabase Realtime para evitar doble compra de asientos.
+Matriz de 19 filas (A a T, sin K) distribuida en 3 bloques (4-20-4), con la fila J para personas con discapacidad (2-10-2) y las filas R, S y T VIP. Sincronización en vivo con WebSockets mediante Supabase Realtime para evitar doble compra de asientos.
 ![Mapa de Sala](docs/screenshots/05-mapa-sala.png)
 
 ---
@@ -135,6 +135,10 @@ Antes de usar la cancelación administrativa, ejecuta el script `supabase/cancel
 Para usar las herramientas **Butacas demo** en Administración de Funciones, ejecuta también `supabase/asientos-demo.sql` completo en el SQL Editor. Simular una sala llena ocupa butacas solo en el mapa: no genera compras, tickets ni ingresos; la liberación afecta exclusivamente las butacas demo.
 
 Para habilitar la **lista de espera**, ejecuta `supabase/lista-espera.sql` después de `supabase/cancelacion-funciones.sql`. El script crea una tabla independiente `lista_espera_funciones` con `funcion_id`, `pelicula_id` y `usuario_id`, las RPC de inscripción/oferta y el procesamiento automático de ofertas vencidas. La sección **Lista de espera** del perfil muestra posición u oferta activa. Las notificaciones se entregan por el sistema in-app/Realtime existente; las notificaciones push del navegador cuando la app está cerrada requieren configurar VAPID y un servicio de envío.
+
+Para validar el **QR en la sala y en el Candy Bar por separado**, ejecuta `supabase/qr-entrada-candy.sql`. Agrega a `compras` las columnas `entrada_usada_en` y `candy_entregado_en`: el mismo QR se consume una vez en la puerta de la sala y una vez en el candy, en cualquier orden.
+
+Para el **convertidor de puntos a crédito**, ejecuta `supabase/convertidor-puntos.sql`. Crea `configuracion_puntos` (tasa y mínimo, editables por el admin en **Panel Admin → Programa de Puntos**, por defecto 10 puntos = $1), el historial `canjes_puntos` y la RPC atómica `convertir_puntos_a_credito`, que descuenta los puntos, suma el crédito y registra el canje en una sola transacción. El cliente convierte desde **Perfil → Mis Puntos**.
 
 Para habilitar **roles administrativos personalizados**, ejecuta `supabase/roles-administrativos.sql`. Luego, un administrador abre **Panel Admin → Roles y permisos**, crea roles seleccionando secciones y los asigna a usuarios. La autorización se valida tanto en la navegación como en cada ruta; la cuenta con rol base `admin` conserva acceso total.
 

@@ -3,7 +3,7 @@
   padding: 2.5rem 1.5rem 4rem;
   max-width: 1040px;
   margin: 0 auto;
-  color: #000000;
+  color: var(--text);
   font-family: inherit;
 }
 
@@ -21,8 +21,8 @@
 .spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border: 4px solid var(--border);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
   margin-bottom: 1.5rem;
@@ -35,12 +35,12 @@
 }
 
 .error-card {
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid rgba(239, 68, 68, 0.3);
   padding: 2.5rem;
   border-radius: 16px;
   max-width: 480px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
 }
 
 .error-icono {
@@ -49,28 +49,28 @@
 }
 
 .error-card h2 {
-  color: #000000;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .error-card p {
-  color: #334155;
+  color: var(--text);
   margin-bottom: 1.5rem;
 }
 
 .btn-primario {
   display: inline-block;
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   transition: background 0.2s ease;
 }
 
 .btn-primario:hover {
-  background: #1d4ed8;
+  background: var(--primary-hover);
 }
 
 /* --- Banner de Construcción (Texto negro para máxima legibilidad) --- */
@@ -78,13 +78,13 @@
   display: flex;
   align-items: flex-start;
   gap: 1.25rem;
-  background: #fef3c7;
-  border: 1px solid #fcd34d;
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-text);
   border-radius: 14px;
   padding: 1.25rem 1.75rem;
   margin-bottom: 2rem;
   box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);
-  color: #000000;
+  color: var(--text);
 }
 
 .construccion-icono {
@@ -106,30 +106,30 @@
 .construccion-titulo-row h3 {
   margin: 0;
   font-size: 1.25rem;
-  color: #000000;
+  color: var(--text);
   font-weight: 800;
 }
 
 .badge-simulacion {
-  background: #f59e0b;
-  color: #000000;
-  font-size: 0.72rem;
+  background: var(--warning);
+  color: var(--on-warning);
+  font-size: 0.8125rem;
   font-weight: 800;
   padding: 3px 8px;
   border-radius: 20px;
   letter-spacing: 0.05em;
-  border: 1px solid #d97706;
+  border: 1px solid var(--warning-text);
 }
 
 .construccion-info p {
   margin: 0;
   font-size: 0.95rem;
-  color: #000000;
+  color: var(--text);
   line-height: 1.5;
 }
 
 .construccion-info p strong {
-  color: #000000;
+  color: var(--text);
   font-weight: 800;
 }
 
@@ -139,13 +139,13 @@
 }
 
 .ticket-card {
-  background: #f1f5f9;
-  border: 1.5px solid #cbd5e1;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
-  color: #000000;
+  color: var(--text);
 }
 
 .ticket-header {
@@ -153,9 +153,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.2rem 2rem;
-  background: #1e40af;
-  border-bottom: 1px solid #1d4ed8;
-  color: #ffffff;
+  background: var(--primary);
+  border-bottom: 1px solid var(--primary);
+  color: var(--on-primary);
 }
 
 .ticket-brand {
@@ -167,21 +167,21 @@
 .brand-cine {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--text);
 }
 
 .ticket-tipo {
-  color: #dbeafe;
+  color: var(--primary);
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .badge-confirmado {
-  background: #ffffff;
+  background: var(--surface);
   border: none;
-  color: #1e40af;
+  color: var(--primary);
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   padding: 4px 12px;
   border-radius: 20px;
 }
@@ -191,7 +191,7 @@
   display: flex;
   align-items: stretch;
   position: relative;
-  background: #f1f5f9;
+  background: var(--surface-2);
 }
 
 /* Columna Izquierda: Detalles del Espectáculo */
@@ -201,13 +201,13 @@
   display: flex;
   flex-direction: column;
   gap: 1.4rem;
-  background: #f1f5f9;
+  background: var(--surface-2);
 }
 
 .eyebrow-pelicula {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 800;
-  color: #000000;
+  color: var(--text);
   letter-spacing: 0.08em;
 }
 
@@ -215,7 +215,7 @@
   font-size: 1.85rem;
   font-weight: 900;
   margin: 0.25rem 0 0.75rem;
-  color: #000000;
+  color: var(--text);
   line-height: 1.2;
 }
 
@@ -228,22 +228,22 @@
 .tag-formato,
 .tag-idioma,
 .tag-sala {
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   padding: 4px 10px;
   border-radius: 6px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .tag-formato {
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .tag-idioma,
 .tag-sala {
-  background: #ffffff;
-  color: #000000;
-  border: 1px solid #cbd5e1;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
   text-transform: capitalize;
 }
 
@@ -260,16 +260,16 @@
 }
 
 .dato-label {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 800;
-  color: #000000;
+  color: var(--text);
   letter-spacing: 0.05em;
 }
 
 .dato-valor {
   font-size: 0.95rem;
-  font-weight: 700;
-  color: #000000;
+  font-weight: 800;
+  color: var(--text);
 }
 
 .asientos-badges {
@@ -279,8 +279,8 @@
 }
 
 .asiento-pill {
-  background: #1e40af;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   font-weight: 800;
   font-size: 0.85rem;
   padding: 3px 10px;
@@ -289,14 +289,14 @@
 
 /* Desglose Candy */
 .candy-desglose {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0.85rem 1.1rem;
 }
 
 .candy-desglose .dato-label {
-  color: #000000;
+  color: var(--text);
 }
 
 .candy-lista {
@@ -310,17 +310,17 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  color: #000000;
+  color: var(--text);
 }
 
 .candy-subtotal {
-  font-weight: 700;
-  color: #000000;
+  font-weight: 800;
+  color: var(--text);
 }
 
 /* Totales */
 .ticket-totales {
-  border-top: 1px solid #cbd5e1;
+  border-top: 1px solid var(--border);
   padding-top: 1rem;
   display: flex;
   flex-direction: column;
@@ -331,21 +331,21 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.92rem;
-  color: #000000;
+  color: var(--text);
 }
 
 .total-fila span,
 .total-fila strong {
-  color: #000000;
+  color: var(--text);
 }
 
 .descuento-fila {
-  color: #1e40af;
-  font-weight: 700;
+  color: var(--primary);
+  font-weight: 800;
 }
 
 .descuento-monto {
-  color: #1e40af;
+  color: var(--primary);
   font-weight: 800;
 }
 
@@ -353,21 +353,21 @@
   font-size: 1.15rem;
   margin-top: 0.35rem;
   padding-top: 0.35rem;
-  border-top: 1px dashed #94a3b8;
-  color: #000000;
+  border-top: 1px dashed var(--border-strong);
+  color: var(--text);
   font-weight: 900;
 }
 
 .monto-final {
-  color: #1e40af;
+  color: var(--primary);
   font-size: 1.45rem;
   font-weight: 900;
 }
 
 .puntos-sumados {
   font-size: 0.85rem;
-  color: #1e40af;
-  font-weight: 700;
+  color: var(--primary);
+  font-weight: 800;
   margin-top: 0.25rem;
 }
 
@@ -378,7 +378,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-left: 2px dashed #94a3b8;
+  border-left: 2px dashed var(--border-strong);
   margin: 1rem 0;
 }
 
@@ -394,8 +394,8 @@
 .ticket-qr-col {
   flex: 1;
   padding: 2rem;
-  background: #e2e8f0;
-  border-left: 1px solid #cbd5e1;
+  background: var(--surface-3);
+  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -412,9 +412,9 @@
 }
 
 .qr-titulo {
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   font-weight: 800;
-  color: #000000;
+  color: var(--text);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -439,25 +439,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000000;
+  color: var(--text);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .qr-instruccion {
   font-size: 0.82rem;
-  color: #000000;
+  color: var(--text);
   margin: 0;
   max-width: 240px;
   line-height: 1.4;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* --- Código Alternativo por si no tiene QR --- */
 .codigo-alternativo-card {
   width: 100%;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0.9rem 1.1rem;
   text-align: left;
@@ -475,15 +475,15 @@
 }
 
 .codigo-label {
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 800;
-  color: #000000;
+  color: var(--text);
   letter-spacing: 0.05em;
 }
 
 .codigo-aclaracion {
-  font-size: 0.78rem;
-  color: #000000;
+  font-size: 0.8125rem;
+  color: var(--text);
   margin: 2px 0 6px;
 }
 
@@ -498,42 +498,42 @@
   font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: 0.1em;
-  color: #000000;
-  background: #f1f5f9;
+  color: var(--text);
+  background: var(--surface-2);
   padding: 4px 10px;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border);
 }
 
 .btn-copiar {
-  background: #2563eb;
+  background: var(--primary);
   border: none;
-  color: #ffffff;
+  color: var(--on-primary);
   padding: 5px 12px;
   border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.8125rem;
+  font-weight: 800;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .btn-copiar:hover {
-  background: #1d4ed8;
+  background: var(--primary-hover);
 }
 
 /* --- Footer Ticket --- */
 .ticket-footer {
   padding: 0.9rem 2rem;
-  background: #e2e8f0;
-  border-top: 1px solid #cbd5e1;
+  background: var(--surface-3);
+  border-top: 1px solid var(--border);
   text-align: center;
 }
 
 .ticket-footer p {
   margin: 0;
-  font-size: 0.8rem;
-  color: #000000;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--text);
+  font-weight: 700;
 }
 
 /* --- Acciones Finales --- */
@@ -551,7 +551,7 @@
   padding: 0.85rem 1.6rem;
   border-radius: 12px;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.25s ease;
@@ -559,62 +559,62 @@
 }
 
 .btn-imprimir {
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .btn-imprimir:hover {
-  background: #1d4ed8;
+  background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.25);
 }
 
 .btn-perfil {
-  background: #ffffff;
-  color: #000000;
-  border: 1px solid #cbd5e1;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .btn-perfil:hover {
-  background: #f1f5f9;
+  background: var(--surface-3);
   transform: translateY(-2px);
 }
 
 .btn-volver {
-  background: #0284c7;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .btn-volver:hover {
-  background: #0369a1;
+  background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+  box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.25);
 }
 
 .aviso-edad-ticket {
   margin: 1rem 0 0;
   padding: 0.6rem 0.8rem;
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-text);
   border-radius: 10px;
-  color: #92400e;
+  color: var(--warning-text);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.4;
 }
 
 /* --- Cancelación de la compra --- */
 .badge-cancelado {
-  color: #b91c1c;
+  color: var(--danger-text);
 }
 
 .btn-cancelar {
-  background: #dc2626;
-  color: #ffffff;
+  background: var(--danger);
+  color: var(--on-danger);
 }
 
 .btn-cancelar:hover {
-  background: #b91c1c;
+  background: var(--danger-hover);
   transform: translateY(-2px);
 }
 
@@ -629,28 +629,28 @@
   padding: 0.85rem 1.1rem;
   border-radius: 12px;
   font-size: 0.92rem;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
 }
 
 .aviso-ok {
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #065f46;
+  background: var(--success-soft);
+  border: 1px solid var(--success-text);
+  color: var(--success-text);
 }
 
 .aviso-error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
 }
 
 .confirmar-cancelacion {
   max-width: 720px;
   margin: 0 auto 1.25rem;
   padding: 1.1rem 1.25rem;
-  background: #ffffff;
-  border: 1px solid #fecaca;
+  background: var(--surface);
+  border: 1px solid var(--danger-border);
   border-radius: 12px;
   text-align: center;
 }
@@ -674,15 +674,15 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  border-left: 4px solid #ea580c;
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-border);
+  border-left: 4px solid var(--warning-text);
   border-radius: 10px;
   padding: 0.9rem 1.25rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
   font-size: 0.92rem;
-  color: #7c2d12;
+  color: var(--warning-text);
   line-height: 1.5;
 }
 
@@ -696,37 +696,37 @@
 }
 
 .aviso-anonimo-texto code {
-  background: #ffedd5;
-  color: #c2410c;
+  background: var(--warning-soft);
+  color: var(--warning-text);
   font-weight: 800;
   padding: 2px 6px;
   border-radius: 4px;
-  border: 1px solid #fdba74;
+  border: 1px solid var(--warning-text);
 }
 
 .aviso-beneficios {
   display: inline-block;
   margin-left: 0.25rem;
-  color: #9a3412;
+  color: var(--warning-text);
 }
 
 .link-registro-inline {
-  color: #ea580c;
-  font-weight: 700;
+  color: var(--warning-text);
+  font-weight: 800;
   text-decoration: underline;
   text-underline-offset: 3px;
   transition: color 0.2s ease;
 }
 
 .link-registro-inline:hover {
-  color: #c2410c;
+  color: var(--warning-text);
 }
 
 .badge-anonimo {
-  background: #ea580c;
-  color: #ffffff;
+  background: var(--warning);
+  color: var(--on-warning);
   font-weight: 800;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   padding: 3px 10px;
   border-radius: 20px;
   letter-spacing: 0.04em;
@@ -738,22 +738,22 @@
 .puntos-aviso-anonimo {
   margin-top: 0.5rem;
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-style: italic;
 }
 
 .btn-beneficios {
-  background: #4f46e5;
-  color: #ffffff !important;
+  background: var(--primary);
+  color: var(--on-primary) !important;
   border: none;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .btn-beneficios:hover {
-  background: #4338ca;
+  background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
-  color: #ffffff !important;
+  box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.25);
+  color: var(--on-primary) !important;
 }
 
 /* --- Media Queries (Tablet y Mobile) --- */
@@ -770,7 +770,7 @@
     width: 100%;
     height: 0;
     border-left: none;
-    border-top: 2px dashed #94a3b8;
+    border-top: 2px dashed var(--border-strong);
     margin: 0;
     position: relative;
   }
@@ -791,7 +791,7 @@
 
   .ticket-qr-col {
     border-left: none;
-    border-top: 1px solid #cbd5e1;
+    border-top: 1px solid var(--border);
     width: 100%;
     box-sizing: border-box;
     padding: 1.75rem 1.25rem;

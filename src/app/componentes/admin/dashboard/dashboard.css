@@ -9,15 +9,15 @@
 .dashboard h1 {
   font-size: 22px;
   margin: 0 0 8px;
-  color: #212529;
-  font-family: Arial, sans-serif;
+  color: var(--text);
+  font-family: var(--font-ui);
 }
 
 .dashboard p {
-  color: #666666;
+  color: var(--text-muted);
   font-size: 14px;
   margin: 0 0 24px;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-ui);
 }
 
 .cards-grid {
@@ -27,28 +27,28 @@
 }
 
 .card {
-  background: #ffffff;
-  border: 1px solid #cccccc;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 20px 24px;
   text-decoration: none;
   color: inherit;
   min-width: 200px;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-ui);
 }
 
 .card:hover {
-  border-color: #0056b3;
+  border-color: var(--primary);
 }
 
 .card h3 {
   margin: 0 0 6px;
   font-size: 15px;
-  color: #0056b3;
+  color: var(--primary);
 }
 
 .card p {
   margin: 0;
   font-size: 13px;
-  color: #666666;
+  color: var(--text-muted);
 }

@@ -109,6 +109,7 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
             credenciales.token
           );
           if (asientoOfertado) {
+            this.asientosService.registrarReservaActiva(funcion.id, asientoOfertado);
             this.asientoOfertaListaEspera.set(asientoOfertado);
             this.mensajeCompra.set(`La butaca ${asientoOfertado} quedó reservada para vos. Tenés 15 minutos para continuar la compra.`);
           }
@@ -154,11 +155,39 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
         .map((estado) => estado.asientoId),
         ...(asientoOferta ? [asientoOferta] : []),
       ])]);
+
+      if (asientoOferta) {
+        await this.continuarConOfertaListaEspera(funcion, sala, asientoOferta);
+      }
     } catch (error) {
       this.errorCompra.set(error instanceof Error ? error.message : 'No se pudo cargar la función.');
     } finally {
       this.cargandoCompra.set(false);
     }
+  }
+
+  private async continuarConOfertaListaEspera(funcion: Funcion, sala: Sala, asientoId: string): Promise<void> {
+    const asiento = sala.filas
+      .flatMap((fila) => [...fila.bloque1, ...fila.bloque2, ...fila.bloque3])
+      .find((item) => item.id === asientoId);
+
+    if (!asiento || typeof sessionStorage === 'undefined') return;
+
+    const totalEntradas = this.salaService.calcularPrecioAsiento(asiento.tipo, Number(funcion.precio || 0));
+    sessionStorage.setItem('cinetp_compra_actual', JSON.stringify({
+      funcionId: funcion.id,
+      peliculaId: funcion.peliculaId,
+      peliculaTitulo: funcion.peliculaTitulo,
+      salaNombre: funcion.salaNombre || sala.nombre,
+      inicio: funcion.inicio,
+      formato: funcion.formato,
+      idioma: funcion.idioma,
+      precioUnitario: funcion.precio,
+      asientos: [asiento.id],
+      totalEntradas,
+    }));
+
+    await this.router.navigate(['/candy'], { queryParams: { funcionId: funcion.id } });
   }
 
   private estaVigente(estado: EstadoAsientoFuncion): boolean {

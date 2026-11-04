@@ -6,7 +6,7 @@
       <p class="subtitulo-seccion">Programe funciones individualmente o utilice la asignación automática inteligente con varianza de formato e idioma.</p>
     </div>
     <div style="display: flex; gap: 8px;">
-      <button type="button" (click)="abrirAutoGeneracion()" class="btn-crear" style="background: #2563eb; border-color: #2563eb;">
+      <button type="button" (click)="abrirAutoGeneracion()" class="btn-crear" style="background: var(--primary); border-color: var(--primary); color: var(--on-primary);">
         ⚡ Programación Automática
       </button>
       <button type="button" (click)="abrirCreacion()" class="btn-crear">
@@ -56,7 +56,7 @@
         <div class="card-header">
           <h3 class="pelicula-nombre">
             {{ funcion.peliculaTitulo }}
-            <span *ngIf="funcion.esPreventa" style="background:#8b5cf6; color:white; font-size:10px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">PREVENTA</span>
+            <span *ngIf="funcion.esPreventa" style="background:var(--purple); color:var(--on-purple); font-size:10px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">PREVENTA</span>
           </h3>
           <span class="estado-badge" [class]="funcion.estado">
             {{ funcion.estado | titlecase }}
@@ -157,7 +157,7 @@
               {{ esPeliculaPreventa(p.id) ? '⭐ [PREVENTA] ' : '' }}{{ p.titulo }}
             </option>
           </select>
-          <p *ngIf="esPeliculaPreventa(editForm.get('peliculaId')?.value)" style="font-size: 12px; color: #8b5cf6; margin: 4px 0 0; font-weight: 500;">
+          <p *ngIf="esPeliculaPreventa(editForm.get('peliculaId')?.value)" style="font-size: 12px; color: var(--purple-text); margin: 4px 0 0; font-weight: 500;">
             ⭐ Película en PREVENTA (Estreno: {{ obtenerPelicula(editForm.get('peliculaId')?.value)?.fechaEstreno }}). Las funciones se realizan a partir del estreno, pero la compra de entradas queda habilitada anticipadamente.
           </p>
         </div>
@@ -193,7 +193,7 @@
                 *ngFor="let h of opcionesHora"
                 [value]="h"
                 [disabled]="esHoraBloqueada(h)"
-                [style.color]="esHoraBloqueada(h) ? '#ef4444' : 'inherit'"
+                [style.color]="esHoraBloqueada(h) ? 'var(--danger-text)' : 'inherit'"
               >
                 {{ h }} hs {{ esHoraBloqueada(h) ? '(Ocupado)' : '' }}
               </option>
@@ -232,7 +232,7 @@
         </div>
 
         <div class="form-group" style="margin-top: 8px;">
-          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: #8b5cf6;">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--purple-text);">
             <input type="checkbox" formControlName="esPreventa" (change)="onEditFormPeliculaOrPreventaChange()" />
             ⭐ Marcar como Función en PREVENTA (Habilita la compra anticipada de entradas)
           </label>
@@ -263,7 +263,7 @@
       </div>
 
       <form [formGroup]="autoForm" (ngSubmit)="ejecutarAutoGeneracion()" class="modal-form">
-        <p style="font-size: 13px; color: #64748b; margin: 0 0 12px;">
+        <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px;">
           Genera automáticamente las funciones para una película seleccionando rango de días, turnos y prioridad. El sistema aplica varianza automática entre formatos (2D/3D) e idiomas (español, subtitulado, doblado) respetando el margen de 30 min entre funciones.
         </p>
         <div class="form-group">
@@ -274,7 +274,7 @@
               {{ esPeliculaPreventa(p.id) ? '⭐ [PREVENTA] ' : '' }}{{ p.titulo }} ({{ p.duracion }} min)
             </option>
           </select>
-          <p *ngIf="esPeliculaPreventa(autoForm.get('peliculaId')?.value)" style="font-size: 12px; color: #8b5cf6; margin: 4px 0 0; font-weight: 500;">
+          <p *ngIf="esPeliculaPreventa(autoForm.get('peliculaId')?.value)" style="font-size: 12px; color: var(--purple-text); margin: 4px 0 0; font-weight: 500;">
             ⭐ Película en PREVENTA (Estreno: {{ obtenerPelicula(autoForm.get('peliculaId')?.value)?.fechaEstreno }}). Las funciones se programan a partir del estreno, pero la compra de entradas queda habilitada anticipadamente.
           </p>
         </div>
@@ -366,16 +366,16 @@
         </div>
 
         <div class="form-group" style="margin-top: 10px;">
-          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: #8b5cf6; font-size: 13px;">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--purple-text); font-size: 13px;">
             <input type="checkbox" formControlName="esPreventa" (change)="onAutoFormPeliculaOrPreventaChange()" />
             ⭐ Programar como Funciones en PREVENTA (Habilita la compra anticipada de entradas)
           </label>
         </div>
 
-        <div *ngIf="mensajeError()" class="alert alert-danger" style="margin-top: 12px; font-size: 13px; color: red;">
+        <div *ngIf="mensajeError()" class="alert alert-danger" style="margin-top: 12px; font-size: 13px; color: var(--danger-text);">
           {{ mensajeError() }}
         </div>
-        <div *ngIf="mensajeExito()" class="alert alert-success" style="margin-top: 12px; font-size: 13px; color: green;">
+        <div *ngIf="mensajeExito()" class="alert alert-success" style="margin-top: 12px; font-size: 13px; color: var(--success-text);">
           {{ mensajeExito() }}
         </div>
 
@@ -383,7 +383,7 @@
           <button type="button" class="btn-cancel" (click)="cerrarAutoGeneracion()">
             Cancelar
           </button>
-          <button type="submit" class="btn-save" [disabled]="guardando()" style="background: #2563eb; border-color: #2563eb;">
+          <button type="submit" class="btn-save" [disabled]="guardando()" style="background: var(--primary); border-color: var(--primary); color: var(--on-primary);">
             {{ guardando() ? 'Generando...' : '⚡ Generar Funciones Automáticas' }}
           </button>
         </div>

@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 1.5rem 1rem 3rem;
   font-family: inherit;
-  color: #1e293b;
+  color: var(--text);
 }
 
 /* Header & Pasos */
@@ -18,19 +18,19 @@
 
 .btn-volver {
   background: transparent;
-  border: 1px solid #cbd5e1;
-  color: #475569;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-volver:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--surface-3);
+  color: var(--text);
 }
 
 .pasos-indicador {
@@ -43,39 +43,39 @@
 .paso {
   padding: 0.35rem 0.75rem;
   border-radius: 20px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .paso.completado {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--surface-2);
+  color: var(--text-muted);
 }
 
 .paso.activo {
-  background: #0f172a;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .paso.pendiente {
-  background: #f8fafc;
-  color: #94a3b8;
+  background: var(--surface-2);
+  color: var(--text-faint);
 }
 
 .paso-flecha {
-  color: #cbd5e1;
-  font-size: 0.8rem;
+  color: var(--text-faint);
+  font-size: 0.8125rem;
 }
 
 /* Resumen Entradas Card (Lateral) */
 .resumen-entradas-card {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--surface);
+  color: var(--text);
   padding: 1.25rem;
   border-radius: 14px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
   gap: 0.75rem;
 }
 
@@ -86,10 +86,10 @@
 
 .eyebrow {
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   letter-spacing: 0.08em;
   font-weight: 800;
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 0.25rem;
   text-transform: uppercase;
 }
@@ -97,14 +97,14 @@
 .pelicula-titulo {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
   margin: 0 0 0.25rem;
   line-height: 1.25;
 }
 
 .funcion-detalles {
   font-size: 0.825rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0 0 0.5rem;
   line-height: 1.4;
 }
@@ -117,9 +117,9 @@
 }
 
 .asientos-lbl {
-  font-size: 0.8rem;
-  color: #475569;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-weight: 700;
 }
 
 .tags-row {
@@ -129,17 +129,17 @@
 }
 
 .asiento-tag {
-  background: #f1f5f9;
-  color: #0f172a;
-  border: 1px solid #cbd5e1;
-  font-weight: 700;
-  font-size: 0.75rem;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-weight: 800;
+  font-size: 0.8125rem;
   padding: 0.15rem 0.45rem;
   border-radius: 5px;
 }
 
 .resumen-precio {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border);
   padding-top: 0.65rem;
   display: flex;
   flex-direction: column;
@@ -151,18 +151,18 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
-  color: #334155;
+  color: var(--text);
 }
 
 .precio-valor {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .tiempo-reserva {
-  font-size: 0.75rem;
-  color: #64748b;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -170,7 +170,7 @@
 .combos-seccion {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .combos-header {
@@ -180,13 +180,13 @@
 .combos-titulo {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
   margin: 0 0 0.25rem;
 }
 
 .combos-subtitulo {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -197,31 +197,31 @@
 }
 
 .combo-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
 }
 
 .combo-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  border-color: var(--border);
 }
 
 .combo-card.en-carrito {
-  border-color: #0f172a;
-  box-shadow: 0 0 0 2px #0f172a;
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 2px var(--primary);
 }
 
 .combo-img-box {
   position: relative;
   height: 150px;
-  background: #f8fafc;
+  background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -242,9 +242,9 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  background: #0f172a;
-  color: #ffffff;
-  font-size: 0.65rem;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 0.8125rem;
   font-weight: 800;
   padding: 0.2rem 0.55rem;
   border-radius: 4px;
@@ -261,13 +261,13 @@
 .combo-nombre {
   font-size: 1.05rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
   margin: 0 0 0.35rem;
 }
 
 .combo-desc {
   font-size: 0.825rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0 0 1rem;
   line-height: 1.35;
   flex: 1;
@@ -293,7 +293,7 @@
 .combo-precio {
   font-size: 1.2rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
 }
 
 /* Sección Candy Header */
@@ -305,12 +305,12 @@
   font-size: 1.35rem;
   font-weight: 800;
   margin: 0 0 0.35rem;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .candy-subtitulo {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0 0 1rem;
 }
 
@@ -322,27 +322,27 @@
 }
 
 .cat-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
 }
 
 .cat-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--surface-3);
+  border-color: var(--border);
 }
 
 .cat-btn.active {
-  background: #0f172a;
-  color: #ffffff;
-  border-color: #0f172a;
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
 }
 
 /* Layout Principal */
@@ -367,8 +367,8 @@
 }
 
 .producto-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -378,19 +378,19 @@
 
 .producto-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  border-color: #cbd5e1;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.21);
+  border-color: var(--border);
 }
 
 .producto-card.en-carrito {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px #3b82f6;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
 }
 
 .producto-img-box {
   position: relative;
   height: 150px;
-  background: #f8fafc;
+  background: var(--surface-2);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -405,7 +405,7 @@
 
 .placeholder-img {
   font-size: 3rem;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .badge-cat {
@@ -414,8 +414,8 @@
   left: 8px;
   background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(4px);
-  color: #ffffff;
-  font-size: 0.65rem;
+  color: var(--text);
+  font-size: 0.8125rem;
   font-weight: 800;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
@@ -431,14 +431,14 @@
 
 .producto-nombre {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0 0 0.35rem;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .producto-desc {
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
   margin: 0 0 1rem;
   flex: 1;
   line-height: 1.35;
@@ -464,13 +464,13 @@
 .precio-num {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .puntos-tag {
-  font-size: 0.68rem;
-  color: #d97706;
-  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--warning-text);
+  font-weight: 800;
 }
 
 /* Controles de Cantidad */
@@ -481,11 +481,11 @@
 }
 
 .btn-cant {
-  background: #0f172a;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   border-radius: 6px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -498,17 +498,17 @@
 .btn-cant.btn-menos {
   padding: 0.35rem 0.6rem;
   font-size: 0.85rem;
-  background: #f1f5f9;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .btn-cant.btn-menos:hover {
-  background: #e2e8f0;
+  background: var(--surface-3);
 }
 
 .btn-cant.btn-mas:hover {
-  background: #2563eb;
+  background: var(--primary-hover);
 }
 
 .cant-num {
@@ -528,18 +528,18 @@
 }
 
 .carrito-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 1.25rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
 }
 
 .carrito-titulo {
   font-size: 1.1rem;
   font-weight: 800;
   margin: 0 0 1rem;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .pedido-seccion {
@@ -552,24 +552,24 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.95rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .pedido-sublinea {
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
 
 .carrito-divider {
   border: none;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border);
   margin: 0.85rem 0;
 }
 
 .candy-vacio-msg {
-  font-size: 0.8rem;
-  color: #94a3b8;
+  font-size: 0.8125rem;
+  color: var(--text-faint);
   font-style: italic;
   padding: 0.25rem 0;
 }
@@ -597,34 +597,34 @@
 }
 
 .item-cant {
-  background: #f1f5f9;
-  font-weight: 700;
-  font-size: 0.75rem;
+  background: var(--surface-2);
+  font-weight: 800;
+  font-size: 0.8125rem;
   padding: 0.15rem 0.35rem;
   border-radius: 4px;
-  color: #334155;
+  color: var(--text);
 }
 
 .item-precio-acciones {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .btn-eliminar-item {
   background: transparent;
   border: none;
-  color: #ef4444;
+  color: var(--danger-text);
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   padding: 2px 4px;
 }
 
 .puntos-banner {
-  background: #fef3c7;
-  color: #92400e;
-  font-size: 0.8rem;
+  background: var(--warning-soft);
+  color: var(--warning-text);
+  font-size: 0.8125rem;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   margin-top: 0.75rem;
@@ -641,7 +641,7 @@
 .total-monto {
   font-size: 1.4rem;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .carrito-acciones {
@@ -653,8 +653,8 @@
 .btn-continuar {
   width: 100%;
   padding: 0.85rem;
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   border-radius: 10px;
   font-size: 0.95rem;
@@ -664,7 +664,7 @@
 }
 
 .btn-continuar:hover {
-  background: #1d4ed8;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 
@@ -672,25 +672,25 @@
   width: 100%;
   padding: 0.65rem;
   background: transparent;
-  border: 1px solid #cbd5e1;
-  color: #64748b;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
   border-radius: 10px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-omitir:hover {
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--surface-3);
+  color: var(--text);
 }
 
 .spinner {
   width: 24px;
   height: 24px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 0.5rem;
@@ -703,7 +703,7 @@
 .loading-state, .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 /* --- Sección Cupones de Descuento --- */
@@ -723,14 +723,14 @@
 .cupones-titulo {
   font-size: 0.88rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .badge-cupones-count {
-  background: #fef3c7;
-  color: #b45309;
-  font-size: 0.72rem;
-  font-weight: 700;
+  background: var(--warning-soft);
+  color: var(--warning-text);
+  font-size: 0.8125rem;
+  font-weight: 800;
   padding: 2px 7px;
   border-radius: 12px;
 }
@@ -738,30 +738,30 @@
 .alerta-cupon {
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 700;
   line-height: 1.35;
 }
 
 .alerta-cupon.exito {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  background: var(--success-soft);
+  color: var(--success-text);
+  border: 1px solid var(--success-text);
 }
 
 .alerta-cupon.error {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
 }
 
 .cupon-anonimo-aviso {
-  font-size: 0.75rem;
-  color: #64748b;
-  background: #f8fafc;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed var(--border);
 }
 
 /* Tarjetas de cupones disponibles */
@@ -778,16 +778,16 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.6rem 0.75rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .cupon-tarjeta:hover {
-  border-color: #f59e0b;
-  background: #fffbeb;
+  border-color: var(--warning-text);
+  background: var(--warning-soft);
 }
 
 .cupon-tarjeta-left {
@@ -797,10 +797,10 @@
 }
 
 .cupon-dto-tag {
-  background: #f59e0b;
-  color: #ffffff;
+  background: var(--warning);
+  color: var(--on-warning);
   font-weight: 800;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   padding: 3px 6px;
   border-radius: 6px;
   white-space: nowrap;
@@ -813,13 +813,13 @@
 }
 
 .cupon-nombre {
-  font-size: 0.8rem;
-  color: #0f172a;
+  font-size: 0.8125rem;
+  color: var(--text);
 }
 
 .cupon-desc-sub {
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
   line-height: 1.25;
 }
 
@@ -827,8 +827,8 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 4px 8px;
   border-radius: 6px;
   transition: all 0.2s ease;
@@ -836,36 +836,36 @@
 
 .cupon-checkbox {
   cursor: pointer;
-  accent-color: #059669;
+  accent-color: var(--primary);
   width: 15px;
   height: 15px;
 }
 
 .cupon-decision-lbl {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--text);
   transition: color 0.2s ease;
 }
 
 /* Estado cuando el usuario decide tildar / canjear el cupón (Verde esmeralda) */
 .cupon-tarjeta.seleccionado {
-  background: #ecfdf5;
-  border-color: #10b981;
+  background: var(--success-soft);
+  border-color: var(--success-text);
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
 }
 
 .cupon-tarjeta.seleccionado .cupon-dto-tag {
-  background: #059669;
+  background: var(--success);
 }
 
 .cupon-tarjeta.seleccionado .cupon-decision-box {
-  background: #059669;
-  border-color: #047857;
+  background: var(--success);
+  border-color: var(--success-text);
 }
 
 .cupon-tarjeta.seleccionado .cupon-decision-lbl {
-  color: #ffffff;
+  color: var(--text);
 }
 
 /* Desglose de Totales */
@@ -879,15 +879,15 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .descuento-linea {
-  color: #059669;
-  font-weight: 600;
+  color: var(--success-text);
+  font-weight: 700;
 }
 
 .descuento-num {
-  color: #059669;
+  color: var(--success-text);
   font-size: 0.95rem;
 }

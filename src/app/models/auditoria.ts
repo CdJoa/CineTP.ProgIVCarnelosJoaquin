@@ -21,6 +21,7 @@ export type AccionAuditoria =
   | 'rol_creado'
   | 'rol_editado'
   | 'rol_asignado'
+  | 'puntos_convertidos'
   | (string & {});
 
 export interface RegistroAuditoria {

@@ -6,6 +6,8 @@ export interface ItemCandyCompra {
   subtotal: number;
 }
 
+// 'usado' = la entrada ya se validó en la sala. El retiro del candy se registra aparte
+// (candyEntregadoEn) porque el mismo QR sirve para ambas cosas.
 export type EstadoCompra = 'confirmada' | 'usado' | 'cancelada';
 
 export interface Compra {
@@ -34,6 +36,8 @@ export interface Compra {
   qrData: string;                // Payload codificado en el QR
   qrImage?: string;              // Data URL base64 de la imagen generada
   estado: EstadoCompra;
+  entradaUsadaEn?: string;       // Fecha/hora en que se validó el ingreso a sala
+  candyEntregadoEn?: string;     // Fecha/hora en que se entregó el candy
   creadoEn: string;
 }
 

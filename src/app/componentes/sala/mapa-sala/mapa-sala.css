@@ -1,10 +1,10 @@
 .mapa-sala-wrapper {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 16px;
   padding: 1.25rem;
-  color: #212121;
-  font-family: system-ui, -apple-system, sans-serif;
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.04);
+  color: var(--text);
+  font-family: var(--font-ui);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.14);
 }
 
 .mapa-sala-wrapper.modo-compra-layout {
@@ -22,19 +22,19 @@
   margin: 1rem auto;
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  font: 500 0.9rem/1.45 system-ui, sans-serif;
+  font: 600 0.9rem/1.45 var(--font-ui);
 }
 
 .compra-alerta.error {
-  color: #991b1b;
-  background: #fee2e2;
+  color: var(--danger-text);
+  background: var(--danger-soft);
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
 .compra-alerta.exito {
-  color: #166534;
-  background: #dcfce7;
+  color: var(--success-text);
+  background: var(--success-soft);
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
@@ -58,7 +58,7 @@
   font-size: 1.35rem;
   font-weight: 800;
   margin: 0;
-  color: #111827;
+  color: var(--text);
 }
 
 /* Pantalla Curved Arc */
@@ -75,15 +75,15 @@
   width: 90%;
   height: 24px;
   margin: 0 auto;
-  border-top: 12px solid #94a3b8;
+  border-top: 12px solid var(--border-strong);
   border-radius: 50% 50% 0 0;
   box-shadow: 0 -3px 10px rgba(148, 163, 184, 0.4);
 }
 
 .pantalla-label {
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   font-weight: 800;
-  color: #94a3b8;
+  color: var(--text-faint);
   letter-spacing: 0.2em;
   margin-top: 5px;
 }
@@ -95,7 +95,7 @@
   gap: 1.5rem;
   margin-bottom: 1.25rem;
   font-size: 0.85rem;
-  color: #4b5563;
+  color: var(--text-muted);
   flex-wrap: wrap;
 }
 
@@ -112,12 +112,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   color: #fff;
 }
 
 .seat-badge.disponible-comun {
-  background: #388e3c;
+  background: #2e7d32;
 }
 
 .seat-badge.disponible-disc {
@@ -125,17 +125,17 @@
 }
 
 .seat-badge.disponible-vip {
-  background: #f57c00;
+  background: #b85700;
 }
 
 .leyenda-precio-chip {
-  background: #f1f5f9;
-  color: #0f172a;
-  font-weight: 700;
-  font-size: 0.78rem;
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.8125rem;
   padding: 0.1rem 0.4rem;
   border-radius: 4px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border);
   margin-left: 0.2rem;
 }
 
@@ -164,10 +164,16 @@
   gap: 4px;
 }
 
+.fila-accesible {
+  margin: 12px 0;
+  padding: 6px 0;
+  border-block: 1px dashed var(--info-border);
+}
+
 .row-label {
   font-weight: 800;
   font-size: 0.88rem;
-  color: #64748b;
+  color: var(--text-muted);
   width: 26px;
   text-align: center;
   user-select: none;
@@ -189,7 +195,7 @@
   height: 32px;
   border-radius: 6px 6px 3px 3px;
   font-size: 0.74rem;
-  font-weight: 700;
+  font-weight: 800;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -213,7 +219,7 @@
 }
 
 .asiento-box.comun {
-  background-color: #388e3c;
+  background-color: #2e7d32;
 }
 
 .asiento-box.discapacitado {
@@ -221,7 +227,7 @@
 }
 
 .asiento-box.vip {
-  background-color: #f57c00;
+  background-color: #b85700;
 }
 
 .asiento-box.seleccionado {
@@ -248,11 +254,11 @@
 .sala-sidebar-compra {
   width: 330px;
   flex-shrink: 0;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 1.25rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
   position: sticky;
   top: 1.5rem;
 }
@@ -267,22 +273,22 @@
 .btn-volver-cartelera {
   background: transparent;
   border: 0;
-  color: #475569;
+  color: var(--text-muted);
   font-size: 0.825rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   padding: 0;
   transition: color 0.15s ease;
 }
 
 .btn-volver-cartelera:hover {
-  color: #0f172a;
+  color: var(--text);
 }
 
 .sidebar-eyebrow {
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   font-weight: 800;
-  color: #64748b;
+  color: var(--text-muted);
   letter-spacing: 0.08em;
 }
 
@@ -293,14 +299,14 @@
 .pelicula-titulo {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
   margin: 0 0 0.25rem;
   line-height: 1.25;
 }
 
 .funcion-detalle-linea {
   font-size: 0.825rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0 0 0.5rem;
 }
 
@@ -310,10 +316,10 @@
 }
 
 .chip-item {
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 0.7rem;
-  font-weight: 700;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 800;
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
   text-transform: uppercase;
@@ -321,7 +327,7 @@
 
 .sidebar-sep {
   border: 0;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border);
   margin: 0.85rem 0;
 }
 
@@ -338,22 +344,22 @@
 
 .asientos-titulo-lbl {
   font-size: 0.85rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: 800;
+  color: var(--text);
 }
 
 .asientos-contador-tag {
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 0.75rem;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8125rem;
   font-weight: 800;
   padding: 0.1rem 0.45rem;
   border-radius: 10px;
 }
 
 .sin-seleccion-aviso {
-  font-size: 0.8rem;
-  color: #94a3b8;
+  font-size: 0.8125rem;
+  color: var(--text-faint);
   font-style: italic;
   padding: 0.35rem 0;
 }
@@ -371,11 +377,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0.35rem 0.55rem;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
 }
 
 .asiento-item-info {
@@ -386,24 +392,24 @@
 
 .asiento-id-txt {
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .asiento-tipo-txt {
-  font-size: 0.7rem;
-  color: #64748b;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
   text-transform: capitalize;
 }
 
 .asiento-precio-txt {
-  color: #0f172a;
-  font-weight: 700;
+  color: var(--text);
+  font-weight: 800;
 }
 
 .asiento-oferta-propia {
   flex-basis: 100%;
-  color: #166534;
-  font-size: 0.7rem;
+  color: var(--success-text);
+  font-size: 0.8125rem;
   font-weight: 800;
 }
 
@@ -416,19 +422,19 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.95rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .totales-valor {
   font-size: 1.45rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .retencion-timer {
-  font-size: 0.75rem;
-  color: #64748b;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
   margin-top: 0.25rem;
   margin-bottom: 0;
 }
@@ -438,16 +444,16 @@
   padding: 0.85rem;
   border: 0;
   border-radius: 10px;
-  background: #0f172a;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-continuar-flujo:hover:not(:disabled) {
-  background: #1e293b;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 

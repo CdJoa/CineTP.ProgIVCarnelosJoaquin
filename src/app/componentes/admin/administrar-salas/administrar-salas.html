@@ -163,7 +163,7 @@
           </div>
           <div class="stat-info">
             <span class="stat-label">Filas Totales:</span>
-            <span class="stat-val">{{ sala.filas.length || 20 }} (A - T)</span>
+            <span class="stat-val">{{ sala.filas.length || 19 }} (A - T)</span>
           </div>
         </div>
 
@@ -243,10 +243,10 @@
             </label>
           </div>
 
-          <div *ngIf="mensajeError()" class="alert alert-danger" style="color: red; font-size: 13px; margin: 8px 0;">
+          <div *ngIf="mensajeError()" class="alert alert-danger" style="color: var(--danger-text); font-size: 13px; margin: 8px 0;">
             {{ mensajeError() }}
           </div>
-          <div *ngIf="mensajeExito()" class="alert alert-success" style="color: green; font-size: 13px; margin: 8px 0;">
+          <div *ngIf="mensajeExito()" class="alert alert-success" style="color: var(--success-text); font-size: 13px; margin: 8px 0;">
             {{ mensajeExito() }}
           </div>
 

@@ -13,15 +13,25 @@ import { PropuestaPelicula } from '../../models/propuesta';
 import { RatingEstrellas } from '../pelicula/rating-estrellas/rating-estrellas';
 import { HoverZoomDirective } from '../../directivas/hover-zoom.directive';
 import { EntradaListaEspera, ListaEsperaService } from '../../servicios/lista-espera';
+import { ConvertidorPuntosComponent } from './convertidor-puntos/convertidor-puntos';
 
-export type TabPerfil = 'peliculas' | 'entradas' | 'espera' | 'propuesta' | 'datos';
+export type TabPerfil = 'peliculas' | 'entradas' | 'puntos' | 'espera' | 'propuesta' | 'datos';
 export type FiltroCalificacion = 'todas' | 'calificadas' | 'sin_calificar';
 export type OrdenHistorial = 'fecha_desc' | 'fecha_asc' | 'calif_desc';
+
+/** Una película del historial con todas las funciones que el usuario compró para ella. */
+export interface PeliculaHistorial {
+  peliculaId: string;
+  compra: Compra;       // Función más reciente (la que se muestra en la tarjeta)
+  veces: number;        // Cantidad de funciones compradas para esta película
+  ultimaFecha: number;
+  primeraFecha: number;
+}
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, RatingEstrellas, HoverZoomDirective],
+  imports: [CommonModule, RouterLink, FormsModule, RatingEstrellas, HoverZoomDirective, ConvertidorPuntosComponent],
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',
 })
@@ -93,47 +103,60 @@ export class PerfilComponent implements OnInit {
     return this.resenasUsuario()[id];
   }
 
+  /**
+   * "Mis Películas" agrupa las compras por película: la calificación es por película,
+   * así que se muestra una sola tarjeta aunque la haya visto en varias funciones.
+   * La tarjeta usa la función más reciente y cuenta cuántas veces la vio.
+   */
+  private historialPorPelicula = computed<PeliculaHistorial[]>(() => {
+    const grupos = new Map<string, PeliculaHistorial>();
+    for (const c of this.compras()) {
+      if (c.estado === 'cancelada') continue;
+      const id = this.obtenerIdPelicula(c);
+      const fecha = new Date(c.funcionInicio || c.creadoEn).getTime();
+      const grupo = grupos.get(id);
+      if (!grupo) {
+        grupos.set(id, { peliculaId: id, compra: c, veces: 1, ultimaFecha: fecha, primeraFecha: fecha });
+        continue;
+      }
+      grupo.veces++;
+      grupo.primeraFecha = Math.min(grupo.primeraFecha, fecha);
+      if (fecha > grupo.ultimaFecha) {
+        grupo.ultimaFecha = fecha;
+        grupo.compra = c;
+      }
+    }
+    return [...grupos.values()];
+  });
+
   // Lista filtrada y ordenada para la sección visual de Mis Películas
   peliculasHistorialFiltradas = computed(() => {
-    const lista = this.compras();
     const mapaResenas = this.resenasUsuario();
     const filtro = this.filtroCalificacion();
     const q = this.busquedaPelicula().toLowerCase().trim();
     const orden = this.ordenHistorial();
 
-    let resultado = lista.filter((c) => {
-      // Coincidencia de búsqueda
+    const resultado = this.historialPorPelicula().filter((g) => {
       if (q) {
-        const tituloCoincide = c.peliculaTitulo.toLowerCase().includes(q);
-        const salaCoincide = c.salaNombre.toLowerCase().includes(q);
+        const tituloCoincide = g.compra.peliculaTitulo.toLowerCase().includes(q);
+        const salaCoincide = g.compra.salaNombre.toLowerCase().includes(q);
         if (!tituloCoincide && !salaCoincide) return false;
       }
 
-      const peliId = this.obtenerIdPelicula(c);
-      const res = mapaResenas[peliId];
+      const res = mapaResenas[g.peliculaId];
       const tieneCalificacion = !!res && res.activo !== false && res.puntos > 0;
-
-      if (filtro === 'calificadas') {
-        return tieneCalificacion;
-      }
-      if (filtro === 'sin_calificar') {
-        return !tieneCalificacion;
-      }
+      if (filtro === 'calificadas') return tieneCalificacion;
+      if (filtro === 'sin_calificar') return !tieneCalificacion;
       return true;
     });
 
-    // Ordenamiento
     return resultado.sort((a, b) => {
       if (orden === 'calif_desc') {
-        const peliIdA = this.obtenerIdPelicula(a);
-        const peliIdB = this.obtenerIdPelicula(b);
-        const pA = mapaResenas[peliIdA]?.puntos || 0;
-        const pB = mapaResenas[peliIdB]?.puntos || 0;
+        const pA = mapaResenas[a.peliculaId]?.puntos || 0;
+        const pB = mapaResenas[b.peliculaId]?.puntos || 0;
         if (pB !== pA) return pB - pA;
       }
-      const fechaA = new Date(a.funcionInicio || a.creadoEn).getTime();
-      const fechaB = new Date(b.funcionInicio || b.creadoEn).getTime();
-      return orden === 'fecha_asc' ? fechaA - fechaB : fechaB - fechaA;
+      return orden === 'fecha_asc' ? a.primeraFecha - b.primeraFecha : b.ultimaFecha - a.ultimaFecha;
     });
   });
 
@@ -182,6 +205,8 @@ export class PerfilComponent implements OnInit {
         this.tabActiva.set('entradas');
       } else if (params['tab'] === 'propuesta' || params['seccion'] === 'propuesta') {
         this.tabActiva.set('propuesta');
+      } else if (params['tab'] === 'puntos' || params['seccion'] === 'puntos') {
+        this.tabActiva.set('puntos');
       } else if (params['tab'] === 'espera' || params['seccion'] === 'espera') {
         this.tabActiva.set('espera');
       } else if (params['tab'] === 'datos' || params['seccion'] === 'datos') {
@@ -229,9 +254,7 @@ export class PerfilComponent implements OnInit {
     if (!funcionId) return;
     try {
       await this.notificacionesService.marcarLeida(notificacion.id);
-      this.notificaciones.update((items) => items.map((item) =>
-        item.id === notificacion.id ? { ...item, leida: true } : item
-      ));
+      this.quitarNotificacion(notificacion.id);
     } catch (error) {
       console.warn('No se pudo marcar la notificación como leída:', error);
     }
@@ -241,6 +264,32 @@ export class PerfilComponent implements OnInit {
   async irAFuncionEnEspera(funcionId: string): Promise<void> {
     if (!funcionId) return;
     await this.router.navigate(['/sala'], { queryParams: { funcionId } });
+  }
+
+  private quitarNotificacion(id: string): void {
+    this.notificaciones.update((lista) => lista.filter((item) => item.id !== id));
+  }
+
+  /** Descarta un aviso: queda como leído en la base y deja de mostrarse. */
+  async descartarNotificacion(notificacion: Notificacion): Promise<void> {
+    this.quitarNotificacion(notificacion.id);
+    try {
+      await this.notificacionesService.marcarLeida(notificacion.id);
+    } catch (err) {
+      console.warn('No se pudo descartar la notificación:', err);
+      await this.cargarNotificaciones();
+    }
+  }
+
+  async descartarTodasNotificaciones(): Promise<void> {
+    const ids = this.notificaciones().map((n) => n.id);
+    this.notificaciones.set([]);
+    try {
+      await this.notificacionesService.marcarLeidas(ids);
+    } catch (err) {
+      console.warn('No se pudieron descartar las notificaciones:', err);
+      await this.cargarNotificaciones();
+    }
   }
 
   async cargarNotificaciones(): Promise<void> {
@@ -258,9 +307,7 @@ export class PerfilComponent implements OnInit {
     if (peliculaId) {
       try {
         await this.notificacionesService.marcarLeida(notificacion.id);
-        this.notificaciones.update((lista) =>
-          lista.map((item) => item.id === notificacion.id ? { ...item, leida: true } : item)
-        );
+        this.quitarNotificacion(notificacion.id);
       } catch (err) {
         console.warn('No se pudo marcar la notificación como leída:', err);
       }
