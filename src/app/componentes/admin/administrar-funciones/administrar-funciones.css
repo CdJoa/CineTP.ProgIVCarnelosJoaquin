@@ -522,3 +522,9 @@
   font-weight: 600;
   color: var(--purple-text);
 }
+
+.estado-badge.en.curso,
+.estado-badge.en-curso {
+  background: var(--warning-soft);
+  color: var(--warning-text);
+}

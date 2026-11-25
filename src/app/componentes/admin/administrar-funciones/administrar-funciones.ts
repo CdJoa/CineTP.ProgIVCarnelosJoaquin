@@ -391,6 +391,10 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
       throw new Error('Una función cancelada no se puede reactivar porque ya se acreditó a sus compradores. Crea una función nueva.');
     }
     if (payload.estado === 'cancelada' && funcionActual?.estado === 'programada') {
+      // También desde el formulario de edición: una función que ya empezó no se suspende
+      if (this.yaComenzo(funcionActual)) {
+        throw new Error('Esta función ya comenzó: no se puede suspender ni acreditar a los compradores.');
+      }
       const confirmar = confirm(
         `Se cancelará toda la función de "${funcionActual.peliculaTitulo}". Las compras confirmadas recibirán crédito por el total abonado (incluido Candy), se liberarán las butacas y se notificará a los compradores. ¿Continuar?`
       );
@@ -558,9 +562,28 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
     }
   }
 
+  /** La función ya arrancó: no se puede suspender ni acreditar (el público ya entró o no fue). */
+  yaComenzo(funcion: Funcion): boolean {
+    return new Date(funcion.inicio).getTime() <= Date.now();
+  }
+
+  /**
+   * Estado para mostrar en la tarjeta. En la base las funciones pasadas siguen como
+   * 'programada', así que acá se muestra "En curso" o "Finalizada" según la hora.
+   */
+  estadoVisible(funcion: Funcion): string {
+    if (funcion.estado !== 'programada' || !this.yaComenzo(funcion)) return funcion.estado;
+    const fin = funcion.fin ? new Date(funcion.fin).getTime() : NaN;
+    return !isNaN(fin) && fin > Date.now() ? 'en curso' : 'finalizada';
+  }
+
   async cambiarEstado(funcion: Funcion, nuevoEstado: EstadoFuncion): Promise<void> {
     if (funcion.estado === 'cancelada' && nuevoEstado === 'programada') {
       this.mensajeError.set('Una función cancelada no se puede reactivar porque ya se acreditó a sus compradores. Crea una función nueva.');
+      return;
+    }
+    if (nuevoEstado === 'cancelada' && this.yaComenzo(funcion)) {
+      this.mensajeError.set('Esta función ya comenzó: no se puede suspender ni acreditar a los compradores.');
       return;
     }
     try {

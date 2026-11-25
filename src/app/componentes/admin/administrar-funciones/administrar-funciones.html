@@ -58,8 +58,8 @@
             {{ funcion.peliculaTitulo }}
             <span *ngIf="funcion.enPreventa" style="background:var(--purple); color:var(--on-purple); font-size:10px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">PREVENTA</span>
           </h3>
-          <span class="estado-badge" [class]="funcion.estado">
-            {{ funcion.estado | titlecase }}
+          <span class="estado-badge" [class]="estadoVisible(funcion)">
+            {{ estadoVisible(funcion) | titlecase }}
           </span>
         </div>
 
@@ -105,7 +105,7 @@
             Editar
           </button>
           <button
-            *ngIf="funcion.estado === 'programada'"
+            *ngIf="funcion.estado === 'programada' && !yaComenzo(funcion)"
             type="button"
             class="btn-accion cancel"
             (click)="cambiarEstado(funcion, 'cancelada')"
@@ -113,7 +113,7 @@
             Suspender y acreditar
           </button>
           <button
-            *ngIf="funcion.estado === 'programada'"
+            *ngIf="funcion.estado === 'programada' && !yaComenzo(funcion)"
             type="button"
             class="btn-accion demo"
             (click)="abrirGestionAsientosDemo(funcion)"
