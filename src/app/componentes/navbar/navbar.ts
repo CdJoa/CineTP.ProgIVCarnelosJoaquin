@@ -4,13 +4,14 @@ import { Router, RouterLink } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { Auth } from '../../servicios/auth';
 import { EmpleadoDirective } from '../../directivas/empleado.directive';
+import { AdminDirective } from '../../directivas/admin.directive';
 import { Notificacion, NotificacionesService } from '../../servicios/notificaciones';
 import { RolesAdminService } from '../../servicios/roles-admin';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, EmpleadoDirective],
+  imports: [CommonModule, RouterLink, EmpleadoDirective, AdminDirective],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })

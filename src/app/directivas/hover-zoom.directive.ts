@@ -1,9 +1,15 @@
-import { Directive, ElementRef, HostListener, inject, Input, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, inject, Input, Renderer2 } from '@angular/core';
 
+/**
+ * Agranda el elemento al pasar el mouse. Uso: `<img [appHoverZoom]="1.05">`.
+ * Los eventos se declaran en `host`, la forma recomendada en Angular moderno
+ * (equivale a usar @HostListener).
+ */
 @Directive({
   selector: '[appHoverZoom]',
   standalone: true,
   host: {
+    '(mouseenter)': 'onMouseEnter()',
     '(mouseleave)': 'onMouseLeave()',
   },
 })
@@ -17,11 +23,11 @@ export class HoverZoomDirective {
     this.render.setStyle(this.el.nativeElement, 'transition', 'transform 0.25s ease-in-out');
   }
 
-  @HostListener('mouseenter') onMouseEnter() {
+  onMouseEnter(): void {
     this.render.setStyle(this.el.nativeElement, 'transform', `scale(${this.appHoverZoom})`);
   }
 
-  @HostListener('mouseleave') onMouseLeave() {
+  onMouseLeave(): void {
     this.render.setStyle(this.el.nativeElement, 'transform', 'scale(1)');
   }
 }
