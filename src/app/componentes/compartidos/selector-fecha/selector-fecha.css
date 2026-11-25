@@ -1,0 +1,39 @@
+.fecha-tres-cajas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.caja-fecha {
+  padding: 7px 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.caja-fecha:focus {
+  outline: 2px solid var(--primary-border);
+  outline-offset: 0;
+}
+
+.caja-fecha.invalid {
+  border-color: var(--danger-text);
+}
+
+.caja-corta {
+  width: 56px;
+}
+
+.caja-anio {
+  width: 80px;
+}
+
+.separador-fecha {
+  color: var(--text-muted);
+  font-size: 16px;
+  font-weight: 800;
+  user-select: none;
+}

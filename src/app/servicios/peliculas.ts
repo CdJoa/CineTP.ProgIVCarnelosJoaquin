@@ -23,6 +23,8 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       en_cartelera: datos.enCartelera ?? true,
       boletos_vendidos: Number(datos.boletosVendidos || 0),
       activa: true,
+      preventa_activa: Boolean(datos.preventaActiva),
+      preventa_porcentaje: Number(datos.preventaPorcentaje || 0),
     });
 
     void this.auditoriaService.registrar(
@@ -71,6 +73,12 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
     if (datos.boletosVendidos !== undefined) payload['boletosVendidos'] = Number(datos.boletosVendidos);
     if (datos.enCartelera !== undefined) payload['enCartelera'] = Boolean(datos.enCartelera);
     if (datos.poster !== undefined) payload['poster'] = datos.poster || null;
+    if (datos.preventaActiva !== undefined) {
+      payload['preventaActiva'] = Boolean(datos.preventaActiva);
+      payload['preventaPorcentaje'] = Number(datos.preventaPorcentaje || 0);
+    }
+
+    const anterior = datos.preventaActiva !== undefined ? await this.obtenerPorId(id) : null;
 
     const res = await this.actualizarAuto(id, payload);
     this.notificarCanalLocal(res);
@@ -79,6 +87,19 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       'pelicula_editada',
       `Película: "${res.titulo}"`
     );
+    if (
+      anterior &&
+      (Boolean(anterior.preventaActiva) !== Boolean(res.preventaActiva) ||
+        Number(anterior.preventaPorcentaje || 0) !== Number(res.preventaPorcentaje || 0) ||
+        (anterior.fechaEstreno || '') !== (res.fechaEstreno || ''))
+    ) {
+      void this.auditoriaService.registrar(
+        'precio_modificado',
+        res.preventaActiva
+          ? `Preventa de "${res.titulo}": ${res.preventaPorcentaje}% sobre el precio normal hasta el estreno (${res.fechaEstreno})`
+          : `Preventa de "${res.titulo}" desactivada`
+      );
+    }
 
     return res;
   }
@@ -159,6 +180,8 @@ export class PeliculasService extends BaseSupabaseService<Pelicula> {
       creadoEn: data['creado_en'],
       formato: data['formato'],
       idioma: data['idioma'],
+      preventaActiva: Boolean(data['preventa_activa']),
+      preventaPorcentaje: Number(data['preventa_porcentaje'] || 0),
     };
   }
 }

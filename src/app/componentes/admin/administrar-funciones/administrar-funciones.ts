@@ -11,6 +11,14 @@ import { SalaService } from '../../../servicios/sala';
 import { ListaEsperaService } from '../../../servicios/lista-espera';
 import { AdministrarBase } from '../administrar-base';
 import {
+  aplicarPorcentaje,
+  describirPorcentaje,
+  estaEnPreventa,
+  fechaLocalIso,
+  formatearFechaCorta,
+  primerDiaFunciones,
+} from '../../../utils/preventa';
+import {
   ESTADOS_FUNCION,
   FORMATOS_FUNCION,
   IDIOMAS_FUNCION,
@@ -125,7 +133,16 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
 
   esPeliculaPreventa(peliculaId: string | undefined): boolean {
     if (!peliculaId) return false;
-    return this.funciones().some((f) => f.peliculaId === peliculaId && f.esPreventa);
+    return estaEnPreventa(this.obtenerPelicula(peliculaId));
+  }
+
+  /** Resumen de la preventa de la película para mostrar debajo del precio, o null si no tiene. */
+  textoPreventa(peliculaId: string | undefined, precio: number | string | undefined): string | null {
+    const pelicula = this.obtenerPelicula(peliculaId);
+    if (!pelicula || !estaEnPreventa(pelicula)) return null;
+    const pct = Number(pelicula.preventaPorcentaje || 0);
+    const precioNormal = Number(precio || 0);
+    return `Película en preventa (${describirPorcentaje(pct)}) hasta el estreno, el ${formatearFechaCorta(pelicula.fechaEstreno)}: esta función se cobra $${aplicarPorcentaje(precioNormal, pct)} hasta esa fecha y después $${precioNormal}.`;
   }
 
   obtenerPelicula(peliculaId: string | undefined): Pelicula | undefined {
@@ -133,42 +150,39 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
     return this.peliculas().find((item) => item.id === peliculaId);
   }
 
+  /** Primer día en que se pueden programar funciones de la película (el estreno, o hoy si ya pasó). */
+  fechaMinimaPelicula(peliculaId: string | undefined): string {
+    return primerDiaFunciones(this.obtenerPelicula(peliculaId));
+  }
+
+  /** Aviso de desde cuándo se pueden programar funciones, o null si es desde hoy. */
+  avisoPrimerDia(peliculaId: string | undefined): string | null {
+    const pelicula = this.obtenerPelicula(peliculaId);
+    const primerDia = this.fechaMinimaPelicula(peliculaId);
+    if (!pelicula || primerDia <= this.minFechaActual) return null;
+    const preventa = estaEnPreventa(pelicula) ? ', hasta ese día corre la preventa' : '';
+    return `Las funciones de esta película empiezan el ${formatearFechaCorta(primerDia)} (estreno${preventa}). No se pueden programar antes.`;
+  }
+
   onAutoFormPeliculaOrPreventaChange(): void {
     const pId = this.autoForm.get('peliculaId')?.value;
     if (!pId) return;
-    const p = this.obtenerPelicula(pId);
-    if (p && p.fechaEstreno) {
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
-      const estrenoDate = new Date(`${p.fechaEstreno}T00:00:00`);
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      const baseInicio = estrenoDate > hoy ? estrenoDate : hoy;
-      const fInicio = `${baseInicio.getFullYear()}-${pad(baseInicio.getMonth() + 1)}-${pad(baseInicio.getDate())}`;
-      const finDate = new Date(baseInicio.getTime() + 15 * 24 * 60 * 60 * 1000);
-      const fFin = `${finDate.getFullYear()}-${pad(finDate.getMonth() + 1)}-${pad(finDate.getDate())}`;
-
-      this.autoForm.patchValue({
-        fechaInicio: fInicio,
-        fechaFin: fFin,
-      });
-    }
+    const fInicio = this.fechaMinimaPelicula(pId);
+    const finDate = new Date(`${fInicio}T00:00:00`);
+    finDate.setDate(finDate.getDate() + 15);
+    this.autoForm.patchValue({
+      fechaInicio: fInicio,
+      fechaFin: fechaLocalIso(finDate),
+    });
   }
 
   onEditFormPeliculaOrPreventaChange(): void {
     const pId = this.editForm.get('peliculaId')?.value;
     if (!pId) return;
-    const p = this.obtenerPelicula(pId);
-    if (p && p.fechaEstreno) {
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
-      const estrenoDate = new Date(`${p.fechaEstreno}T00:00:00`);
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      const baseInicio = estrenoDate > hoy ? estrenoDate : hoy;
-      const fInicio = `${baseInicio.getFullYear()}-${pad(baseInicio.getMonth() + 1)}-${pad(baseInicio.getDate())}`;
-
-      this.editForm.patchValue({
-        fecha: fInicio,
-      });
+    const minima = this.fechaMinimaPelicula(pId);
+    const actual = this.editForm.get('fecha')?.value;
+    if (!actual || actual < minima) {
+      this.editForm.patchValue({ fecha: minima });
     }
     this.onFechaOrSalaChange();
   }
@@ -691,6 +705,17 @@ export class AdministrarFunciones extends AdministrarBase<Funcion> {
     }
     if (!val.fechaInicio || !val.fechaFin) {
       this.mensajeError.set('Debes seleccionar el rango de fechas.');
+      return;
+    }
+    const primerDia = this.fechaMinimaPelicula(val.peliculaId);
+    if (val.fechaInicio < primerDia) {
+      this.mensajeError.set(
+        this.avisoPrimerDia(val.peliculaId) || `La fecha de inicio no puede ser anterior al ${formatearFechaCorta(primerDia)}.`
+      );
+      return;
+    }
+    if (val.fechaFin < val.fechaInicio) {
+      this.mensajeError.set('La fecha "hasta" no puede ser anterior a la fecha "desde".');
       return;
     }
 

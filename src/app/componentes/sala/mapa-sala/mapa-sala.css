@@ -473,3 +473,8 @@
     position: static;
   }
 }
+
+.leyenda-preventa {
+  color: var(--purple-text);
+  font-weight: 600;
+}

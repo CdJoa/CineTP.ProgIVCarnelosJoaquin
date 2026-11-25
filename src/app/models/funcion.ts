@@ -19,6 +19,8 @@ export interface Funcion {
   peliculaTitulo?: string;
   duracionPelicula?: number;
   salaNombre?: string;
+  precioVigente?: number;   // Precio a cobrar hoy (con el ajuste de preventa si corresponde)
+  enPreventa?: boolean;     // La película de esta función está hoy en preventa
 }
 
 export interface CrearFuncionDto {

@@ -32,6 +32,10 @@ export interface Pelicula {
   creadoEn?: string;
   formato?: Formato;
   idioma?: Idioma;
+  // Preventa: mientras esté activa y no haya llegado `fechaEstreno`, el precio de cada
+  // función se ajusta por `preventaPorcentaje` (-50 a +50). Desde el estreno vuelve al normal.
+  preventaActiva?: boolean;
+  preventaPorcentaje?: number;
 }
 
 export interface CrearPeliculaDto {
@@ -47,4 +51,6 @@ export interface CrearPeliculaDto {
   boletosVendidos?: number;
   formato?: Formato;
   idioma?: Idioma;
+  preventaActiva?: boolean;
+  preventaPorcentaje?: number;
 }

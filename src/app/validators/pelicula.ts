@@ -1,5 +1,25 @@
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { GenerosPelicula, Pelicula } from '../models/pelicula';
+import { fechaLocalIso, PREVENTA_PORCENTAJE_MAX, PREVENTA_PORCENTAJE_MIN } from '../utils/preventa';
+
+/** La fecha que arma el selector de 3 cajas es 'YYYY-MM-DD' o 'invalida'. */
+export const fechaIsoValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const valor = String(control.value || '');
+  if (!valor) return null;
+  return /^\d{4}-\d{2}-\d{2}$/.test(valor.slice(0, 10)) ? null : { fechaInvalida: true };
+};
+
+/**
+ * La preventa dura hasta el estreno, así que solo tiene sentido si el estreno es futuro:
+ * el día del estreno empiezan las funciones y vuelve el precio normal.
+ */
+export const preventaValidator: ValidatorFn = (grupo: AbstractControl): ValidationErrors | null => {
+  if (!grupo.get('preventaActiva')?.value) return null;
+  const estreno = String(grupo.get('fechaEstreno')?.value || '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(estreno)) return null; // ya lo marca el validador del campo
+  if (estreno <= fechaLocalIso()) return { preventaEstrenoPasado: true };
+  return null;
+};
 
 export const GENEROS_PELICULA = [
   { value: 'accion', label: 'Acción' },
@@ -23,7 +43,7 @@ export const peliculaValidators = {
   generos: [Validators.required],
   restriccionEdad: [Validators.required, Validators.min(0), Validators.max(18)],
   puntajeCompra: [Validators.required, Validators.min(0)],
-  fechaEstreno: [Validators.required],
+  fechaEstreno: [Validators.required, fechaIsoValidator],
 };
 
 export function crearFormularioPelicula(fb: FormBuilder): FormGroup {
@@ -37,7 +57,9 @@ export function crearFormularioPelicula(fb: FormBuilder): FormGroup {
     poster: [''],
     enCartelera: [true],
     boletosVendidos: [0],
-  });
+    preventaActiva: [false],
+    preventaPorcentaje: [0, [Validators.min(PREVENTA_PORCENTAJE_MIN), Validators.max(PREVENTA_PORCENTAJE_MAX)]],
+  }, { validators: preventaValidator });
 }
 
 export function generarPreviewPelicula(

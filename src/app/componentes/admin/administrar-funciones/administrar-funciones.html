@@ -56,7 +56,7 @@
         <div class="card-header">
           <h3 class="pelicula-nombre">
             {{ funcion.peliculaTitulo }}
-            <span *ngIf="funcion.esPreventa" style="background:var(--purple); color:var(--on-purple); font-size:10px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">PREVENTA</span>
+            <span *ngIf="funcion.enPreventa" style="background:var(--purple); color:var(--on-purple); font-size:10px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">PREVENTA</span>
           </h3>
           <span class="estado-badge" [class]="funcion.estado">
             {{ funcion.estado | titlecase }}
@@ -86,7 +86,12 @@
 
           <div class="info-row">
             <span class="info-label">Precio:</span>
-            <strong class="precio-val">${{ funcion.precio }}</strong>
+            <strong class="precio-val">
+              ${{ funcion.precio }}
+              @if (funcion.enPreventa && funcion.precioVigente !== funcion.precio) {
+                <span class="precio-preventa-admin">→ ${{ funcion.precioVigente }} en preventa</span>
+              }
+            </strong>
           </div>
 
           <div class="info-row">
@@ -157,9 +162,9 @@
               {{ esPeliculaPreventa(p.id) ? '⭐ [PREVENTA] ' : '' }}{{ p.titulo }}
             </option>
           </select>
-          <p *ngIf="esPeliculaPreventa(editForm.get('peliculaId')?.value)" style="font-size: 12px; color: var(--purple-text); margin: 4px 0 0; font-weight: 500;">
-            ⭐ Película en PREVENTA (Estreno: {{ obtenerPelicula(editForm.get('peliculaId')?.value)?.fechaEstreno }}). Las funciones se realizan a partir del estreno, pero la compra de entradas queda habilitada anticipadamente.
-          </p>
+          @if (avisoPrimerDia(editForm.get('peliculaId')?.value); as aviso) {
+            <p class="nota-preventa">⭐ {{ aviso }}</p>
+          }
         </div>
 
         <!-- Sala -->
@@ -180,7 +185,7 @@
             <input
               type="date"
               formControlName="fecha"
-              [min]="minFechaActual"
+              [min]="fechaMinimaPelicula(editForm.get('peliculaId')?.value)"
               (change)="onFechaOrSalaChange()"
               class="form-input"
             />
@@ -231,12 +236,13 @@
           </div>
         </div>
 
-        <div class="form-group" style="margin-top: 8px;">
-          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--purple-text);">
-            <input type="checkbox" formControlName="esPreventa" (change)="onEditFormPeliculaOrPreventaChange()" />
-            ⭐ Marcar como Función en PREVENTA (Habilita la compra anticipada de entradas)
-          </label>
-        </div>
+        <p class="nota-preventa">
+          @if (textoPreventa(editForm.get('peliculaId')?.value, editForm.get('precio')?.value); as texto) {
+            ⭐ {{ texto }}
+          } @else {
+            El precio de preventa se configura en la película (Administrar Películas → Preventa).
+          }
+        </p>
 
         <div class="modal-footer">
           <button type="button" class="btn-cancel" (click)="cerrarEdicion()">
@@ -274,19 +280,19 @@
               {{ esPeliculaPreventa(p.id) ? '⭐ [PREVENTA] ' : '' }}{{ p.titulo }} ({{ p.duracion }} min)
             </option>
           </select>
-          <p *ngIf="esPeliculaPreventa(autoForm.get('peliculaId')?.value)" style="font-size: 12px; color: var(--purple-text); margin: 4px 0 0; font-weight: 500;">
-            ⭐ Película en PREVENTA (Estreno: {{ obtenerPelicula(autoForm.get('peliculaId')?.value)?.fechaEstreno }}). Las funciones se programan a partir del estreno, pero la compra de entradas queda habilitada anticipadamente.
-          </p>
+          @if (avisoPrimerDia(autoForm.get('peliculaId')?.value); as aviso) {
+            <p class="nota-preventa">⭐ {{ aviso }}</p>
+          }
         </div>
 
         <div class="form-row" style="margin-top: 12px;">
           <div class="form-group">
             <label class="form-label">Fecha Desde *</label>
-            <input type="date" formControlName="fechaInicio" [min]="minFechaActual" class="form-input" />
+            <input type="date" formControlName="fechaInicio" [min]="fechaMinimaPelicula(autoForm.get('peliculaId')?.value)" class="form-input" />
           </div>
           <div class="form-group">
             <label class="form-label">Fecha Hasta *</label>
-            <input type="date" formControlName="fechaFin" [min]="minFechaActual" class="form-input" />
+            <input type="date" formControlName="fechaFin" [min]="autoForm.get('fechaInicio')?.value || fechaMinimaPelicula(autoForm.get('peliculaId')?.value)" class="form-input" />
           </div>
         </div>
 
@@ -365,12 +371,13 @@
           </div>
         </div>
 
-        <div class="form-group" style="margin-top: 10px;">
-          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--purple-text); font-size: 13px;">
-            <input type="checkbox" formControlName="esPreventa" (change)="onAutoFormPeliculaOrPreventaChange()" />
-            ⭐ Programar como Funciones en PREVENTA (Habilita la compra anticipada de entradas)
-          </label>
-        </div>
+        <p class="nota-preventa">
+          @if (textoPreventa(autoForm.get('peliculaId')?.value, autoForm.get('precio')?.value); as texto) {
+            ⭐ {{ texto }}
+          } @else {
+            El precio de preventa se configura en la película (Administrar Películas → Preventa).
+          }
+        </p>
 
         <div *ngIf="mensajeError()" class="alert alert-danger" style="margin-top: 12px; font-size: 13px; color: var(--danger-text);">
           {{ mensajeError() }}

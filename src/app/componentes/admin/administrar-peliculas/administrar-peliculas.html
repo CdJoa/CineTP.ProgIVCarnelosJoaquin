@@ -105,12 +105,15 @@
               </div>
 
               <div class="form-group">
-                <label for="fechaEstreno">Fecha de Estreno</label>
-                <input
-                  id="fechaEstreno"
-                  type="date"
+                <label>Fecha de Estreno</label>
+                <app-selector-fecha
                   formControlName="fechaEstreno"
-                />
+                  etiqueta="Fecha de estreno"
+                  [invalido]="!!errorEstreno"
+                ></app-selector-fecha>
+                @if (errorEstreno) {
+                  <span class="error-text">{{ errorEstreno }}</span>
+                }
               </div>
             </div>
 
@@ -180,6 +183,53 @@
                 <label for="boletosVendidos">Boletos Vendidos</label>
                 <input id="boletosVendidos" type="number" formControlName="boletosVendidos" min="0" />
               </div>
+            </div>
+
+            <!-- Preventa -->
+            <div class="preventa-box" [class.activa]="preventaActiva?.value">
+              <label class="check-label">
+                <input type="checkbox" formControlName="preventaActiva" />
+                ⭐ Película en preventa
+              </label>
+
+              @if (preventaActiva?.value) {
+                <div class="form-group">
+                  <label for="preventaPorcentaje">
+                    Precio de preventa:
+                    <strong class="preventa-pct" [class.sube]="preventaPorcentaje?.value > 0" [class.baja]="preventaPorcentaje?.value < 0">
+                      {{ preventaPorcentaje?.value > 0 ? '+' : '' }}{{ preventaPorcentaje?.value }}%
+                    </strong>
+                    <span class="preventa-desc">({{ textoPorcentajePreventa }})</span>
+                  </label>
+                  <input
+                    id="preventaPorcentaje"
+                    type="range"
+                    class="preventa-slider"
+                    formControlName="preventaPorcentaje"
+                    [min]="preventaMin"
+                    [max]="preventaMax"
+                    step="5"
+                  />
+                  <div class="preventa-marcas">
+                    @for (marca of marcasPreventa; track marca) {
+                      <button type="button" class="preventa-marca" [class.actual]="preventaPorcentaje?.value === marca" (click)="marcarPorcentaje(marca)">
+                        {{ marca > 0 ? '+' : '' }}{{ marca }}%
+                      </button>
+                    }
+                  </div>
+                  <p class="preventa-ejemplo">
+                    Ej: una función de ${{ precioEjemplo }} se cobra <strong>${{ precioEjemploPreventa }}</strong> durante la preventa.
+                  </p>
+                </div>
+
+                <span class="preventa-ayuda">
+                  @if (estrenoLegible) {
+                    La preventa dura hasta el estreno ({{ estrenoLegible }}): antes se venden entradas a este precio y desde ese día, cuando empiezan las funciones, se cobra el normal.
+                  } @else {
+                    La preventa dura hasta la fecha de estreno: ese día empiezan las funciones y vuelve el precio normal.
+                  }
+                </span>
+              }
             </div>
 
             <!-- Botones Modal -->

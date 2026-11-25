@@ -1,0 +1,48 @@
+<div class="fecha-tres-cajas" role="group" [attr.aria-label]="etiqueta()">
+  <input
+    #diaInput
+    type="text"
+    inputmode="numeric"
+    maxlength="2"
+    placeholder="DD"
+    [value]="dia()"
+    [disabled]="deshabilitado()"
+    (input)="onDia($event)"
+    (blur)="marcarTocado()"
+    class="caja-fecha caja-corta"
+    [class.invalid]="invalido()"
+    [attr.aria-label]="etiqueta() + ': día'"
+  />
+  <span class="separador-fecha" aria-hidden="true">/</span>
+  <input
+    #mesInput
+    type="text"
+    inputmode="numeric"
+    maxlength="2"
+    placeholder="MM"
+    [value]="mes()"
+    [disabled]="deshabilitado()"
+    (input)="onMes($event)"
+    (keydown.backspace)="volverSiVacio('mes')"
+    (blur)="marcarTocado()"
+    class="caja-fecha caja-corta"
+    [class.invalid]="invalido()"
+    [attr.aria-label]="etiqueta() + ': mes'"
+  />
+  <span class="separador-fecha" aria-hidden="true">/</span>
+  <input
+    #anioInput
+    type="text"
+    inputmode="numeric"
+    maxlength="4"
+    placeholder="AAAA"
+    [value]="anio()"
+    [disabled]="deshabilitado()"
+    (input)="onAnio($event)"
+    (keydown.backspace)="volverSiVacio('anio')"
+    (blur)="marcarTocado()"
+    class="caja-fecha caja-anio"
+    [class.invalid]="invalido()"
+    [attr.aria-label]="etiqueta() + ': año'"
+  />
+</div>

@@ -7,11 +7,21 @@ import { PeliculasService } from '../../../servicios/peliculas';
 import { CartaPelicula } from '../../pelicula/carta-pelicula/carta-pelicula';
 import { GENEROS_PELICULA, crearFormularioPelicula, generarPreviewPelicula } from '../../../validators/pelicula';
 import { AdministrarBase } from '../administrar-base';
+import { SelectorFecha } from '../../compartidos/selector-fecha/selector-fecha';
+import { SalaService } from '../../../servicios/sala';
+import {
+  PREVENTA_PORCENTAJE_MAX,
+  PREVENTA_PORCENTAJE_MIN,
+  aplicarPorcentaje,
+  describirPorcentaje,
+  fechaLocalIso,
+  formatearFechaCorta,
+} from '../../../utils/preventa';
 
 @Component({
   selector: 'app-administrar-peliculas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CartaPelicula],
+  imports: [CommonModule, ReactiveFormsModule, CartaPelicula, SelectorFecha],
   templateUrl: './administrar-peliculas.html',
   styleUrl: './administrar-peliculas.css',
 })
@@ -41,6 +51,48 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> implements O
   get poster() { return this.editForm.get('poster'); }
   get enCartelera() { return this.editForm.get('enCartelera'); }
   get boletosVendidos() { return this.editForm.get('boletosVendidos'); }
+  get preventaActiva() { return this.editForm.get('preventaActiva'); }
+  get preventaPorcentaje() { return this.editForm.get('preventaPorcentaje'); }
+
+  private salaService = inject(SalaService);
+  readonly preventaMin = PREVENTA_PORCENTAJE_MIN;
+  readonly preventaMax = PREVENTA_PORCENTAJE_MAX;
+  readonly marcasPreventa = [-50, -25, 0, 25, 50];
+
+  /** Precio de referencia (tarifa base de salas) para mostrar un ejemplo del ajuste. */
+  get precioEjemplo(): number {
+    return this.salaService.configuracionPrecios().precioBaseReferencia || 5000;
+  }
+
+  get textoPorcentajePreventa(): string {
+    return describirPorcentaje(Number(this.preventaPorcentaje?.value || 0));
+  }
+
+  get precioEjemploPreventa(): number {
+    return aplicarPorcentaje(this.precioEjemplo, Number(this.preventaPorcentaje?.value || 0));
+  }
+
+  /** Fecha de estreno en DD/MM/AAAA (o vacío si todavía no es válida). */
+  get estrenoLegible(): string {
+    const valor = String(this.fechaEstreno?.value || '').slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(valor) ? formatearFechaCorta(valor) : '';
+  }
+
+  get errorEstreno(): string | null {
+    const tocado = this.fechaEstreno?.touched || this.fechaEstreno?.dirty;
+    if (this.fechaEstreno?.errors && tocado) {
+      if (this.fechaEstreno.errors['required']) return 'La fecha de estreno es obligatoria.';
+      return 'La fecha no es válida.';
+    }
+    if (this.editForm.errors?.['preventaEstrenoPasado']) {
+      return 'Para usar preventa, el estreno tiene que ser una fecha futura.';
+    }
+    return null;
+  }
+
+  marcarPorcentaje(valor: number): void {
+    this.preventaPorcentaje?.setValue(valor);
+  }
 
   get peliculaEditandoPreview(): Pelicula | null {
     if (!this.modoModal()) return null;
@@ -87,6 +139,8 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> implements O
       poster: pelicula.poster || '',
       enCartelera: pelicula.enCartelera ?? true,
       boletosVendidos: pelicula.boletosVendidos || 0,
+      preventaActiva: Boolean(pelicula.preventaActiva),
+      preventaPorcentaje: Number(pelicula.preventaPorcentaje || 0),
     };
   }
 
@@ -98,10 +152,12 @@ export class AdministrarPeliculas extends AdministrarBase<Pelicula> implements O
       duracion: 120,
       restriccionEdad: 13,
       puntajeCompra: 100,
-      fechaEstreno: new Date().toISOString().split('T')[0],
+      fechaEstreno: fechaLocalIso(),
       poster: '',
       enCartelera: true,
       boletosVendidos: 0,
+      preventaActiva: false,
+      preventaPorcentaje: 0,
     });
   }
 

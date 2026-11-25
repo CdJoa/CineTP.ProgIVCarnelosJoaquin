@@ -21,17 +21,20 @@
       <div class="leyenda-item">
         <span class="seat-badge disponible-comun"></span>
         Común (x{{ salaService.configuracionPrecios().multiplicadorComun }})
-        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('comun', funcion()?.precio) }}</span>
+        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('comun', funcion()?.precioVigente ?? funcion()?.precio) }}</span>
       </div>
       <div class="leyenda-item">
         <span class="seat-badge disponible-disc">♿</span>
         Discapacitado (x{{ salaService.configuracionPrecios().multiplicadorDiscapacitado }})
-        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('discapacitado', funcion()?.precio) }}</span>
+        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('discapacitado', funcion()?.precioVigente ?? funcion()?.precio) }}</span>
       </div>
       <div class="leyenda-item">
         <span class="seat-badge disponible-vip"></span>
         VIP (x{{ salaService.configuracionPrecios().multiplicadorVip }})
-        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('vip', funcion()?.precio) }}</span>
+        <span *ngIf="esModoCompra() && funcion()?.precio" class="leyenda-precio-chip">${{ salaService.calcularPrecioAsiento('vip', funcion()?.precioVigente ?? funcion()?.precio) }}</span>
+      </div>
+      <div class="leyenda-item leyenda-preventa" *ngIf="esModoCompra() && funcion()?.enPreventa">
+        ⭐ Precio de preventa
       </div>
       <ng-container *ngIf="esModoCompra()">
         <div class="leyenda-item"><span class="seat-badge estado-elegido"></span> Tu selección</div>

@@ -16,6 +16,7 @@ import { EntradaListaEspera, ListaEsperaService } from '../../../servicios/lista
 import { CartaPelicula } from '../carta-pelicula/carta-pelicula';
 import { RatingEstrellas } from '../rating-estrellas/rating-estrellas';
 import { InsertarComentarioDirective } from '../../../directivas/insertar-comentario.directive';
+import { estaEnPreventa } from '../../../utils/preventa';
 
 @Component({
   selector: 'app-cartelera',
@@ -405,10 +406,10 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   }
 
   esPeliculaPreventa(peliculaId: string): boolean {
-    const tieneFuncionPreventa = this.funciones().some((f) => f.peliculaId === peliculaId && f.esPreventa);
-    if (tieneFuncionPreventa) return true;
-
     const p = this.peliculas().find((x) => x.id === peliculaId);
+    // Preventa configurada por el admin: termina sola al llegar a la fecha de fin.
+    if (p?.preventaActiva) return estaEnPreventa(p);
+
     const hoyStr = this.obtenerFechaLocalKey(new Date());
     return !!(p?.fechaEstreno && p.fechaEstreno > hoyStr && (p.boletosVendidos || 0) > 0);
   }

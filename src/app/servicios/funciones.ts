@@ -6,6 +6,13 @@ import { Sala } from '../models/sala';
 import { PeliculasService } from './peliculas';
 import { SalaService } from './sala';
 import { AuditoriaService } from './auditoria';
+import {
+  estaEnPreventa,
+  fechaLocalIso,
+  formatearFechaCorta,
+  precioVigente,
+  primerDiaFunciones,
+} from '../utils/preventa';
 
 export interface OpcionesGeneracionAutomatica {
   peliculaId: string;
@@ -101,6 +108,8 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
       peliculaTitulo: pelicula?.titulo || 'Película no encontrada',
       duracionPelicula: duracionPeli,
       salaNombre: sala?.nombre || 'Sala no encontrada',
+      precioVigente: precioVigente(funcion.precio, pelicula),
+      enPreventa: estaEnPreventa(pelicula),
     };
   }
 
@@ -171,7 +180,22 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     ));
   }
 
+  /** Rechaza funciones anteriores al estreno (antes solo corre la preventa). */
+  private async validarPrimerDia(peliculaId: string | undefined, inicioIso: string): Promise<void> {
+    if (!peliculaId || !inicioIso) return;
+    const pelicula = await this.peliculasService.obtenerPorId(peliculaId);
+    if (!pelicula) return;
+    // new Date(0): acá solo importa el estreno; las fechas pasadas ya se validan aparte.
+    const primerDia = primerDiaFunciones(pelicula, new Date(0));
+    if (fechaLocalIso(new Date(inicioIso)) < primerDia) {
+      throw new Error(
+        `Las funciones de "${pelicula.titulo}" empiezan el ${formatearFechaCorta(primerDia)} (estreno). Elegí una fecha a partir de ese día.`
+      );
+    }
+  }
+
   async crearFuncionConValidacion(dto: CrearFuncionDto, duracionPelicula: number): Promise<Funcion> {
+    await this.validarPrimerDia(dto.peliculaId, dto.inicio);
     const finIso = this.calcularFin(dto.inicio, duracionPelicula);
     await this.validarDisponibilidad(dto.salaId || '', dto.inicio, finIso);
 
@@ -200,6 +224,9 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     dto: Partial<CrearFuncionDto>,
     duracionPelicula: number
   ): Promise<Funcion> {
+    if (dto.inicio) {
+      await this.validarPrimerDia(dto.peliculaId || (await this.obtenerPorId(id))?.peliculaId, dto.inicio);
+    }
     if (dto.inicio && dto.salaId) {
       const finIso = this.calcularFin(dto.inicio, duracionPelicula);
       await this.validarDisponibilidad(dto.salaId, dto.inicio, finIso, id);
@@ -355,8 +382,8 @@ export class FuncionesService extends BaseSupabaseService<Funcion> {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    const fechaEstrenoDate = pelicula.fechaEstreno ? new Date(`${pelicula.fechaEstreno}T00:00:00`) : hoy;
-    const inicioMin = fechaEstrenoDate > hoy ? fechaEstrenoDate : hoy;
+    // No antes de hoy ni del estreno (antes del estreno solo corre la preventa).
+    const inicioMin = new Date(`${primerDiaFunciones(pelicula)}T00:00:00`);
 
     const userInicio = opciones.fechaInicio ? new Date(`${opciones.fechaInicio}T00:00:00`) : hoy;
     const fechaInicioCalcular = userInicio > inicioMin ? userInicio : inicioMin;

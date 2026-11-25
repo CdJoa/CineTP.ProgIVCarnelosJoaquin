@@ -173,7 +173,7 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
 
     if (!asiento || typeof sessionStorage === 'undefined') return;
 
-    const totalEntradas = this.salaService.calcularPrecioAsiento(asiento.tipo, Number(funcion.precio || 0));
+    const totalEntradas = this.salaService.calcularPrecioAsiento(asiento.tipo, Number(funcion.precioVigente ?? funcion.precio ?? 0));
     sessionStorage.setItem('cinetp_compra_actual', JSON.stringify({
       funcionId: funcion.id,
       peliculaId: funcion.peliculaId,
@@ -182,7 +182,7 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
       inicio: funcion.inicio,
       formato: funcion.formato,
       idioma: funcion.idioma,
-      precioUnitario: funcion.precio,
+      precioUnitario: funcion.precioVigente ?? funcion.precio,
       asientos: [asiento.id],
       totalEntradas,
     }));
@@ -308,7 +308,7 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
         inicio: funcion.inicio,
         formato: funcion.formato,
         idioma: funcion.idioma,
-        precioUnitario: funcion.precio,
+        precioUnitario: funcion.precioVigente ?? funcion.precio,
         asientos: asientos.map((a) => a.id),
         totalEntradas: this.totalCompra,
       };
@@ -334,7 +334,7 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
   }
 
   precioAsiento(asiento: Asiento): number {
-    const base = Number(this.funcion()?.precio || 0);
+    const base = Number(this.funcion()?.precioVigente ?? this.funcion()?.precio ?? 0);
     return this.salaService.calcularPrecioAsiento(asiento.tipo, base);
   }
 

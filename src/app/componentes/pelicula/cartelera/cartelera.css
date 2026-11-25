@@ -1145,3 +1145,10 @@
   border-left: 3px solid var(--review);
 }
 
+
+.fn-precio-normal {
+  margin-right: 4px;
+  font-size: 0.8em;
+  font-weight: 400;
+  color: var(--text-muted);
+}

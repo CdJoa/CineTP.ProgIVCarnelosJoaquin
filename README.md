@@ -142,6 +142,8 @@ Para el **convertidor de puntos a crédito**, ejecuta `supabase/convertidor-punt
 
 Para habilitar **roles administrativos personalizados**, ejecuta `supabase/roles-administrativos.sql`. Luego, un administrador abre **Panel Admin → Roles y permisos**, crea roles seleccionando secciones y los asigna a usuarios. La autorización se valida tanto en la navegación como en cada ruta; la cuenta con rol base `admin` conserva acceso total.
 
+Para la **preventa por película**, ejecuta `supabase/preventa.sql`. Agrega a `peliculas` las columnas `preventa_activa` y `preventa_porcentaje` (-50 a +50 sobre el precio normal). El admin la configura en **Panel Admin → Películas**: tilda la preventa y elige el ajuste con la barra. La preventa dura hasta la **fecha de estreno**, que es el día en que empiezan las funciones y vuelve el precio normal; ni la carga manual ni la programación automática permiten crear funciones antes del estreno. El precio se calcula según la fecha cada vez que se consulta, así que desde el estreno se cobra el precio normal sin necesidad de ningún proceso programado.
+
 ### Pasos de instalación y puesta en marcha
 
 1. **Ingresar a la carpeta del proyecto:**
