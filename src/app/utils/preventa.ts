@@ -35,6 +35,26 @@ export function primerDiaFunciones(
   return estreno && estreno > hoy ? estreno : hoy;
 }
 
+/** La venta de entradas abre esta cantidad de días antes del estreno (mail del 08/03). */
+export const DIAS_PREVENTA = 7;
+
+/** Día en que abre la venta de entradas (YYYY-MM-DD): una semana antes del estreno. */
+export function aperturaVenta(pelicula: Pick<Pelicula, 'fechaEstreno'> | null | undefined): string | null {
+  if (!pelicula?.fechaEstreno) return null;
+  const apertura = new Date(`${pelicula.fechaEstreno.slice(0, 10)}T00:00:00`);
+  apertura.setDate(apertura.getDate() - DIAS_PREVENTA);
+  return fechaLocalIso(apertura);
+}
+
+/** Se pueden comprar entradas si ya se llegó a la apertura (o la película no tiene estreno cargado). */
+export function ventaHabilitada(
+  pelicula: Pick<Pelicula, 'fechaEstreno'> | null | undefined,
+  ahora: Date = new Date()
+): boolean {
+  const apertura = aperturaVenta(pelicula);
+  return !apertura || fechaLocalIso(ahora) >= apertura;
+}
+
 /** YYYY-MM-DD → DD/MM/AAAA */
 export function formatearFechaCorta(fechaIso: string): string {
   const [anio, mes, dia] = fechaIso.slice(0, 10).split('-');

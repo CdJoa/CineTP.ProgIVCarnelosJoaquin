@@ -1152,3 +1152,10 @@
   font-weight: 400;
   color: var(--text-muted);
 }
+
+.aviso-preventa {
+  margin: 0 0 0.75rem;
+  background: var(--purple-soft);
+  border-color: var(--purple-border);
+  color: var(--purple-text);
+}

@@ -10,6 +10,7 @@ import { PeliculasService } from '../../../servicios/peliculas';
 import { AsientosRealtimeService, EstadoAsientoFuncion } from '../../../servicios/asientos-realtime';
 import { Auth } from '../../../servicios/auth';
 import { ListaEsperaService } from '../../../servicios/lista-espera';
+import { VentaPreventaPipe } from '../../../pipes/venta-preventa.pipe';
 
 @Component({
   selector: 'app-mapa-sala',
@@ -24,6 +25,8 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
   private peliculasService = inject(PeliculasService);
   private asientosService = inject(AsientosRealtimeService);
   authService = inject(Auth);
+  // El mismo pipe que muestra el aviso en la cartelera, usado acá para bloquear la compra por URL.
+  private ventaPreventaPipe = new VentaPreventaPipe();
   private listaEsperaService = inject(ListaEsperaService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -93,6 +96,8 @@ export class MapaSalaComponent implements OnInit, OnDestroy {
       await this.authService.obtenerUsuario();
       const bloqueo = this.authService.motivoBloqueoPorEdad(pelicula?.restriccionEdad || 0);
       if (bloqueo) throw new Error(bloqueo);
+      const ventaCerrada = this.ventaPreventaPipe.transform(pelicula);
+      if (ventaCerrada) throw new Error(ventaCerrada);
 
       this.funcion.set(funcion);
       const sala = await this.salaService.obtenerSalaPorId(funcion.salaId);

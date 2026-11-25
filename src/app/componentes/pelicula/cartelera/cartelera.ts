@@ -16,7 +16,8 @@ import { EntradaListaEspera, ListaEsperaService } from '../../../servicios/lista
 import { CartaPelicula } from '../carta-pelicula/carta-pelicula';
 import { RatingEstrellas } from '../rating-estrellas/rating-estrellas';
 import { InsertarComentarioDirective } from '../../../directivas/insertar-comentario.directive';
-import { estaEnPreventa } from '../../../utils/preventa';
+import { estaEnPreventa, ventaHabilitada } from '../../../utils/preventa';
+import { VentaPreventaPipe } from '../../../pipes/venta-preventa.pipe';
 
 @Component({
   selector: 'app-cartelera',
@@ -28,6 +29,7 @@ import { estaEnPreventa } from '../../../utils/preventa';
     CartaPelicula,
     RatingEstrellas,
     InsertarComentarioDirective,
+    VentaPreventaPipe,
   ],
   templateUrl: './cartelera.html',
   styleUrl: './cartelera.css',
@@ -534,6 +536,7 @@ export class CarteleraComponent implements OnInit, OnDestroy {
   irASala(funcion: Funcion): void {
     const pelicula = this.peliculaSeleccionada();
     if (pelicula && this.bloqueoPorEdad(pelicula)) return;
+    if (pelicula && !ventaHabilitada(pelicula)) return;
 
     this.router.navigate(['/sala'], { queryParams: { funcionId: funcion.id, salaId: funcion.salaId } });
   }

@@ -383,6 +383,9 @@
       <!-- Lista de Funciones Filtradas -->
       <div class="sidebar-body">
         <p *ngIf="bloqueoPorEdad(p) as motivo" class="aviso-edad aviso-edad-bloqueo">{{ motivo }}</p>
+        @if (p | ventaPreventa; as avisoVenta) {
+          <p class="aviso-edad aviso-preventa">{{ avisoVenta }}</p>
+        }
 
         <div *ngIf="cargandoFunciones()" class="loading-sidebar">
           <div class="mini-spinner"></div>
@@ -398,7 +401,7 @@
           <div
             *ngFor="let fn of funcionesDePeliculaFiltradas"
             class="fn-card-vertical"
-            [class.fn-bloqueada]="bloqueoPorEdad(p)"
+            [class.fn-bloqueada]="bloqueoPorEdad(p) || (p | ventaPreventa)"
             [class.fn-agotada]="funcionAgotada(fn.id)"
             (click)="!funcionAgotada(fn.id) && irASala(fn)"
           >
@@ -423,7 +426,7 @@
                 *ngIf="!funcionAgotada(fn.id)"
                 type="button"
                 class="btn-comprar-fn"
-                [disabled]="!!bloqueoPorEdad(p) || (cargandoFunciones() && !disponibilidadFuncionesCargada())"
+                [disabled]="!!bloqueoPorEdad(p) || !!(p | ventaPreventa) || (cargandoFunciones() && !disponibilidadFuncionesCargada())"
                 (click)="$event.stopPropagation(); irASala(fn)"
               >
                 {{ fn.enPreventa ? '⭐ Compra Anticipada' : '🎟️ Comprar' }}
